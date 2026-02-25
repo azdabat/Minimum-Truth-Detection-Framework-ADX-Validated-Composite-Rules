@@ -1528,6 +1528,240 @@ Enriched
 | order by RiskScore desc, Timestamp desc
 ```
 
+# Noise Model & Suppression Strategy  
+## PowerShell Execution Composite (Production-Tuning Doctrine)
+
+This section defines how enterprise-grade noise suppression is engineered **without brittle static allowlists**, while preserving high-confidence malicious convergence.
+
+This doctrine applies to:
+
+- SCCM deployments  
+- Intune remediation scripts  
+- Blue team automation  
+- DevOps CI/CD execution  
+- Internal enterprise management tooling  
+
+The objective:
+
+> Preserve high-confidence malicious convergence  
+> Suppress operational noise  
+> Avoid hard-coded exclusions  
+> Maintain portability across tenants  
+
+---
+
+# Core Principle
+
+Noise is not removed through blind exclusions.  
+Noise is measured, profiled, and **down-scored through contextual weighting**.
+
+We do not hardcode trust.  
+We model operational behavior.
+
+---
+
+# 1. Empirical Noise Baseline (Pre-Tuning Requirement)
+
+Before suppression logic is applied, extract dominant operational patterns:
+
+```kql
+DeviceProcessEvents
+| where FileName =~ "powershell.exe"
+| summarize 
+    Count = count(),
+    Devices = dcount(DeviceId)
+  by InitiatingProcessFileName,
+     InitiatingProcessAccountName,
+     bin(Timestamp, 1h)
+| order by Count desc
+```
+
+Objectives:
+
+- Identify dominant parent processes  
+- Identify recurring service accounts  
+- Identify patch-window bursts  
+- Identify common automation command-line fragments  
+- Identify recurring execution paths  
+
+Noise suppression begins with measurement — not assumptions.
+
+---
+
+# 2. Soft-Allow Scoring (Never Hard Exclusion)
+
+Avoid brittle exclusions such as:
+
+```kql
+| where InitiatingProcessFileName != "ccmexec.exe"
+```
+
+Hard exclusions create blind spots.
+
+Instead, apply contextual score adjustments.
+
+### Conceptual Scoring Model
+
+```kql
+let Score_EncodedPrimitive = 40;
+let Score_SuspiciousParent = 30;
+let Score_WritablePath     = 20;
+let Score_ExternalNetwork  = 25;
+let Score_RareExecution    = 15;
+
+let Penalty_ManagedLineage = -25;
+let Penalty_InternalNet    = -10;
+let Penalty_HighBurst      = -20;
+```
+
+Managed automation reduces risk — it does not eliminate telemetry.
+
+This preserves detection integrity.
+
+---
+
+# 3. Managed Execution Context Modeling
+
+Instead of static allowlists, detect behavioral automation traits.
+
+Indicators of managed activity may include:
+
+- SYSTEM or service account execution  
+- Parent lineage including management agents  
+- High-volume execution during known patch windows  
+- Repeated execution across large device groups  
+- Consistent working directories (agent cache paths)  
+
+Example lineage exploration:
+
+```kql
+DeviceProcessEvents
+| where FileName =~ "powershell.exe"
+| summarize count() by InitiatingProcessFileName
+| order by count_ desc
+```
+
+Management parents are not excluded — they are down-scored.
+
+---
+
+# 4. Convergence Over Single Indicators
+
+Encoded PowerShell alone is insufficient.
+
+Require convergence of:
+
+- Encoded or runtime execution primitive  
+- Suspicious parent (Office, browser, LOLBin chain)  
+- User-writable staging path  
+- External network contact  
+- Low organizational prevalence  
+
+Only convergence elevates severity.
+
+Single noisy signals remain low priority.
+
+---
+
+# 5. Prevalence as Prioritisation (Never Suppression)
+
+Organizational prevalence influences urgency — not existence.
+
+Example prevalence modeling:
+
+```kql
+DeviceProcessEvents
+| where FileName =~ "powershell.exe"
+| summarize DeviceCount = dcount(DeviceId) 
+  by ProcessCommandLine
+```
+
+Interpretation:
+
+- Seen on 1–2 devices → high priority  
+- Seen on 500 devices simultaneously → likely automation  
+
+Prevalence modifies response velocity, not alert visibility.
+
+---
+
+# 6. Burst Modeling
+
+High-volume simultaneous execution across many hosts typically indicates:
+
+- Patch deployment  
+- Configuration push  
+- Remediation task  
+
+Low-volume isolated execution suggests:
+
+- Targeted intrusion  
+- Lateral staging  
+- Operator activity  
+
+Burst detection example:
+
+```kql
+DeviceProcessEvents
+| where FileName =~ "powershell.exe"
+| summarize BurstCount = dcount(DeviceId) 
+  by bin(Timestamp, 10m)
+| order by BurstCount desc
+```
+
+Burst patterns reduce score — they do not suppress detection.
+
+---
+
+# 7. Tenant Configuration Overlay (Optional)
+
+Instead of hardcoding trusted parents, use a configuration table:
+
+```kql
+let TrustedAutomationParents = 
+datatable(ProcessName:string)
+[
+  "ccmexec.exe",
+  "intunemanagementextension.exe",
+  "taniumclient.exe"
+];
+```
+
+Then apply soft scoring logic referencing this dataset.
+
+This keeps logic portable and tenant-adjustable.
+
+---
+
+# Architectural Summary
+
+| Principle | Implementation |
+|-----------|----------------|
+| No brittle allowlists | Score reduction instead of exclusion |
+| Measure first | Empirical baseline extraction |
+| Convergence required | Multiple reinforcement layers |
+| Prevalence modifies urgency | Never suppresses alerts |
+| Burst modeling | Differentiates automation from intrusion |
+| Config-driven tuning | Avoid hard-coded exclusions |
+
+---
+
+# Final Doctrine
+
+Detection engineering is not about eliminating noise.
+
+It is about:
+
+1. Anchoring truth  
+2. Reinforcing intent  
+3. Modeling operational behavior  
+4. Scoring convergence  
+5. Preserving visibility  
+
+Noise suppression must never create blind spots.
+
+Confidence must emerge from convergence — not exclusion.
+
 #  Next Step: The Attack Ecosystem ATLAS
 
 While this repository provides the **tactical sensors** (the KQL code and logic), understanding how these sensors fit together requires a strategic map.

@@ -1,0 +1,193 @@
+// ============================================================================
+// COMPOSITE HUNT (L2/L2.5) — OAuth Illicit Consent Abuse (Production-Ready)
+// Author: Ala Dabat
+//
+// MINIMUM TRUTH:
+//   Successful consent / permission grant event occurred in Entra ID AuditLogs.
+//
+// REINFORCEMENT (Confidence, not dependency):
+//   - High-risk delegated scopes / app roles granted
+//   - Admin consent (OnBehalfOfAll)
+//   - Suspicious User-Agent at consent time (tools/scripts)
+//   - AppId "newness"/rarity in tenant (prevalence)
+//   - "Known good" overlay discount (NOT a bypass; spoofable by name)
+//
+// DATA: AuditLogs (required)
+// ============================================================================
+
+let ConsentLookback = 30d;
+let PrevalenceLB    = 90d;      // Longer window for "first seen / rarity"
+let RiskThreshold   = 18;
+
+// ---------------------------------------------------------------------------
+// TENANT OVERLAY (replace datatable with Watchlist/external table in production)
+// Keys matter: AppId is strongest. Name is weakest.
+// ---------------------------------------------------------------------------
+let OrgKnownGoodApps = datatable(AppId:string, AppName:string, TrustLevel:string)
+[
+  // AppId,            DisplayName,               TrustLevel (High/Med/Low)
+  // "00000000-....", "Microsoft Teams",         "High"
+];
+
+// “Tool” user agents at the point of consent are a strong signal
+let SuspiciousUAs = dynamic([
+  "python","curl","wget","postman","insomnia","powershell","java","go-http","okhttp","rest-client","http-client"
+]);
+
+// Exact high-risk scopes/roles (expand per tenant)
+let HighRiskExact = dynamic([
+  "Application.ReadWrite.All","AppRoleAssignment.ReadWrite.All","RoleManagement.ReadWrite.Directory",
+  "ServicePrincipal.ReadWrite.All","Directory.ReadWrite.All","Directory.AccessAsUser.All",
+  "Mail.Read","Mail.ReadWrite","Mail.Send","MailboxSettings.ReadWrite",
+  "Files.ReadWrite.All","Sites.ReadWrite.All","Sites.FullControl.All",
+  "User.ReadWrite.All","Group.ReadWrite.All"
+]);
+
+// Broad patterns (catch families without listing everything)
+let HighRiskRegex = @"(?i)(ReadWrite\.All|FullControl\.All|AccessAsUser\.All|RoleManagement\.ReadWrite\.Directory|Directory\.ReadWrite\.All|ServicePrincipal\.ReadWrite\.All)";
+
+// ---------------------------------------------------------------------------
+// PREVALENCE / FIRST-SEEN REINFORCEMENT (tenant reality, not allowlists)
+// We measure how often this AppId appears in consent events over a longer window.
+// ---------------------------------------------------------------------------
+let AppIdPrevalence =
+AuditLogs
+| where TimeGenerated >= ago(PrevalenceLB)
+| where Result =~ "success"
+| where OperationName in~ ("Consent to application","Add delegated permission grant","Add app role assignment grant to service principal")
+| extend T = TargetResources[0]
+| extend AppId = tostring(T.id)
+| where isnotempty(AppId)
+| summarize AppSeen = count(), AppSeenDays = dcount(bin(TimeGenerated, 1d)) by AppId;
+
+// ---------------------------------------------------------------------------
+// BASE: Consent grant events
+// ---------------------------------------------------------------------------
+AuditLogs
+| where TimeGenerated >= ago(ConsentLookback)
+| where Result =~ "success"
+| where OperationName in~ ("Consent to application","Add delegated permission grant","Add app role assignment grant to service principal")
+| extend T = TargetResources[0]
+| extend AppId   = tostring(T.id),
+         AppName = tostring(T.displayName)
+| extend InitiatorUPN = tostring(InitiatedBy.user.userPrincipalName),
+         InitiatorId  = tostring(InitiatedBy.user.id),
+         InitiatorIp  = tostring(InitiatedBy.user.ipAddress),
+         UserAgent    = tostring(InitiatedBy.user.userAgent)
+
+// ---- Extract consent properties (Scope / AppRoles / Publisher / Admin Consent)
+| mv-expand MP = T.modifiedProperties
+| extend Prop = tostring(MP.displayName),
+         New  = trim('"', tostring(MP.newValue))
+| summarize
+    CreatedTime  = min(TimeGenerated),
+    Publisher    = take_anyif(New, Prop == "ConsentContext.PublisherName"),
+    IsAdmin      = max(iif(Prop == "ConsentContext.OnBehalfOfAll" and tolower(New) == "true", 1, 0)),
+    Delegated    = take_anyif(New, Prop == "Scope"),
+    AppRoles     = take_anyif(New, Prop == "AppRoles"),
+    InitiatorUPN = any(InitiatorUPN),
+    InitiatorId  = any(InitiatorId),
+    InitiatorIp  = any(InitiatorIp),
+    UserAgent    = any(UserAgent)
+  by AppId, AppName
+
+// ---- Normalize permissions into a single list
+| extend DelegatedList = iif(isempty(Delegated), dynamic([]), split(Delegated, " "))
+| extend AppRoleList   = iif(isempty(AppRoles),  dynamic([]), split(AppRoles,  " "))
+| extend AllPerms      = array_concat(DelegatedList, AppRoleList)
+| mv-expand Perm = AllPerms to typeof(string)
+| extend Perm = trim(" ", tostring(Perm))
+| where isnotempty(Perm)
+
+// ---- High-risk evaluation
+| extend IsHighRisk = iif(Perm in (HighRiskExact) or Perm matches regex HighRiskRegex, 1, 0)
+| summarize
+    CreatedTime   = any(CreatedTime),
+    Publisher     = any(Publisher),
+    IsAdmin       = any(IsAdmin),
+    HighRiskCount = sum(IsHighRisk),
+    HighRiskPerms = make_set_if(Perm, IsHighRisk == 1, 100),
+    AllPerms      = make_set(Perm, 100),
+    InitiatorUPN  = any(InitiatorUPN),
+    InitiatorId   = any(InitiatorId),
+    InitiatorIp   = any(InitiatorIp),
+    UserAgent     = any(UserAgent)
+  by AppId, AppName
+
+// ---- Join prevalence (small -> small)
+| join kind=leftouter AppIdPrevalence on AppId
+| extend AppSeen = coalesce(AppSeen, 0),
+         AppSeenDays = coalesce(AppSeenDays, 0),
+         IsNewApp = toint(AppSeen == 0),
+         IsRareApp = toint(AppSeenDays <= 2)
+
+// ---- Tenant overlay match (NOT required)
+| join kind=leftouter OrgKnownGoodApps on AppId
+| extend TrustLevel = tostring(TrustLevel)
+
+// ---- UA signal
+| extend IsSuspiciousUA = iif(tolower(UserAgent) has_any (SuspiciousUAs), 1, 0)
+
+// ---------------------------------------------------------------------------
+// SCORING (Truth already met; now we decide confidence + priority)
+// Key rules:
+// - HighRiskCount drives severity
+// - Admin + Suspicious UA are strong escalators
+// - New/Rare AppId is a major reinforcement (tenant reality)
+// - "Known good" is a DISCOUNT, not a bypass (name spoofing exists)
+// - High-risk floor: if perms are extreme, safe discounts can't zero it out
+// ---------------------------------------------------------------------------
+| extend
+    BaseScore          = 8,                         // consent happened (low by itself)
+    Score_HighRisk     = HighRiskCount * 10,         // your primary driver
+    Score_Admin        = IsAdmin * 15,
+    Score_SuspUA       = IsSuspiciousUA * 12,
+    Score_NewApp       = IsNewApp * 12,
+    Score_RareApp      = IsRareApp * 8,
+    // Tiered "known good" discount (AppId-based only; no display-name trust)
+    Discount_KnownGood = case(
+        TrustLevel == "High", -18,
+        TrustLevel == "Med",  -10,
+        TrustLevel == "Low",   -5,
+        0
+    )
+| extend RawScore = BaseScore + Score_HighRisk + Score_Admin + Score_SuspUA + Score_NewApp + Score_RareApp + Discount_KnownGood
+
+// High-risk floor: if HighRiskCount is large, don't let discounts bury it
+| extend Score = iif(HighRiskCount >= 3 and RawScore < 30, 30, RawScore)
+
+| where Score >= RiskThreshold
+| extend Severity = case(Score >= 50, "CRITICAL", Score >= 35, "HIGH", "MEDIUM")
+| extend HunterDirective = strcat(
+    "ACTION: ", Severity, " OAuth Consent Review | ",
+    "Truth: Successful consent grant. ",
+    "Reinforcement: HighRiskCount=", tostring(HighRiskCount),
+    " Admin=", tostring(IsAdmin),
+    " SuspUA=", tostring(IsSuspiciousUA),
+    " AppNew=", tostring(IsNewApp), "/Rare=", tostring(IsRareApp),
+    " | App='", AppName, "' (", AppId, ")",
+    " | Publisher='", iif(isempty(Publisher),"Unknown",Publisher), "'",
+    " | UA='", substring(UserAgent,0,60), "' | ",
+    "PIVOT: Validate business owner + expected use. If unrecognized: ",
+    "Revoke consent (target AppId) + rotate affected creds/secrets. ",
+    "Then hunt Graph/mail/file activity for InitiatorUPN='", InitiatorUPN, "' and AppId='", AppId, "'."
+)
+
+| project
+    CreatedTime,
+    Severity,
+    Score,
+    AppName,
+    AppId,
+    Publisher,
+    TrustLevel,
+    AppSeen,
+    AppSeenDays,
+    InitiatorUPN,
+    InitiatorId,
+    InitiatorIp,
+    UserAgent,
+    HighRiskCount,
+    HighRiskPerms,
+    HunterDirective
+| order by Score desc, CreatedTime desc

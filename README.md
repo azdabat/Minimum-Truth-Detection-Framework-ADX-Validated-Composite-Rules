@@ -60,7 +60,218 @@ This repository documents a **deliberate, operationally grounded methodology** f
 - Preserves signal fidelity
 - Reduces analyst fatigue
 - Applies behavioural correlation **only when the attack requires it**
+# Substrate-First vs Intent-First Minimum Truth  
+## Refining the Minimum Truth Layer in Composite Detection Engineering
 
+**Author:** Ala Dabat  
+**Framework Alignment:** Minimum Truth → Reinforcement → Scoring → Narrative Convergence  
+**Purpose:** Formalize the distinction between *substrate-first* and *intent-first* minimum truth anchoring within detection engineering using PowerShell as the reference substrate.
+
+---
+
+# 1. Why This Matters
+
+In composite detection engineering, the **Minimum Truth** defines the non-negotiable event that must exist for malicious behavior to be possible.
+
+There are two valid anchoring strategies:
+
+- **Substrate-First Minimum Truth**
+- **Intent-First Minimum Truth**
+
+Explicitly separating these completes the framework and prevents:
+
+- Over-broad noisy rules  
+- Over-fitted brittle intent assumptions  
+- Confusion between observability and attacker intent  
+
+---
+
+# 2. Substrate-First Minimum Truth
+
+## Definition
+
+A detection anchored on the **execution substrate itself**, without requiring proof of malicious intent at the minimum truth layer.
+
+It answers:
+
+> “Did the execution surface exist?”
+
+---
+
+## Example: PowerShell Substrate-First
+
+### Minimum Truth
+
+PowerShell execution occurred.
+
+```kql
+DeviceProcessEvents
+| where FileName in~ ("powershell.exe", "pwsh.exe")
+```
+
+That is the substrate. Nothing more.
+
+---
+
+## Characteristics
+
+- High observability  
+- Broad coverage  
+- Requires reinforcement to gain confidence  
+- Suitable for L1 / atomic sensor logic  
+- Ideal for correlation-driven architectures  
+
+---
+
+## Reinforcement Examples (Required for Confidence)
+
+```kql
+// Suspicious parent relationship
+| where InitiatingProcessFileName in~ ("winword.exe","excel.exe","outlook.exe","wscript.exe","cscript.exe")
+```
+
+```kql
+// External egress shortly after execution
+DeviceNetworkEvents
+| where InitiatingProcessFileName in~ ("powershell.exe","pwsh.exe")
+| where RemoteIPType == "Public"
+```
+
+Substrate-first truths are not alerts.  
+They are signal generators.
+
+---
+
+# 3. Intent-First Minimum Truth
+
+## Definition
+
+A detection anchored on a **malicious execution primitive**, not just the substrate.
+
+It answers:
+
+> “Did this substrate perform an action that implies attacker capability?”
+
+---
+
+## Example: PowerShell Intent-First
+
+### Minimum Truth
+
+PowerShell executed a high-risk primitive.
+
+```kql
+DeviceProcessEvents
+| where FileName in~ ("powershell.exe","pwsh.exe")
+| where ProcessCommandLine has_any (
+    "Invoke-WebRequest",
+    "DownloadString",
+    "FromBase64String",
+    "IEX",
+    "Add-Type",
+    "-EncodedCommand"
+)
+```
+
+Here, execution alone is not sufficient.  
+The primitive implies capability.
+
+---
+
+## Why Intent-First Is Stronger
+
+PowerShell execution is common.
+
+PowerShell performing:
+
+- In-memory execution  
+- Payload decoding  
+- Remote retrieval  
+- Direct code execution  
+
+is not common in normal enterprise workflows.
+
+Intent-first anchoring raises base confidence.
+
+---
+
+# 4. Comparative Model
+
+| Feature | Substrate-First | Intent-First |
+|----------|----------------|--------------|
+| Anchor | Execution surface | Malicious primitive |
+| Noise | Higher | Lower |
+| Reinforcement dependency | High | Moderate |
+| Coverage | Broad | Focused |
+| Tier suitability | L1 / Sensor | L2 / Composite |
+
+---
+
+# 5. Composite Framework Integration
+
+Your framework becomes structurally complete when both are explicitly defined.
+
+### Layered Model
+
+#### Sensor Layer (Substrate-First)
+
+```kql
+DeviceProcessEvents
+| where FileName in~ ("powershell.exe","pwsh.exe")
+```
+
+Purpose: Generate execution visibility.
+
+---
+
+#### Intent Layer (Intent-First)
+
+```kql
+DeviceProcessEvents
+| where FileName in~ ("powershell.exe","pwsh.exe")
+| where ProcessCommandLine has_any ("Invoke-WebRequest","DownloadString","IEX")
+```
+
+Purpose: Anchor malicious capability.
+
+---
+
+#### Reinforcement Layer
+
+- Suspicious parent  
+- Rare command-line fingerprint  
+- External egress  
+- Privileged user context  
+
+---
+
+#### Scoring Layer
+
+- Substrate truth = low base score  
+- Intent truth = higher base score  
+- Reinforcement = additive  
+- Safe overlays = subtractive  
+- High-risk floor logic prevents score burial  
+
+---
+
+# 6. Final Principle
+
+Substrate enables execution.  
+Intent reveals capability.  
+Reinforcement confirms context.  
+Scoring determines priority.  
+Narrative convergence defines incident reality.
+
+---
+
+# 7. One-Sentence Summary
+
+Substrate-first truth observes *where* execution occurred.  
+Intent-first truth observes *what* was done with it.  
+
+Both are valid.  
+The engineer chooses the tier intentionally.
 ---
 
 ## Core Philosophy (TL;DR)
@@ -69,6 +280,8 @@ This repository documents a **deliberate, operationally grounded methodology** f
 > Everything else is reinforcement — not dependency.
 
 If the baseline truth is not met, the attack **is not real**.
+
+
 
 ---
 

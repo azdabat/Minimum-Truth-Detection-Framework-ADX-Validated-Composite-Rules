@@ -1,0 +1,213 @@
+// ============================================================================
+// COMPOSITE HUNT (L2/L2.5) — OAuth Illicit Consent Abuse (Hardened / Production-Ready)
+// Author: Ala Dabat
+//
+// DOCTRINE PRESERVED:
+// - Minimum Truth: successful consent grant occurred (AuditLogs)
+// - Intent Anchor: high-risk capability granted (scopes/roles)
+// - Reinforcement: admin consent, scripted/tool UA (optional), AppId newness/rarity
+// - Noise Control: prevalence + scoring discounts (NOT bypass)
+// - Joins: only small->small summarized joins
+//
+// KEY HARDENING:
+// - Initiator can be User or App (service principal performing action)
+// - UA is optional (not always populated, do not depend on it)
+// - Publisher extraction is best-effort only (never required)
+// ============================================================================
+
+let ConsentLookback = 30d;
+let PrevalenceLB    = 90d;
+let RiskThreshold   = 18;
+
+// ---------------------------------------------------------------------------
+// TENANT OVERLAY (replace datatable with Watchlist/external table in production)
+// Strong key: AppId. Weak key: AppName (spoofable by name).
+// Discount, not bypass.
+// ---------------------------------------------------------------------------
+let OrgKnownGoodApps = datatable(AppId:string, AppName:string, TrustLevel:string)
+[
+  // "00000000-0000-0000-0000-000000000000", "Microsoft Teams", "High"
+];
+
+// Optional tool UA tokens (best-effort; treat missing UA as "unknown")
+let SuspiciousUAs = dynamic([
+  "python","curl","wget","postman","insomnia","powershell","java","go-http","okhttp","rest-client","http-client"
+]);
+
+// High-risk permissions: exact list + regex family catch
+let HighRiskExact = dynamic([
+  "Application.ReadWrite.All","AppRoleAssignment.ReadWrite.All","RoleManagement.ReadWrite.Directory",
+  "ServicePrincipal.ReadWrite.All","Directory.ReadWrite.All","Directory.AccessAsUser.All",
+  "Mail.Read","Mail.ReadWrite","Mail.Send","MailboxSettings.ReadWrite",
+  "Files.ReadWrite.All","Sites.ReadWrite.All","Sites.FullControl.All",
+  "User.ReadWrite.All","Group.ReadWrite.All"
+]);
+
+let HighRiskRegex = @"(?i)(ReadWrite\.All|FullControl\.All|AccessAsUser\.All|RoleManagement\.ReadWrite\.Directory|Directory\.ReadWrite\.All|ServicePrincipal\.ReadWrite\.All)";
+
+// ---------------------------------------------------------------------------
+// PREVALENCE (tenant reality, not allowlists)
+// Summarize down: small table keyed by AppId.
+// ---------------------------------------------------------------------------
+let AppIdPrevalence =
+AuditLogs
+| where TimeGenerated >= ago(PrevalenceLB)
+| where Result =~ "success"
+| where OperationName in~ ("Consent to application","Add delegated permission grant","Add app role assignment grant to service principal")
+| extend T = TargetResources[0]
+| extend AppId = tostring(T.id)
+| where isnotempty(AppId)
+| summarize AppSeen = count(), AppSeenDays = dcount(bin(TimeGenerated, 1d)), FirstSeen=min(TimeGenerated) by AppId;
+
+// ---------------------------------------------------------------------------
+// BASE: Consent grant events (Minimum Truth)
+// ---------------------------------------------------------------------------
+AuditLogs
+| where TimeGenerated >= ago(ConsentLookback)
+| where Result =~ "success"
+| where OperationName in~ ("Consent to application","Add delegated permission grant","Add app role assignment grant to service principal")
+| extend T = TargetResources[0]
+| extend AppId   = tostring(T.id),
+         AppName = tostring(T.displayName)
+| where isnotempty(AppId)
+
+// Initiator normalization: user OR app
+| extend InitiatorUPN = tostring(InitiatedBy.user.userPrincipalName),
+         InitiatorUserId = tostring(InitiatedBy.user.id),
+         InitiatorIp  = tostring(InitiatedBy.user.ipAddress),
+         UserAgent    = tostring(InitiatedBy.user.userAgent),
+         InitiatorAppName = tostring(InitiatedBy.app.displayName),
+         InitiatorAppId   = tostring(InitiatedBy.app.servicePrincipalId)
+
+// Unified initiator label for directives/pivots
+| extend InitiatorActor = case(
+    isnotempty(InitiatorUPN), strcat("USER:", InitiatorUPN),
+    isnotempty(InitiatorAppName), strcat("APP:", InitiatorAppName),
+    "UNKNOWN"
+  )
+
+// ---- Extract consent properties (Publisher / Admin / Scope / AppRoles)
+// Best-effort: do NOT assume every event carries every modifiedProperty.
+| mv-expand MP = T.modifiedProperties
+| extend Prop = tostring(MP.displayName),
+         New  = trim('"', tostring(MP.newValue))
+
+| summarize
+    CreatedTime  = min(TimeGenerated),
+    Publisher    = take_anyif(New, Prop == "ConsentContext.PublisherName"),
+    IsAdmin      = max(iif(Prop == "ConsentContext.OnBehalfOfAll" and tolower(New) == "true", 1, 0)),
+    Delegated    = take_anyif(New, Prop == "Scope"),
+    AppRoles     = take_anyif(New, Prop == "AppRoles"),
+    InitiatorUPN = any(InitiatorUPN),
+    InitiatorUserId = any(InitiatorUserId),
+    InitiatorIp  = any(InitiatorIp),
+    UserAgent    = any(UserAgent),
+    InitiatorAppName = any(InitiatorAppName),
+    InitiatorAppId = any(InitiatorAppId),
+    InitiatorActor = any(InitiatorActor)
+  by AppId, AppName
+
+// ---- Normalize permissions into a single list
+| extend DelegatedList = iif(isempty(Delegated), dynamic([]), split(Delegated, " "))
+| extend AppRoleList   = iif(isempty(AppRoles),  dynamic([]), split(AppRoles,  " "))
+| extend AllPerms      = array_concat(DelegatedList, AppRoleList)
+| mv-expand Perm = AllPerms to typeof(string)
+| extend Perm = trim(" ", tostring(Perm))
+| where isnotempty(Perm)
+
+// ---- Intent evaluation: high-risk capability granted
+| extend IsHighRisk = iif(Perm in (HighRiskExact) or Perm matches regex HighRiskRegex, 1, 0)
+
+| summarize
+    CreatedTime   = any(CreatedTime),
+    Publisher     = any(Publisher),
+    IsAdmin       = any(IsAdmin),
+    HighRiskCount = sum(IsHighRisk),
+    HighRiskPerms = make_set_if(Perm, IsHighRisk == 1, 100),
+    AllPerms      = make_set(Perm, 100),
+    InitiatorUPN  = any(InitiatorUPN),
+    InitiatorUserId = any(InitiatorUserId),
+    InitiatorIp   = any(InitiatorIp),
+    UserAgent     = any(UserAgent),
+    InitiatorAppName = any(InitiatorAppName),
+    InitiatorAppId = any(InitiatorAppId),
+    InitiatorActor = any(InitiatorActor)
+  by AppId, AppName
+
+// ---------------------------------------------------------------------------
+// Reinforcement joins (small -> small)
+// ---------------------------------------------------------------------------
+| join kind=leftouter AppIdPrevalence on AppId
+| extend AppSeen = coalesce(AppSeen, 0),
+         AppSeenDays = coalesce(AppSeenDays, 0),
+         FirstSeen = coalesce(FirstSeen, datetime(null)),
+         IsNewApp = toint(AppSeen == 0),
+         IsRareApp = toint(AppSeenDays <= 2)
+
+| join kind=leftouter OrgKnownGoodApps on AppId
+| extend TrustLevel = tostring(TrustLevel)
+
+// UA reinforcement is OPTIONAL
+| extend HasUA = toint(isnotempty(UserAgent)),
+         IsSuspiciousUA = iif(HasUA == 1 and tolower(UserAgent) has_any (SuspiciousUAs), 1, 0)
+
+// ---------------------------------------------------------------------------
+// Scoring (discount not bypass; rarity only after truth)
+// ---------------------------------------------------------------------------
+| extend
+    BaseScore          = 8,                   // consent happened
+    Score_HighRisk     = HighRiskCount * 10,   // primary driver (intent)
+    Score_Admin        = IsAdmin * 15,         // tenant-wide blast radius
+    Score_SuspUA       = IsSuspiciousUA * 12,  // only if UA exists
+    Score_NewApp       = IsNewApp * 12,
+    Score_RareApp      = IsRareApp * 8,
+    Discount_KnownGood = case(
+        TrustLevel == "High", -18,
+        TrustLevel == "Med",  -10,
+        TrustLevel == "Low",   -5,
+        0
+    )
+| extend RawScore = BaseScore + Score_HighRisk + Score_Admin + Score_SuspUA + Score_NewApp + Score_RareApp + Discount_KnownGood
+
+// High-risk floor: extreme capability cannot be buried by discounts
+| extend Score = iif(HighRiskCount >= 3 and RawScore < 30, 30, RawScore)
+
+| where Score >= RiskThreshold
+| extend Severity = case(Score >= 50, "CRITICAL", Score >= 35, "HIGH", "MEDIUM")
+
+| extend HunterDirective = strcat(
+    "ACTION: ", Severity, " OAuth Consent Review | ",
+    "Truth: Successful consent grant. ",
+    "Intent: HighRiskCount=", tostring(HighRiskCount),
+    " Admin=", tostring(IsAdmin),
+    " AppNew=", tostring(IsNewApp), "/Rare=", tostring(IsRareApp),
+    " UA=", iif(isnotempty(UserAgent), substring(UserAgent,0,60), "NA"),
+    " | App='", AppName, "' (", AppId, ")",
+    " | Publisher='", iif(isempty(Publisher),"Unknown",Publisher), "'",
+    " | Initiator=", InitiatorActor,
+    " | PIVOT: Confirm business owner. If unrecognized: Revoke consent (AppId) + rotate secrets. ",
+    "Then hunt Graph/mail/file activity for InitiatorActor='", InitiatorActor, "' and AppId='", AppId, "'."
+)
+
+| project
+    CreatedTime,
+    Severity,
+    Score,
+    AppName,
+    AppId,
+    Publisher,
+    TrustLevel,
+    AppSeen,
+    AppSeenDays,
+    FirstSeen,
+    InitiatorActor,
+    InitiatorUPN,
+    InitiatorUserId,
+    InitiatorAppName,
+    InitiatorAppId,
+    InitiatorIp,
+    UserAgent,
+    HighRiskCount,
+    HighRiskPerms,
+    HunterDirective
+| order by Score desc, CreatedTime desc

@@ -1975,6 +1975,212 @@ Noise suppression must never create blind spots.
 
 Confidence must emerge from convergence — not exclusion.
 
+
+---
+
+# 8. Applying Substrate vs Intent Anchoring to OAuth Consent Abuse
+
+PowerShell helped clarify the distinction.
+
+OAuth consent makes it operationally necessary.
+
+Unlike endpoint execution, OAuth abuse is identity-driven and user-mediated.  
+Therefore, the distinction between substrate-first and intent-first becomes critical.
+
+---
+
+## 8.1 OAuth Substrate-First Minimum Truth
+
+### Substrate
+
+A successful OAuth consent grant occurred.
+
+```kql
+AuditLogs
+| where OperationName in~ (
+    "Consent to application",
+    "Add delegated permission grant",
+    "Add app role assignment grant to service principal"
+)
+| where Result =~ "success"
+```
+
+This confirms:
+
+- A trust boundary changed.
+- An application was granted permissions.
+- A new execution surface was created.
+
+It does **not** imply malicious intent.
+
+This is substrate truth.
+
+---
+
+### Characteristics
+
+- Consent events are common.
+- Many are legitimate.
+- Noise potential is high.
+- Requires strong reinforcement layers.
+
+Substrate-first OAuth detection is appropriate when:
+
+- Building tenant visibility
+- Feeding narrative convergence models
+- Measuring consent velocity or anomalies
+
+---
+
+## 8.2 OAuth Intent-First Minimum Truth
+
+Intent-first in OAuth is not “consent happened.”
+
+It is:
+
+> High-risk permission capability was granted.
+
+Example:
+
+```kql
+AuditLogs
+| where OperationName in~ (
+    "Consent to application",
+    "Add delegated permission grant",
+    "Add app role assignment grant to service principal"
+)
+| where Result =~ "success"
+| mv-expand TargetResources[0].modifiedProperties
+| where tostring(TargetResources[0].modifiedProperties.newValue) has_any (
+    "Mail.ReadWrite",
+    "Directory.ReadWrite.All",
+    "AppRoleAssignment.ReadWrite.All",
+    "RoleManagement.ReadWrite.Directory",
+    "Files.ReadWrite.All",
+    "Sites.FullControl.All"
+)
+```
+
+Now the anchor is:
+
+- Capability to access mail
+- Capability to modify directory
+- Capability to assign roles
+- Capability to read/write files
+
+This is closer to attacker intent.
+
+---
+
+## 8.3 Why OAuth Must Use Intent Anchoring
+
+OAuth consent is not inherently malicious.
+
+But:
+
+- High-risk permissions imply data access capability.
+- Admin consent implies tenant-wide blast radius.
+- Rare AppId implies anomaly.
+- Scripted UA implies automation.
+
+Intent-first anchoring stabilizes the detection.
+
+Without it, the rule behaves like phishing tuning — endless refinement.
+
+---
+
+## 8.4 Composite Integration Model
+
+### Sensor Layer (Substrate-First)
+
+```kql
+AuditLogs
+| where OperationName has "Consent"
+| where Result =~ "success"
+```
+
+Purpose:
+- Visibility
+- Telemetry measurement
+- Baseline modeling
+
+---
+
+### Intent Layer (Intent-First)
+
+```kql
+AuditLogs
+| where OperationName has "Consent"
+| where Result =~ "success"
+| where HighRiskPermission == true
+```
+
+Purpose:
+- Anchor malicious capability
+
+---
+
+### Reinforcement Layer
+
+- Admin consent (OnBehalfOfAll == true)
+- Suspicious User-Agent
+- FirstSeen AppId
+- Rare AppId in tenant
+- Privileged user involvement
+
+---
+
+### Scoring Philosophy
+
+- Substrate consent = low base score
+- High-risk permission = primary weight
+- Admin consent = escalator
+- Rarity/newness = anomaly boost
+- Known-good AppId = discount (never bypass)
+- High-risk floor prevents burial
+
+---
+
+# 9. Final Framework Refinement
+
+Your framework now explicitly contains two anchoring modes:
+
+- Substrate-First (surface existence)
+- Intent-First (capability existence)
+
+This resolves the previous conceptual gap.
+
+PowerShell clarified it.
+OAuth required it.
+
+Now your detection doctrine is internally consistent across:
+
+- Endpoint execution
+- Cloud identity abuse
+- Service persistence
+- Privilege escalation
+- Lateral movement
+
+---
+
+# 10. Final Principle
+
+Substrate answers:  
+**Did the execution surface exist?**
+
+Intent answers:  
+**Was attacker capability created?**
+
+Reinforcement answers:  
+**Is this contextually malicious?**
+
+Scoring answers:  
+**How urgent is this?**
+
+Narrative convergence answers:  
+**Is this an 
+
+---
 #  Next Step: The Attack Ecosystem ATLAS
 
 While this repository provides the **tactical sensors** (the KQL code and logic), understanding how these sensors fit together requires a strategic map.

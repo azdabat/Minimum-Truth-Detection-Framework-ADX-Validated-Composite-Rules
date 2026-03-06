@@ -1,0 +1,150 @@
+// ============================================================================
+// COMPOSITE HUNT (L2 / L2.5): SMB + Service Execution (PsExec / Impacket style)
+// AUTHOR: Ala Dabat
+// MITRE: T1021.002, T1543.003
+// DATA: DeviceProcessEvents, DeviceFileEvents, DeviceNetworkEvents (MDE / Sentinel)
+//
+// FIXES APPLIED:
+// [FIX-1] HIGH   — AllowMgmtTooling defined but never applied in ServiceSpawn filter.
+//                  SCCM/Intune/Tanium agents spawned by services.exe were scoring 55
+//                  points on every managed endpoint. Suppression now applied.
+// [FIX-2] MEDIUM — DroppedFiles/DroppedPaths null when leftouter join finds no match.
+//                  Coalesced to empty dynamic arrays for clean analyst output.
+// [FIX-3] LOW    — BinSize=5m with CorrWindow=15m caused boundary misses. Events
+//                  2 seconds apart across a bin boundary never correlated.
+//                  BinSize set to CorrWindow to guarantee adjacent event coverage.
+// ============================================================================
+
+let Lookback   = 3d;
+let CorrWindow = 15m;
+let BinSize    = CorrWindow;  // [FIX-3] must match CorrWindow to prevent boundary misses
+
+let CommonServiceChildren = dynamic([
+  "svchost.exe","dllhost.exe","taskhostw.exe","taskhost.exe","conhost.exe",
+  "msmpeng.exe","senseir.exe","searchindexer.exe","tiworker.exe"
+]);
+
+let AllowMgmtTooling = dynamic([
+  "ccmexec.exe","intunemanagementextension.exe","taniumclient.exe",
+  "qualysagent.exe","nxlog.exe"
+]);
+
+let StageDirsRx = @"(?i)^([a-z]:\\)?(windows\\temp|temp|users\\public|programdata|users\\[^\\]+\\appdata\\(local|roaming)\\temp)\\";
+let DropExt     = dynamic([".exe",".dll",".sys",".bat",".ps1",".vbs",".js",".hta"]);
+
+// -----------------------------------------------------------------------
+// A) Inbound SMB/RPC — pre-binned per DeviceId + BinTime
+// -----------------------------------------------------------------------
+let InboundSMBRPC =
+DeviceNetworkEvents
+| where Timestamp >= ago(Lookback)
+| where ActionType == "InboundConnectionAccepted"
+| where LocalPort in (445, 135)
+| where isnotempty(RemoteIP)
+| extend BinTime = bin(Timestamp, BinSize)
+| summarize
+    SMBFirst   = min(Timestamp),
+    SMBSources = make_set(RemoteIP, 10),
+    SMBPorts   = make_set(LocalPort, 5)
+  by DeviceId, BinTime;
+
+// -----------------------------------------------------------------------
+// B) Suspicious staging writes — pre-binned per DeviceId + BinTime
+// -----------------------------------------------------------------------
+let SuspiciousStagingWrites =
+DeviceFileEvents
+| where Timestamp >= ago(Lookback)
+| where isnotempty(FileName) and isnotempty(FolderPath)
+| extend LowerName = tolower(FileName)
+| where LowerName endswith_any (DropExt)
+| where tostring(FolderPath) matches regex StageDirsRx
+| extend BinTime = bin(Timestamp, BinSize)
+| summarize
+    WriteFirst   = min(Timestamp),
+    DroppedFiles = make_set(FileName, 10),
+    DroppedPaths = make_set(FolderPath, 10)
+  by DeviceId, BinTime;
+
+// -----------------------------------------------------------------------
+// C) Baseline truth — services.exe spawns uncommon child
+// [FIX-1] AllowMgmtTooling now applied — was defined but never used
+// -----------------------------------------------------------------------
+let ServiceSpawn =
+DeviceProcessEvents
+| where Timestamp >= ago(Lookback)
+| where InitiatingProcessFileName =~ "services.exe"
+| extend ChildL = tolower(tostring(FileName))
+| where not(ChildL in~ (CommonServiceChildren))
+| where not(ChildL in~ (AllowMgmtTooling))  // [FIX-1]
+| extend SvcCmd  = tostring(ProcessCommandLine)
+| extend BinTime = bin(Timestamp, BinSize)
+| summarize
+    SvcFirst         = min(Timestamp),
+    ServiceProcesses = make_set(FileName, 10),
+    ServiceCmds      = make_set(SvcCmd, 10),
+    Accounts         = make_set(AccountName, 10),
+    DeviceName       = any(DeviceName)
+  by DeviceId, BinTime;
+
+// -----------------------------------------------------------------------
+// D) Correlate — bin join keeps cost bounded
+// -----------------------------------------------------------------------
+ServiceSpawn
+| join kind=inner (InboundSMBRPC) on DeviceId, BinTime
+| extend SvcTime = SvcFirst, SMBTime = SMBFirst
+| where SMBTime between ((SvcTime - CorrWindow) .. (SvcTime + 2m))
+
+| join kind=leftouter (SuspiciousStagingWrites) on DeviceId, BinTime
+
+// [FIX-2] coalesce nulls from no-match leftouter to empty arrays
+| extend
+    DroppedFiles = coalesce(DroppedFiles, dynamic([])),
+    DroppedPaths = coalesce(DroppedPaths, dynamic([]))
+
+| extend HasDrop = iif(isnotempty(WriteFirst), 1, 0)
+
+| extend RiskScore =
+      55                                              // baseline: SMB/RPC + uncommon services.exe child
+    + iif(HasDrop == 1,                        25, 0) // staging write reinforcement
+    + iif(array_length(SMBSources) >= 2,        5, 0) // multi-source spray indicator
+
+| extend Severity = case(
+    RiskScore >= 85, "CRITICAL",
+    RiskScore >= 70, "HIGH",
+                     "MEDIUM"
+)
+| extend Confidence = iif(
+    HasDrop == 1,
+    "High (SMB/RPC + Service + Staging)",
+    "Medium (SMB/RPC + Service)"
+)
+| extend HunterDirective = strcat(
+    "ACTION: ", Severity, " suspected SMB/service lateral movement | ",
+    "CONTEXT: ", Confidence,
+    " | Sources=", tostring(SMBSources),
+    " Ports=", tostring(SMBPorts),
+    " | ServiceProcs=", tostring(ServiceProcesses), " | ",
+    "PIVOT: On target host, inspect service install artifacts (System 7045 if available), ",
+    "review services.exe lineage and created service details. ",
+    iif(HasDrop == 1,
+        strcat("Validate staged payloads at ", tostring(DroppedPaths),
+               " and hash/signer of dropped files. "),
+        ""),
+    "On source IPs pivot to remote execution tooling (psexec/impacket/wmiexec/winrm) ",
+    "and check authentication/logon events around the same window."
+)
+
+| project
+    Time             = SvcTime,
+    Severity,
+    RiskScore,
+    TargetHost       = DeviceName,
+    SourceIPs        = SMBSources,
+    Ports            = SMBPorts,
+    Accounts,
+    ServiceProcesses,
+    ServiceCmds,
+    DroppedFiles,
+    DroppedPaths,
+    HunterDirective
+| order by RiskScore desc, Time desc

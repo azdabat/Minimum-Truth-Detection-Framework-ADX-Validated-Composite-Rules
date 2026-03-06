@@ -1,0 +1,123 @@
+// ============================================================================
+// COMPOSITE HUNT (L2 / L2.5): Scheduled Task Abuse (Creation / Modification)
+// AUTHOR: Ala Dabat
+// MITRE: T1053.005 (Scheduled Task/Job: Scheduled Task)
+// DATA: DeviceProcessEvents (MDE / Sentinel)
+//
+// FIXES APPLIED:
+// [FIX-1] MEDIUM — Score floor gap: gate passed events scoring 35 (ScriptEngine or
+//                  WritablePath alone) which fell below RiskScore >= 40 threshold.
+//                  Silent detection gap on clean single-signal attacks. Added BaseScore=10
+//                  so gate conditions always produce >= 45 when firing.
+// [FIX-2] MEDIUM — /f (force flag) included in HiddenTaskHints added 10 points to
+//                  virtually all automated task creation including legitimate tooling
+//                  that survived allowlist suppression. Removed — /f is not a suspicion
+//                  indicator. Retained /rl highest, /it, /z which are genuinely anomalous.
+// [FIX-3] LOW    — /mo (modifier flag) in SuspSchedule too broad — present in majority
+//                  of scheduled task definitions including benign. Removed standalone /mo.
+//                  Retained specific high-signal patterns: onlogon, onstart, minute, hourly.
+// ============================================================================
+
+let Lookback = 7d;
+
+let WritablePaths = dynamic([
+  "\\users\\public\\",
+  "\\programdata\\",
+  "\\windows\\temp\\",
+  "\\temp\\",
+  "\\appdata\\local\\temp\\",
+  "\\appdata\\roaming\\",
+  "\\perflogs\\"
+]);
+
+let ScriptEngines = dynamic([
+  "powershell.exe","pwsh.exe","cmd.exe","wscript.exe","cscript.exe",
+  "mshta.exe","rundll32.exe","regsvr32.exe"
+]);
+
+let AllowInitiatingParents = dynamic([
+  "sihclient.exe","usoclient.exe","trustedinstaller.exe",
+  "tiworker.exe","msiexec.exe","setuphost.exe"
+]);
+
+let AllowKeywords = dynamic([
+  "\\microsoft\\windows\\",
+  "onedrive","teams","edgeupdate","googleupdate",
+  "sccm","ccm","intune","defender","microsoft update"
+]);
+
+DeviceProcessEvents
+| where Timestamp >= ago(Lookback)
+| where FileName =~ "schtasks.exe"
+| extend Cmd = tolower(ProcessCommandLine)
+| where Cmd has_any ("/create", "/change")
+
+// Reinforcement extraction
+| extend
+    HasTaskAction     = iif(Cmd has "/tr" or Cmd has " /tr ", 1, 0),
+    UsesScriptEngine  = iif(Cmd has_any (ScriptEngines), 1, 0),
+    UsesWritablePath  = iif(Cmd has_any (WritablePaths), 1, 0),
+    RunsAsSystem      = iif(Cmd has_any (
+                              "/ru system",
+                              " /ru \"system\"",
+                              "/ru \"nt authority\\system\""
+                            ), 1, 0),
+    SuspSchedule      = iif(Cmd has_any (
+                              "/sc onlogon","/sc onstart",
+                              "/sc minute","/sc hourly"
+                            ), 1, 0),  // [FIX-3] removed /mo — too broad
+    HiddenTaskHints   = iif(Cmd has_any (
+                              "/rl highest","/it","/z"
+                            ), 1, 0)   // [FIX-2] removed /f — present in most automated task creation
+
+// Minimum truth gate — must have script engine OR writable path
+| where UsesScriptEngine == 1 or UsesWritablePath == 1
+
+// Noise suppression
+| where not(tolower(InitiatingProcessFileName) in~ (AllowInitiatingParents))
+| where not(Cmd has_any (AllowKeywords))
+| where not(Cmd has "\\program files\\")
+
+// Scoring
+// [FIX-1] BaseScore=10 ensures gate conditions always produce score above threshold
+| extend RiskScore =
+      10  // BaseScore — schtasks /create|/change is minimum truth
+    + iif(HasTaskAction    == 1, 15, 0)
+    + iif(UsesScriptEngine == 1, 35, 0)
+    + iif(UsesWritablePath == 1, 35, 0)
+    + iif(RunsAsSystem     == 1, 20, 0)
+    + iif(SuspSchedule     == 1, 15, 0)
+    + iif(HiddenTaskHints  == 1, 10, 0)
+
+| where RiskScore >= 40
+
+| extend Severity = case(
+    RiskScore >= 95, "CRITICAL",
+    RiskScore >= 75, "HIGH",
+                     "MEDIUM"
+)
+
+| extend HunterDirective = strcat(
+    "ACTION: ", Severity, " scheduled task persistence triage | ",
+    "CONTEXT: schtasks /create|/change with ",
+      iif(UsesScriptEngine == 1, "ScriptEngine", "NonScript"),
+      " + ",
+      iif(UsesWritablePath == 1, "WritablePath", "NonWritablePath"),
+      iif(RunsAsSystem == 1, " + SYSTEM", ""),
+      " | ",
+    "PIVOT: extract TaskName (/tn) + TaskRun (/tr). Verify owner/change ticket. ",
+    "If unapproved: inspect referenced payload, check recent downloads, ",
+    "and hunt for lateral movement."
+)
+
+| project
+    Timestamp,
+    DeviceName,
+    AccountName,
+    InitiatingProcessFileName,
+    FileName,
+    RiskScore,
+    Severity,
+    HunterDirective,
+    ProcessCommandLine
+| order by RiskScore desc, Timestamp desc

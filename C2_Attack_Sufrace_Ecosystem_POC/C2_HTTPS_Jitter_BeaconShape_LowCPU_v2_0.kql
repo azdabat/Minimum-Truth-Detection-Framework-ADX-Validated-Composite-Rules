@@ -1,0 +1,133 @@
+// ============================================================================
+// COMPOSITE HUNT (L3): C2_HTTPS_Jitter_BeaconShape_LowCPU_v1_0
+// Author: Ala Dabat
+// MITRE: TA0011 Command and Control
+//
+// FIXES APPLIED:
+// [FIX-1] HIGH   — DeviceName in partition inner summarize by clause but not in
+//                  partition key. Device rename during lookback splits ConnectionCount
+//                  across multiple rows, both falling below min_connections threshold.
+//                  DeviceName moved to aggregations: any(DeviceName).
+// [FIX-2] MEDIUM — ConnectionCount counted valid intervals after gap filter, not raw
+//                  connections. Misleading to analysts and silently fails min_connections
+//                  gate for endpoints with many extreme-gap intervals. Renamed to
+//                  IntervalCount. Raw ConnectionCount approximated as IntervalCount + 1.
+// [FIX-3] LOW    — BeaconScore had no floor. Browser/cloud agents scoring 0 on positive
+//                  conditions produced negative scores (-25) that passed through to
+//                  project output. Added floor at 0 after penalty application.
+// ============================================================================
+
+let lookback          = 24h;
+let min_connections   = 20;
+let max_payload_bytes = 50000;
+
+let BrowserLike      = dynamic(["chrome.exe","msedge.exe","firefox.exe","brave.exe","opera.exe"]);
+let CommonCloudAgents = dynamic(["teams.exe","onedrive.exe","msedgewebview2.exe"]);
+
+let Net =
+DeviceNetworkEvents
+| where Timestamp >= ago(lookback)
+| where RemotePort == 443
+| where Protocol =~ "Tcp"
+| where isnotempty(RemoteIP)
+| extend Proc       = tolower(InitiatingProcessFileName)
+| extend TotalBytes = tolong(coalesce(SentBytes, 0)) + tolong(coalesce(ReceivedBytes, 0))
+| where TotalBytes <= max_payload_bytes
+| project Timestamp, DeviceId, DeviceName, RemoteIP,
+          Proc,
+          InitiatingProcessCommandLine,
+          InitiatingProcessParentFileName,
+          TotalBytes;
+
+// Partition prevents prev() bleeding across different (DeviceId, RemoteIP, Proc) entities
+// [FIX-1] Partition key now matches summarize by clause — DeviceName moved to aggregations
+Net
+| partition hint.strategy=native by DeviceId, RemoteIP, Proc (
+    sort by Timestamp asc
+    | serialize
+    | extend PrevTime     = prev(Timestamp)
+    | extend IntervalSec  = datetime_diff("second", Timestamp, PrevTime)
+    | where isnotnull(PrevTime) and IntervalSec > 0
+    | where IntervalSec between (5 .. 21600)   // 5s - 6h sanity bounds
+    | summarize
+        IntervalCount     = count(),            // [FIX-2] valid intervals after gap filter
+        ConnectionCount   = count() + 1,        // [FIX-2] approximate raw connections
+        AvgIntervalSec    = avg(IntervalSec),
+        MinIntervalSec    = min(IntervalSec),
+        MaxIntervalSec    = max(IntervalSec),
+        StdDevIntervalSec = stdev(IntervalSec),
+        AvgBytes          = avg(TotalBytes),
+        FirstSeen         = min(Timestamp),
+        LastSeen          = max(Timestamp),
+        SampleCommand     = any(InitiatingProcessCommandLine),
+        SampleParent      = any(InitiatingProcessParentFileName),
+        DeviceName        = any(DeviceName)     // [FIX-1] moved from by clause to aggregation
+      by DeviceId, RemoteIP, Proc
+)
+| where IntervalCount >= min_connections        // [FIX-2] uses renamed field
+
+| extend JitterRatio = iif(
+    AvgIntervalSec > 0 and isnotnull(StdDevIntervalSec),
+    StdDevIntervalSec / AvgIntervalSec,
+    0.0
+  )
+| extend
+    IsBrowserLike = iff(Proc in (BrowserLike),       1, 0),
+    IsCommonCloud = iff(Proc in (CommonCloudAgents),  1, 0)
+
+// Scoring
+| extend BeaconScore =
+      iif(AvgIntervalSec between (10 .. 3600), 20, 0)  // typical beacon window
+    + iif(JitterRatio between (0.02 .. 0.50),  20, 0)  // controlled jitter
+    + iif(AvgBytes <= 5000,                    10, 0)  // tiny payloads
+    + iif(ConnectionCount >= 40,               10, 0)  // stronger repetition
+    + iif(IsBrowserLike == 1,                 -15, 0)  // soft suppression
+    + iif(IsCommonCloud == 1,                 -10, 0)
+
+// [FIX-3] Floor at 0 — negative scores confuse analysts and pipeline consumers
+| extend BeaconScore = iif(BeaconScore < 0, 0, BeaconScore)
+
+| extend Severity = case(
+    BeaconScore >= 45, "HIGH",
+    BeaconScore >= 30, "MEDIUM",
+    BeaconScore >= 20, "LOW",
+                       "INFO"
+)
+| where Severity != "INFO"
+
+| extend HuntingDirectives = pack_array(
+    strcat("[SUMMARY] Host=", DeviceName,
+           " | RemoteIP=", RemoteIP,
+           " | Proc=", Proc),
+    strcat("[SCORE] ", tostring(BeaconScore),
+           " | Sev=", Severity,
+           " | Intervals=", tostring(IntervalCount),
+           " | Connections≈", tostring(ConnectionCount),
+           " | AvgInt=", tostring(AvgIntervalSec), "s",
+           " | JitterCV=", tostring(JitterRatio),
+           " | AvgBytes=", tostring(AvgBytes)),
+    strcat("[EVIDENCE] First=", tostring(FirstSeen),
+           " | Last=", tostring(LastSeen),
+           " | Parent=", tostring(SampleParent)),
+    "[NEXT] Pivot: check same RemoteIP across estate; review process tree; correlate with persistence (tasks/run keys/services) and script/LOLBins.",
+    "[CONTAIN] If unauthorized: isolate host, acquire triage, block destination, hunt for sibling beacons and credential theft."
+)
+
+| project
+    Severity,
+    BeaconScore,
+    DeviceName,
+    RemoteIP,
+    Proc,
+    IntervalCount,      // [FIX-2]
+    ConnectionCount,    // [FIX-2]
+    AvgIntervalSec,
+    StdDevIntervalSec,
+    JitterRatio,
+    AvgBytes,
+    SampleParent,
+    SampleCommand,
+    FirstSeen,
+    LastSeen,
+    HuntingDirectives
+| order by BeaconScore desc, ConnectionCount desc, LastSeen desc

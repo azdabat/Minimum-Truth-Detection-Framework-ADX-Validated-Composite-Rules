@@ -92,7 +92,6 @@ This repository documents a **deliberate, operationally grounded methodology** f
 # Substrate-First vs Intent-First Minimum Truth  
 ## Refining the Minimum Truth Layer in Composite Detection Engineering
 
-**Author:** Ala Dabat  
 **Framework Alignment:** Minimum Truth → Reinforcement → Scoring → Narrative Convergence  
 **Purpose:** Formalize the distinction between *substrate-first* and *intent-first* minimum truth anchoring within detection engineering using PowerShell as the reference substrate.
 

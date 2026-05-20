@@ -89,7 +89,7 @@ The Minimum Truth Detection Framework introduces a **Cousin Technique Doctrine**
 
 ---
 
-🌐 Attack Ecosystem Intelligence: Defeating Temporal Deception & Substrate Fallbacks
+🌐 NEW ADDITION TO FRAMEWORK!!!! Attack Ecosystem Intelligence: Defeating Temporal Deception & Substrate Fallbacks
 
 Modern adversary tradecraft relies heavily on Temporal Deception—such as staggered C2 jitter and delayed BYOVD kernel exploits—alongside automated script loops designed to pivot dynamically across parallel execution boundaries (Cousin Techniques). When defensive units rely on traditional, out-of-the-box vendor rules built around monolithic, join-dependent kill chains, they face catastrophic query timeouts or miss intrusions entirely due to sequence fracturing over time.
 

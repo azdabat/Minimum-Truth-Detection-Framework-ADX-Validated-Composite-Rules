@@ -15,14 +15,14 @@
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════════╗
-║                    MINIMUM TRUTH DETECTION FRAMEWORK                        ║
+║                    MINIMUM TRUTH DETECTION FRAMEWORK                         ║
 ║                                                                              ║
 ║    Minimum Truth  ──▶  Reinforcement  ──▶  Scoring  ──▶  Hunter Directive  ║
 ║                                                                              ║
-║    Truth Anchor = Sensor       Reinforcement = Evidence                     ║
-║    Cousins = Adjacent Sensors  Incident = Story Stitching                   ║
+║    Truth Anchor = Sensor       Reinforcement = Evidence                      ║
+║    Cousins = Adjacent Sensors  Incident = Story Stitching                    ║
 ║                                                                              ║
-║    The rule is the sensor. The incident is the narrative.                   ║
+║    The rule is the sensor. The incident is the narrative.                    ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 ```
 

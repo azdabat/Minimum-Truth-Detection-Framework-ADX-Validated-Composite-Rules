@@ -89,6 +89,21 @@ The Minimum Truth Detection Framework introduces a **Cousin Technique Doctrine**
 
 ---
 
+🌐 Attack Ecosystem Intelligence: Defeating Temporal Deception & Substrate Fallbacks
+
+Modern adversary tradecraft relies heavily on Temporal Deception—such as staggered C2 jitter and delayed BYOVD kernel exploits—alongside automated script loops designed to pivot dynamically across parallel execution boundaries (Cousin Techniques). When defensive units rely on traditional, out-of-the-box vendor rules built around monolithic, join-dependent kill chains, they face catastrophic query timeouts or miss intrusions entirely due to sequence fracturing over time.
+
+This core documentation formalizes the operational necessity of a high-maturity hybrid architecture: deploying highly optimized, single-surface Behavioral Composites to deliver immediate, high-confidence alerts (HunterDirectives), while concurrently running a silent Incident-Layer Stitching Engine mapped to common entity keys (DeviceName, AccountName). By separating the sensor architecture from chronological storytelling, this framework achieves true scale-safe efficiency—forcing immediate narrative convergence the exact second an attacker touches an un-bypassable telemetric substrate choke point.
+
+---
+
+> [!NOTE]
+> **Operational Architecture Reference**
+>
+> This documentation defines the foundational methodology of our multi-tier detection architecture. For the complete engineering breakdown of this hybrid strategy, behavioral convergence modeling, and specific mitigation protocols against staggered tactics, refer directly to the reference file:
+>
+> 👉 **[Attack Ecosystem Intelligence Blueprints](https://github.com/azdabat/Minimum-Truth-Detection-Framework-ADX-Validated-Composite-Rules/blob/main/Attack%20Ecosystem%20Intelligence.md)**
+
 *Framework: Minimum Truth Detection Framework*  
 # Threat Hunting Philosophy & Detection Design
 

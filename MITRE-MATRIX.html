@@ -2,1411 +2,848 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ala Dabat — Full Detection Ecosystem Matrix</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ala Dabat — Detection Ecosystem Matrix v3</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;800&display=swap');
-
-  :root {
-    --bg: #0a0c10;
-    --surface: #11141b;
-    --surface2: #181c26;
-    --border: #252a38;
-    --accent: #00d4ff;
-    --text: #dde4f0;
-    --muted: #5a6480;
-    --core: #f59e0b;
-    --novel: #a855f7;
-    --pipeline: #10b981;
-
-    --c2: #ef4444;
-    --persist: #f97316;
-    --lateral: #eab308;
-    --cred: #22c55e;
-    --identity: #10b981;
-    --exec: #a855f7;
-    --evasion: #ec4899;
-    --impact: #f43f5e;
-    --control: #6366f1;
-    --initial: #06b6d4;
-    --exfil: #f97316;
-    --rmm: #84cc16;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    line-height: 1.6;
-  }
-
-  header {
-    padding: 36px 32px 20px;
-    border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, #0a0c10 0%, #11141b 100%);
-    position: relative;
-    overflow: hidden;
-  }
-
-  header::before {
-    content: '';
-    position: absolute;
-    top: -60px; right: -60px;
-    width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(0,212,255,0.04) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  header h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: 20px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    color: var(--accent);
-    margin-bottom: 3px;
-  }
-
-  header .sub {
-    color: var(--muted);
-    font-size: 11px;
-    margin-bottom: 14px;
-  }
-
-  .meta {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .meta span {
-    font-size: 10px;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    padding: 3px 10px;
-    border-radius: 3px;
-    background: var(--surface);
-  }
-
-  .meta span b { color: var(--text); }
-
-  .tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    background: var(--surface);
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .tabs::-webkit-scrollbar { display: none; }
-
-  .tab {
-    padding: 11px 18px;
-    cursor: pointer;
-    color: var(--muted);
-    font-size: 11px;
-    font-family: 'Syne', sans-serif;
-    font-weight: 600;
-    border-bottom: 2px solid transparent;
-    transition: all 0.15s;
-    white-space: nowrap;
-    letter-spacing: 0.3px;
-  }
-
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .tab.novel { }
-  .tab.novel.active { color: var(--novel); border-bottom-color: var(--novel); }
-  .tab.pipeline.active { color: var(--pipeline); border-bottom-color: var(--pipeline); }
-
-  .panel { display: none; padding: 28px 32px; }
-  .panel.active { display: block; }
-
-  .callout {
-    background: var(--surface2);
-    border-left: 3px solid var(--accent);
-    padding: 10px 14px;
-    margin-bottom: 20px;
-    border-radius: 0 4px 4px 0;
-    font-size: 11px;
-    color: var(--muted);
-    line-height: 1.7;
-  }
-
-  .callout.novel-callout { border-left-color: var(--novel); }
-  .callout.pipeline-callout { border-left-color: var(--pipeline); }
-  .callout b { color: var(--text); }
-
-  .legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 10px;
-    color: var(--muted);
-  }
-
-  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 11.5px;
-  }
-
-  th {
-    text-align: left;
-    padding: 9px 12px;
-    background: var(--surface2);
-    color: var(--muted);
-    font-size: 9px;
-    font-weight: 600;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-
-  td {
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: top;
-  }
-
-  tr:hover td { background: rgba(255,255,255,0.02); }
-
-  .tactic-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-  }
-
-  .eco-name {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 11px;
-    color: var(--text);
-    margin-bottom: 2px;
-  }
-
-  .eco-sub {
-    color: var(--muted);
-    font-size: 9px;
-    margin-bottom: 4px;
-  }
-
-  .rule-list { list-style: none; }
-
-  .rule-list li {
-    padding: 1px 0;
-    color: var(--muted);
-    font-size: 10px;
-  }
-
-  .rule-list li::before {
-    content: '· ';
-    color: var(--border);
-  }
-
-  .rule-list li.core {
-    color: var(--core);
-    font-weight: 600;
-  }
-
-  .rule-list li.core::before {
-    content: '★ ';
-    font-size: 9px;
-  }
-
-  .rule-list li.novel-rule {
-    color: var(--novel);
-    font-weight: 600;
-  }
-
-  .rule-list li.novel-rule::before {
-    content: '◆ ';
-    font-size: 9px;
-  }
-
-  .tag {
-    display: inline-block;
-    font-size: 9px;
-    padding: 1px 6px;
-    border-radius: 3px;
-    margin: 2px 2px 2px 0;
-    white-space: nowrap;
-  }
-
-  .technique { background: var(--surface2); border: 1px solid var(--border); color: var(--accent); }
-  .cousin { background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.3); color: #a78bfa; }
-  .missing-tag { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; }
-  .novel-tag { background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.3); color: #c084fc; }
-  .new-tag { background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #34d399; font-weight: 700; font-size: 8px; padding: 1px 5px; border-radius: 2px; margin-left: 4px; vertical-align: middle; }
-
-  .section-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 800;
-    color: var(--text);
-    margin: 28px 0 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-    letter-spacing: 0.3px;
-  }
-
-  .section-title:first-child { margin-top: 0; }
-
-  .section-title.novel-title { color: var(--novel); border-bottom-color: rgba(168,85,247,0.3); }
-  .section-title.pipeline-title { color: var(--pipeline); border-bottom-color: rgba(16,185,129,0.3); }
-
-  .grid-2 {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    padding: 12px 14px;
-  }
-
-  .card.novel-card { border-color: rgba(168,85,247,0.25); }
-  .card.pipeline-card { border-color: rgba(16,185,129,0.2); }
-
-  .card-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 11px;
-    color: var(--text);
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-
-  .card-body {
-    color: var(--muted);
-    font-size: 10px;
-    line-height: 1.65;
-  }
-
-  .card-rules {
-    margin-top: 8px;
-    border-top: 1px solid var(--border);
-    padding-top: 6px;
-  }
-
-  .status-badge {
-    font-size: 8px;
-    padding: 1px 6px;
-    border-radius: 2px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-  }
-
-  .status-live { background: rgba(34,197,94,0.15); color: #22c55e; }
-  .status-poc { background: rgba(168,85,247,0.15); color: #a855f7; }
-  .status-pipeline { background: rgba(245,158,11,0.15); color: #f59e0b; }
-  .status-research { background: rgba(6,182,212,0.15); color: #06b6d4; }
-
-  .repo-label {
-    display: inline-block;
-    font-size: 8px;
-    padding: 1px 6px;
-    border-radius: 2px;
-    background: rgba(0,212,255,0.08);
-    border: 1px solid rgba(0,212,255,0.2);
-    color: var(--accent);
-    margin-bottom: 8px;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-  }
-
-  @media (max-width: 900px) {
-    .panel { padding: 16px; }
-    header { padding: 20px 16px; }
-    .tabs { padding: 0 16px; }
-    td, th { padding: 8px 10px; }
-    table { font-size: 10px; }
-  }
+:root{--bg:#0d1117;--sf:#161b22;--sf2:#1c2128;--bdr:#21262d;--acc:#1f6feb;--pur:#7B2FBE;--grn:#238636;--amb:#d29922;--red:#da3633;--cyn:#0891b2;--txt:#c9d1d9;--mut:#8b949e;--lnk:#58a6ff}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;line-height:1.5}
+body.edit-mode .rtag{cursor:pointer!important;outline:2px dashed var(--amb)!important;outline-offset:2px}
+body.edit-mode .rtag:hover{background:#2d1f00!important;color:#e3b341!important}
+.rtag.linked{border-color:var(--grn)!important;color:#56d364!important;cursor:pointer}
+.rtag.linked::after{content:"↗";font-size:.6em;opacity:.7;margin-left:.2em}
+.hdr{background:linear-gradient(135deg,#0d1117,#161b22 50%,#0d1117);border-bottom:1px solid var(--bdr);padding:1.8rem 2rem 1.4rem;text-align:center}
+.hdr pre{font-size:8px;color:var(--acc);line-height:1.2;overflow-x:auto;margin-bottom:.8rem;font-family:monospace}
+.hdr h1{font-size:1.35rem;font-weight:700;color:#fff;margin-bottom:.25rem}
+.hdr p{color:var(--mut);font-size:.82rem}
+.badges{display:flex;flex-wrap:wrap;justify-content:center;gap:.35rem;margin:.8rem 0 0}
+.badge{padding:.18rem .55rem;border-radius:20px;font-size:.68rem;font-weight:600;letter-spacing:.03em;border:1px solid}
+.bb{background:#0d2847;color:#58a6ff;border-color:#1f6feb}
+.bg{background:#04260f;color:#56d364;border-color:#238636}
+.bp{background:#21033f;color:#d2a8ff;border-color:#7B2FBE}
+.ba{background:#2d1f00;color:#e3b341;border-color:#d29922}
+.bc{background:#003344;color:#76e4f7;border-color:#0891b2}
+.br{background:#2d0f0e;color:#ff7b72;border-color:#da3633}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem;padding:.6rem 2rem;background:var(--sf);border-bottom:1px solid var(--bdr)}
+.tl,.tr{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+.tbtn{padding:.28rem .7rem;border-radius:5px;border:1px solid var(--bdr);background:var(--sf2);color:var(--mut);font-size:.7rem;font-weight:600;cursor:pointer;transition:all .15s}
+.tbtn:hover{border-color:var(--acc);color:var(--lnk)}
+.tbtn.on{background:#2d1f00;border-color:var(--amb);color:#e3b341}
+.lcount{font-size:.7rem;color:var(--mut)}
+.mo{display:none;position:fixed;inset:0;background:#0009;z-index:200;align-items:center;justify-content:center}
+.mo.open{display:flex}
+.mbox{background:var(--sf);border:1px solid var(--acc);border-radius:10px;padding:1.4rem;max-width:540px;width:90%;max-height:80vh;overflow-y:auto}
+.mbox h3{color:#fff;margin-bottom:.8rem;font-size:.95rem}
+.mclose{float:right;background:none;border:none;color:var(--mut);font-size:1.1rem;cursor:pointer}
+.step{display:flex;gap:.7rem;margin-bottom:.7rem;align-items:flex-start}
+.sn{background:var(--acc);color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;margin-top:.1rem}
+.step p{font-size:.78rem;color:var(--mut);line-height:1.5}
+.step strong{color:var(--txt)}
+.stats{display:flex;flex-wrap:wrap;justify-content:center;gap:1.5rem;padding:.9rem 2rem;background:var(--sf);border-bottom:1px solid var(--bdr)}
+.stat{text-align:center}
+.snum{font-size:1.7rem;font-weight:800;color:var(--acc);line-height:1}
+.slbl{font-size:.68rem;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+.doctrine{margin:1.2rem 2rem;padding:.9rem 1.1rem;background:var(--sf);border:1px solid var(--acc);border-left:4px solid var(--acc);border-radius:6px;font-size:.8rem;line-height:1.6}
+.doctrine strong{color:#58a6ff}
+.tabs{display:flex;flex-wrap:wrap;gap:.25rem;padding:0 2rem;border-bottom:1px solid var(--bdr);margin-top:.5rem}
+.tab{padding:.45rem .85rem;border-radius:6px 6px 0 0;cursor:pointer;font-size:.73rem;font-weight:600;border:1px solid transparent;border-bottom:none;color:var(--mut);background:none;transition:all .15s}
+.tab:hover{color:var(--txt);background:var(--sf)}
+.tab.on{color:#fff;background:var(--sf);border-color:var(--bdr);border-bottom-color:var(--sf)}
+.panel{display:none;padding:1.4rem 2rem}
+.panel.on{display:block}
+.legend{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;padding:.7rem 1rem;background:var(--sf);border:1px solid var(--bdr);border-radius:6px}
+.li{display:flex;align-items:center;gap:.3rem;font-size:.7rem;color:var(--mut)}
+.egrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:.9rem}
+.ec{background:var(--sf);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;transition:border-color .2s}
+.ec:hover{border-color:var(--acc)}
+.eh{padding:.65rem .9rem;display:flex;align-items:center;justify-content:space-between;gap:.4rem;border-bottom:1px solid var(--bdr);flex-wrap:wrap}
+.etac{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:.12rem .4rem;border-radius:3px;white-space:nowrap}
+.etit{font-size:.82rem;font-weight:700;color:#fff;flex:1;padding:0 .4rem}
+.est{font-size:.6rem;font-weight:700;padding:.12rem .4rem;border-radius:3px;white-space:nowrap}
+.sv{background:#04260f;color:#56d364}
+.si{background:#0d2244;color:#79c0ff}
+.sp{background:#21033f;color:#d2a8ff}
+.sl{background:#1a1a0d;color:#d4c57a}
+.sr{background:#2d0f0e;color:#ff7b72}
+.tc2{background:#003344;color:#76e4f7}
+.tex{background:#1a3300;color:#7ee787}
+.tps{background:#2d1f00;color:#e3b341}
+.tev{background:#21033f;color:#d2a8ff}
+.tcr{background:#2d0f0e;color:#ff7b72}
+.tlt{background:#1a1a3f;color:#a0bcff}
+.tcl{background:#0d2847;color:#58a6ff}
+.tmp{background:#3d0000;color:#ff9ea0}
+.tia{background:#1a1a0d;color:#d4c57a}
+.tnv{background:#1a0a2e;color:#c9a0dc}
+.tai{background:#003344;color:#76e4f7}
+.eb{padding:.75rem .9rem}
+.ed{font-size:.76rem;color:var(--mut);margin-bottom:.55rem;line-height:1.5}
+.rl{display:flex;flex-wrap:wrap;gap:.25rem;margin-bottom:.5rem}
+.rtag{font-size:.63rem;padding:.1rem .38rem;border-radius:3px;background:var(--sf2);border:1px solid var(--bdr);color:var(--mut);font-family:'Consolas',monospace;transition:all .15s;user-select:none;white-space:nowrap}
+.rtag.core{border-color:#1f6feb;color:#58a6ff}
+.cs{margin-top:.45rem}
+.cl{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--pur);margin-bottom:.25rem}
+.ct{display:flex;flex-wrap:wrap;gap:.2rem}
+.ctag{font-size:.61rem;padding:.1rem .38rem;border-radius:3px;background:#21033f;border:1px solid #7B2FBE33;color:#d2a8ff}
+.ctag.gap{background:#2d0f0e;border-color:#da363333;color:#ff7b72}
+.mt{display:flex;flex-wrap:wrap;gap:.18rem;margin-top:.4rem}
+.mt span{font-size:.58rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace}
+.cmap{overflow-x:auto;margin-top:.8rem}
+.cmap table{width:100%;border-collapse:collapse;font-size:.74rem}
+.cmap th{background:var(--sf);border:1px solid var(--bdr);padding:.45rem .65rem;text-align:left;color:var(--mut);font-size:.65rem;text-transform:uppercase;letter-spacing:.04em}
+.cmap td{border:1px solid var(--bdr);padding:.45rem .65rem;vertical-align:top}
+.cmap tr:hover td{background:var(--sf2)}
+.tc{background:#003344;border-left:3px solid #da3633}
+.tcard{background:var(--sf);border:1px solid var(--bdr);border-radius:8px;margin-bottom:1.3rem;overflow:hidden}
+.thead2{padding:.75rem .95rem;background:var(--sf2);display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+.tbadge{padding:.18rem .55rem;border-radius:4px;font-size:.66rem;font-weight:700}
+.ttit{font-size:.95rem;font-weight:700;color:#fff;flex:1}
+.tsrc{font-size:.66rem;color:var(--mut)}
+.tbody{padding:.9rem}
+.tsec{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);margin-bottom:.45rem;margin-top:.75rem}
+.tsec:first-child{margin-top:0}
+.tdesc{font-size:.78rem;color:var(--txt);line-height:1.6;margin-bottom:.7rem}
+.iot{width:100%;border-collapse:collapse;font-size:.72rem;margin-bottom:.7rem}
+.iot th{background:var(--sf2);border:1px solid var(--bdr);padding:.38rem .55rem;text-align:left;color:var(--mut);font-size:.65rem}
+.iot td{border:1px solid var(--bdr);padding:.38rem .55rem;vertical-align:top}
+.iot tr:hover td{background:var(--sf2)}
+.itype{font-weight:700;color:#e3b341;font-family:monospace;font-size:.66rem;white-space:nowrap}
+.ival{color:var(--txt);font-family:monospace;font-size:.7rem}
+.inote{color:var(--mut);font-size:.66rem}
+.ioa{display:flex;gap:.45rem;margin-bottom:.38rem;align-items:flex-start}
+.iob{color:var(--red);font-weight:700;flex-shrink:0}
+.iot2{font-size:.77rem;color:var(--txt);line-height:1.5}
+.mwrap{background:#0d1117;border:1px solid var(--bdr);border-radius:6px;padding:.9rem;margin:.45rem 0;overflow-x:auto}
+.rmph{margin-bottom:1.8rem}
+.rphhd{display:flex;align-items:center;gap:.7rem;margin-bottom:.9rem;padding-bottom:.45rem;border-bottom:1px solid var(--bdr)}
+.rpbdg{padding:.18rem .7rem;border-radius:20px;font-size:.7rem;font-weight:700}
+.rphtt{font-size:.95rem;font-weight:700;color:#fff}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.75rem}
+.ri{background:var(--sf);border:1px solid var(--bdr);border-radius:6px;padding:.75rem}
+.rit{font-weight:700;color:#fff;font-size:.8rem;margin-bottom:.28rem;display:flex;align-items:center;gap:.35rem}
+.rid{font-size:.72rem;color:var(--mut);line-height:1.5}
+.pp0{border-left:3px solid var(--red)}
+.pp1{border-left:3px solid var(--amb)}
+.pp2{border-left:3px solid var(--acc)}
+.ppr{border-left:3px solid var(--pur)}
+.pdn{border-left:3px solid var(--grn);opacity:.75}
+.gtab{width:100%;border-collapse:collapse;font-size:.74rem;margin-top:.9rem}
+.gtab th{background:var(--sf);border:1px solid var(--bdr);padding:.45rem .7rem;text-align:left;color:var(--mut);font-size:.64rem;text-transform:uppercase}
+.gtab td{border:1px solid var(--bdr);padding:.45rem .7rem;vertical-align:top}
+.gtab tr:hover td{background:var(--sf2)}
+.t1{color:#ff7b72;font-weight:700}
+.t2{color:#e3b341;font-weight:700}
+.tn{color:#76e4f7;font-weight:700}
+.stup{position:fixed;bottom:1.2rem;right:1.2rem;background:var(--acc);color:#fff;border:none;border-radius:50%;width:34px;height:34px;font-size:1rem;cursor:pointer;z-index:50}
+@media(max-width:600px){.hdr pre{display:none}.egrid{grid-template-columns:1fr}.panel{padding:1rem}.toolbar{flex-direction:column}}
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Ala Dabat — Detection Ecosystem Matrix</h1>
-  <div class="sub">Minimum Truth Framework · ADX Validated · Full Ruleset Across All Repos</div>
-  <div class="meta">
-    <span>Author: <b>Ala Dabat (azdabat)</b></span>
-    <span>Licence: <b>CC BY-NC-SA 4.0</b></span>
-    <span>Ecosystems: <b>14</b></span>
-    <span>Rules: <b>100+</b></span>
-    <span>★ Core Rule &nbsp;◆ Novel/POC</span>
-  </div>
-</header>
+<div id="help-modal" class="mo">
+<div class="mbox">
+<button class="mclose" onclick="document.getElementById('help-modal').classList.remove('open')">✕</button>
+<h3>🔗 How to Link Rules to KQL Files</h3>
+<p style="font-size:.78rem;color:var(--mut);margin-bottom:.9rem">Links are saved in your browser's localStorage. Use Export/Import to back up and restore across devices or browsers.</p>
+<div class="step"><div class="sn">1</div><p>Upload your KQL files to GitHub (e.g. <code>ADX-Tested-Composite-Rules/C2_HTTPS_Jitter_v2.kql</code>)</p></div>
+<div class="step"><div class="sn">2</div><p>Get the file URL from GitHub — either the raw URL or the blob/browse URL</p></div>
+<div class="step"><div class="sn">3</div><p>Click <strong>🔗 Edit Links</strong> button in the toolbar — rule tags will highlight with a yellow dashed border</p></div>
+<div class="step"><div class="sn">4</div><p>Click any rule tag — paste the GitHub URL in the prompt and click OK</p></div>
+<div class="step"><div class="sn">5</div><p>The tag turns <strong style="color:#56d364">green</strong> with ↗. Click <strong>💾 Done</strong> when finished.</p></div>
+<div class="step"><div class="sn">6</div><p>Use <strong>📤 Export</strong> to save links as JSON backup. <strong>📥 Import</strong> to restore on another device.</p></div>
+<div class="step"><div class="sn">7</div><p>To remove a link: enter edit mode, click the tag, clear the URL field and click OK.</p></div>
+</div>
+</div>
+
+<div class="hdr">
+<pre>
+███╗   ███╗██╗███╗   ██╗██╗███╗   ███╗██╗   ██╗███╗   ███╗    ████████╗██████╗ ██╗   ██╗████████╗██╗  ██╗
+████╗ ████║██║████╗  ██║██║████╗ ████║██║   ██║████╗ ████║    ╚══██╔══╝██╔══██╗██║   ██║╚══██╔══╝██║  ██║
+██╔████╔██║██║██╔██╗ ██║██║██╔████╔██║██║   ██║██╔████╔██║       ██║   ██████╔╝██║   ██║   ██║   ███████║
+██║╚██╔╝██║██║██║╚██╗██║██║██║╚██╔╝██║██║   ██║██║╚██╔╝██║       ██║   ██╔══██╗██║   ██║   ██║   ██╔══██║
+██║ ╚═╝ ██║██║██║ ╚████║██║██║ ╚═╝ ██║╚██████╔╝██║ ╚═╝ ██║       ██║   ██║  ██║╚██████╔╝   ██║   ██║  ██║
+╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝╚═╝     ╚═╝ ╚═════╝ ╚═╝     ╚═╝       ╚═╝   ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝
+</pre>
+<h1>Detection Ecosystem Matrix v3</h1>
+<p>Minimum Truth Framework · Cousin Technique Doctrine · ADX-Validated · Active Threat Intelligence</p>
+<p style="margin-top:.25rem;color:#58a6ff;font-size:.8rem">Author: Ala Dabat (azdabat) · CC BY-NC-SA 4.0 · 2026</p>
+<div class="badges">
+<span class="badge bb">KQL ADX Validated</span>
+<span class="badge bg">MITRE ATT&amp;CK Mapped</span>
+<span class="badge bp">Cousin Technique Doctrine</span>
+<span class="badge ba">PEAK · TAHITI Aligned</span>
+<span class="badge bc">MDE · Sentinel</span>
+<span class="badge br">Novel Tradecraft Research</span>
+</div>
+</div>
+
+<div class="toolbar">
+<div class="tl">
+<button class="tbtn" id="ebtn" onclick="toggleEdit()">🔗 Edit Links</button>
+<button class="tbtn" onclick="expLinks()">📤 Export</button>
+<label class="tbtn" style="cursor:pointer">📥 Import<input type="file" id="impf" accept=".json" style="display:none" onchange="impLinks(this)"></label>
+</div>
+<div class="tr">
+<button class="tbtn" onclick="document.getElementById('help-modal').classList.add('open')">❓ How to Link</button>
+<span class="lcount" id="lcount"></span>
+</div>
+</div>
+
+<div class="stats">
+<div class="stat"><div class="snum">16</div><div class="slbl">Ecosystems</div></div>
+<div class="stat"><div class="snum">100+</div><div class="slbl">Rules</div></div>
+<div class="stat"><div class="snum">~60</div><div class="slbl">In Iteration</div></div>
+<div class="stat"><div class="snum">3</div><div class="slbl">Repositories</div></div>
+<div class="stat"><div class="snum">6</div><div class="slbl">Novel Research</div></div>
+<div class="stat"><div class="snum">5</div><div class="slbl">Active Threat Intel</div></div>
+</div>
+
+<div class="doctrine">
+<strong>Minimum Truth Framework doctrine:</strong> Each rule is a sensor, not a kill-chain monolith. Core rules (★) are the minimum truth anchor per ecosystem — the behaviour that must occur regardless of evasion. Cousin rules cover adjacent surfaces with the same adversary intent on a different substrate. <strong>Cousin gaps (⚠)</strong> are documented explicitly — every unmapped gap is a free attacker pivot surface. Click any <span style="border:1px solid #1f6feb;color:#58a6ff;padding:.1rem .3rem;border-radius:3px;font-family:monospace;font-size:.82em">rule tag</span> to open its KQL file after linking via the toolbar.
+</div>
 
 <div class="tabs">
-  <div class="tab active" onclick="showTab('full', this)">Full Matrix</div>
-  <div class="tab novel" onclick="showTab('novel', this)">◆ Novel Tradecraft</div>
-  <div class="tab pipeline" onclick="showTab('pipeline', this)">Roadmap</div>
-  <div class="tab" onclick="showTab('missing', this)">Coverage Gaps</div>
+<button class="tab on" onclick="showTab('full',this)">Full Matrix</button>
+<button class="tab" onclick="showTab('cousin',this)">Cousin Map</button>
+<button class="tab" onclick="showTab('threat',this)">🔴 Threat Intel 2026</button>
+<button class="tab" onclick="showTab('novel',this)">◆ Novel Tradecraft</button>
+<button class="tab" onclick="showTab('ai',this)">🤖 AI Vectors</button>
+<button class="tab" onclick="showTab('roadmap',this)">Roadmap</button>
+<button class="tab" onclick="showTab('gaps',this)">Gaps</button>
 </div>
 
-<!-- ════════════════════════════════════════
-     TAB 1 — FULL MATRIX
-════════════════════════════════════════ -->
-<div id="full" class="panel active">
 
-  <div class="callout">
-    <b>Framework doctrine:</b> Each rule is a sensor, not a kill-chain monolith. Core rules (★) are the minimum truth anchor per ecosystem. Cousin rules cover adjacent surfaces with the same attack intent on a different substrate. No ghost chains — sensor layer always separated from narrative layer. Rules span two repos: <b>Minimum-Truth-Detection-Framework</b> (validated composites) and <b>Attack-Ecosystems-and-POC</b> (expanded ecosystem coverage).
+<div id="full" class="panel on">
+<div class="legend">
+  <span class="li"><span class="est sv">✅ ADX Validated</span> Production-grade</span>
+  <span class="li"><span class="est si">🔄 Iteration</span> Testing & tuning</span>
+  <span class="li"><span class="est sp">🔵 POC/Modelled</span> Proof of concept</span>
+  <span class="li"><span class="est sl">📋 Pipeline</span> Planned</span>
+  <span class="li"><span class="est sr">🔴 Research</span> Early stage</span>
+</div>
+<div class="egrid">
+
+<div class="ec">
+  <div class="eh">
+    <span class="etac tc2">C2</span>
+    <span class="etit">C2 Full Ecosystem — HTTPS Jitter · Named Pipe · Blockchain · RMM</span>
+    <span class="est si">🔄 Iteration</span>
   </div>
-
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:var(--c2)"></div>C2</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--initial)"></div>Initial Access</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--exec)"></div>Execution</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--persist)"></div>Persistence</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--evasion)"></div>Defence Evasion</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--cred)"></div>Credential Access</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--lateral)"></div>Lateral Movement</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--identity)"></div>Identity / Cloud</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--exfil)"></div>Exfiltration</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--impact)"></div>Impact</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--rmm)"></div>RMM / Control</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--control)"></div>Control Plane</div>
+  <div class="eb">
+    <div class="ed">Statistical jitter detection (entity-keyed 30-day baseline), named pipe IPC correlation, blockchain RPC beacon identification. HTTPS Jitter v2 and Named Pipe in iteration tuning. Blockchain RPC stable. RMM abuse via LOLRMM list (400+ tools) in iteration.</div>
+    <div class="rl"><span class="rtag core" data-rule="C2_HTTPS_Jitter_Beacon_v2">★ C2_HTTPS_Jitter_v2</span><span class="rtag core" data-rule="C2_NamedPipe_IPC">★ C2_NamedPipe_IPC</span><span class="rtag core" data-rule="C2_Blockchain_RPC_Beacon">★ C2_Blockchain_RPC</span><span class="rtag" data-rule="C2_and_RMM_Abuse">C2_RMM_Abuse</span><span class="rtag" data-rule="TOR_Exit_Nodes">TOR_Exit_Nodes</span></div>
+    <div class="cs">
+      <div class="cl">Cousin Surfaces</div>
+      <div class="ct"><span class="ctag">HTTPS Jitter 🔄</span><span class="ctag">Named Pipe 🔄</span><span class="ctag">Blockchain RPC ✅</span><span class="ctag">RMM 400+ tools 🔄</span><span class="ctag gap">⚠ DNS Tunnelling</span><span class="ctag gap">⚠ ICMP C2</span><span class="ctag gap">⚠ Teams/Slack C2</span></div>
+    </div>
+    <div class="mt"><span>T1071.001</span><span>T1559.001</span><span>T1102</span><span>T1571</span><span>T1219</span></div>
   </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th style="width:110px">Tactic</th>
-        <th style="width:170px">Ecosystem</th>
-        <th>Core Rules ★</th>
-        <th>Cousin / Adjacent</th>
-        <th style="width:210px">MITRE Techniques</th>
-      </tr>
-    </thead>
-    <tbody>
-
-      <!-- ── INITIAL ACCESS ── -->
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(6,182,212,0.15);color:var(--initial)">Initial Access</span></td>
-        <td>
-          <div class="eco-name">Phishing & ClickFix Chain</div>
-          <div class="eco-sub">SafeLinks + Clipboard Injection</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">Sentinel_Phishing_SafeLinks_ClickThrough_V2</li>
-            <li class="core">ClickFix_ErrTraffic_Clipboard_Chain</li>
-            <li class="core">MDE_BEC_Malicious_ClickThrough</li>
-            <li>Sentinel_Phishing_SafeLinks (v1)</li>
-            <li>Smartscreen_High_Risk_Event</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">HTML Smuggling</span>
-          <span class="tag cousin">Macro Execution Chain</span>
-          <span class="tag cousin">QR Code Phish</span>
-          <span class="tag cousin">OneNote Attachment</span>
-          <span class="tag cousin">AitM Proxy Phish</span>
-        </td>
-        <td>
-          <span class="tag technique">T1566.002 Spearphish Link</span>
-          <span class="tag technique">T1204.002 User Exec</span>
-          <span class="tag technique">T1059.007 JS/VBS</span>
-          <span class="tag technique">T1566.001 Attachment</span>
-        </td>
-      </tr>
-
-      <!-- ── C2 ── -->
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(239,68,68,0.15);color:var(--c2)">C2</span></td>
-        <td>
-          <div class="eco-name">C2 Full Ecosystem</div>
-          <div class="eco-sub">HTTPS · Named Pipe · Blockchain · RMM</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">C2_HTTPS_Jitter_Beacon (v2)</li>
-            <li class="core">C2_NamedPipe_IPC_Session</li>
-            <li class="core">Pipe_C2_Lateral_Movement_Hunt</li>
-            <li class="core">Pipe2_C2_Lateral_Movement_L3</li>
-            <li class="core">Suspicious_Names_Pipes</li>
-            <li class="core">C2_and_RMM_Behavioural_Abuse</li>
-            <li>C2_HTTPS_Jitter_Beacon (v1)</li>
-            <li>C2_Blockchain_RPC_Beacon</li>
-            <li>Crypto_Miner_C2</li>
-            <li>Suspicious_Outbound_Connections</li>
-            <li>TOR_Exit_Nodes_on_Network</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">DNS Tunnelling C2</span>
-          <span class="tag cousin">ICMP C2</span>
-          <span class="tag cousin">Domain Fronting</span>
-          <span class="tag cousin">FastFlux Beacon</span>
-          <span class="tag cousin">Slack/Teams C2</span>
-          <span class="tag cousin">WebDAV C2</span>
-        </td>
-        <td>
-          <span class="tag technique">T1071.001 Web Protocols</span>
-          <span class="tag technique">T1559.001 Named Pipes</span>
-          <span class="tag technique">T1102 Web Service</span>
-          <span class="tag technique">T1571 Non-Std Port</span>
-          <span class="tag technique">T1219 Remote Access</span>
-          <span class="tag technique">T1090 Proxy</span>
-        </td>
-      </tr>
-
-      <!-- ── EXECUTION ── -->
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(168,85,247,0.15);color:var(--exec)">Execution</span></td>
-        <td>
-          <div class="eco-name">LOLBins + PowerShell Full Pack</div>
-          <div class="eco-sub">9 sub-packs · Rare LOLBins · Rundll32 · PS Hunter</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">01_ProxyExec_Ingress</li>
-            <li class="core">Powershell_Cradle_Ingress</li>
-            <li class="core">PowerShell_Download</li>
-            <li class="core">Powershell_Intent_First</li>
-            <li class="core">Muli_LOLBIN_Hunt_2</li>
-            <li class="core">ASR_Blocked_Executables</li>
-            <li class="core">Untrusted_Executable_Execution</li>
-            <li>08_Debug_Dump_Injection</li>
-            <li>LOLBINS_Ingress_Pack</li>
-            <li>Powershell_Cradle_Staged</li>
-            <li>Ingress_Tool_Transfer</li>
-            <li>04_DefenseEvasion_Renamed</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">MSHTA Execution</span>
-          <span class="tag cousin">Certutil Download</span>
-          <span class="tag cousin">Regsvr32 Proxy</span>
-          <span class="tag cousin">BitsAdmin Transfer</span>
-          <span class="tag cousin">Wscript/Cscript</span>
-          <span class="tag cousin">Compiled HTML (CHM)</span>
-          <span class="tag cousin">Electron App Abuse</span>
-        </td>
-        <td>
-          <span class="tag technique">T1218 Sys Binary Proxy</span>
-          <span class="tag technique">T1059.001 PowerShell</span>
-          <span class="tag technique">T1105 Ingress Transfer</span>
-          <span class="tag technique">T1036.003 Renamed Binary</span>
-          <span class="tag technique">T1218.011 Rundll32</span>
-          <span class="tag technique">T1218.005 Mshta</span>
-        </td>
-      </tr>
-
-      <!-- ── PERSISTENCE ── -->
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(249,115,22,0.15);color:var(--persist)">Persistence</span></td>
-        <td>
-          <div class="eco-name">Registry Persistence Ecosystem</div>
-          <div class="eco-sub">Boot · LSA · Payload Stash · Drift</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">Registry_Persistence_Boot (primary)</li>
-            <li class="core">Registry_Payload_Stash</li>
-            <li class="core">Registry_Persistence_LSA</li>
-            <li class="core">Registry_Core_Hunt</li>
-            <li class="core">Registry_Persistence_Drift_ReWrite</li>
-            <li>ADX_Registry_Persistence</li>
-            <li>Registry_Persistence_Security</li>
-            <li>Registry_Persistence_UAC</li>
-            <li>Registry_Persistence_Hive</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">TaskCache (silent)</span>
-          <span class="tag cousin">Service ImagePath Hijack</span>
-          <span class="tag cousin">COM Object Hijack</span>
-          <span class="tag cousin">AppInit DLL</span>
-          <span class="tag cousin">Winlogon Helper</span>
-          <span class="tag cousin">Time Provider DLL</span>
-        </td>
-        <td>
-          <span class="tag technique">T1547.001 Run Keys</span>
-          <span class="tag technique">T1112 Modify Registry</span>
-          <span class="tag technique">T1547.005 Security Support</span>
-          <span class="tag technique">T1553.004 Code Signing</span>
-          <span class="tag technique">T1548.002 UAC Bypass</span>
-          <span class="tag technique">T1027 Obfuscated Files</span>
-        </td>
-      </tr>
-
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(249,115,22,0.15);color:var(--persist)">Persistence</span></td>
-        <td>
-          <div class="eco-name">Scheduled Task Ecosystem</div>
-          <div class="eco-sub">TaskCache · AT · BITS</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">02_ScheduledTask_Persistence</li>
-            <li class="core">03_Persistence_Surface</li>
-            <li>Scheduled_Tasks_Abuse</li>
-            <li>Scheduled_Tasks_Rundll</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">TaskCache (no schtasks.exe)</span>
-          <span class="tag cousin">AT Job Legacy</span>
-          <span class="tag cousin">BITS Job Persistence</span>
-          <span class="tag cousin">Winlogon Helper</span>
-        </td>
-        <td>
-          <span class="tag technique">T1053.005 Scheduled Task</span>
-          <span class="tag technique">T1053.002 AT Job</span>
-          <span class="tag technique">T1197 BITS Jobs</span>
-          <span class="tag technique">T1547.004 Winlogon</span>
-        </td>
-      </tr>
-
-      <!-- ── DEFENCE EVASION ── -->
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(236,72,153,0.15);color:var(--evasion)">Def Evasion</span></td>
-        <td>
-          <div class="eco-name">BYOVD / LOLDriver Ecosystem</div>
-          <div class="eco-sub">Kernel · Delayed/Staged · Combined</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">LOLDriver_Abuse_Kernel</li>
-            <li class="core">LOLDrivers_BYOVD_Combined_Rule</li>
-            <li class="core">_BYOVD_Service_Creation_Detection</li>
-            <li>LOLDRIVER_Abuse-v2</li>
-            <li>LOLDRIVER_BYOVD_Delayed_Staged</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">ProcExp Driver Abuse</span>
-          <span class="tag cousin">EDR Kill via Vulnerable Driver</span>
-          <span class="tag cousin">HVCI Bypass Attempt</span>
-          <span class="tag cousin">Driver Signature Spoof</span>
-        </td>
-        <td>
-          <span class="tag technique">T1014 Rootkit</span>
-          <span class="tag technique">T1562.001 Impair Defences</span>
-          <span class="tag technique">T1068 Privilege Escalation</span>
-          <span class="tag technique">T1543.003 Windows Service</span>
-        </td>
-      </tr>
-
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(236,72,153,0.15);color:var(--evasion)">Def Evasion</span></td>
-        <td>
-          <div class="eco-name">DLL Sideloading Chain</div>
-          <div class="eco-sub">MDE · Sentinel · BYOVD Combo</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">DLL_Sideload_BYOVD_CHAIN_UNIFIED</li>
-            <li class="core">MDE_DLL_Sideloading_Attack_Chain</li>
-            <li class="core">L3_DLL_SIDELOAD_CHAIN_SENTINEL</li>
-            <li>DLL_Sideload_BYOVD_CHAIN_MDE_ONLY</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">Search Order Hijack</span>
-          <span class="tag cousin">Phantom DLL</span>
-          <span class="tag cousin">Known DLL Override</span>
-          <span class="tag cousin">SxS DLL Hijack</span>
-        </td>
-        <td>
-          <span class="tag technique">T1574.002 DLL Sideloading</span>
-          <span class="tag technique">T1574.001 DLL Search Order</span>
-          <span class="tag technique">T1574.006 Dynamic Linker</span>
-        </td>
-      </tr>
-
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(236,72,153,0.15);color:var(--evasion)">Def Evasion</span></td>
-        <td>
-          <div class="eco-name">In-Memory Injection + Obfuscation</div>
-          <div class="eco-sub">Process Injection · AMSI Bypass · Polymorphic</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">AMSI_Bypass_Hunt</li>
-            <li class="core">Polymorphic_Malware</li>
-            <li class="core">EDR_Malicious_Driver_Tamper</li>
-            <li>In-Memory Injection Detection (pack)</li>
-            <li>Obfuscation (pack)</li>
-            <li>WSL_Hunt_Advanced_Pack</li>
-            <li>WSL_Hunt_REFACTORED</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">Reflective DLL Injection</span>
-          <span class="tag cousin">Process Hollowing</span>
-          <span class="tag cousin">Heaven's Gate</span>
-          <span class="tag cousin">ETW Patching</span>
-          <span class="tag cousin">WSL Linux Binary Proxy</span>
-        </td>
-        <td>
-          <span class="tag technique">T1055 Process Injection</span>
-          <span class="tag technique">T1562.001 Impair Defences</span>
-          <span class="tag technique">T1027.010 Command Obfusc</span>
-          <span class="tag technique">T1497 Virtualization Evasion</span>
-          <span class="tag technique">T1202 Indirect Cmd Exec</span>
-        </td>
-      </tr>
-
-      <!-- ── CREDENTIAL ACCESS ── -->
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(34,197,94,0.15);color:var(--cred)">Cred Access</span></td>
-        <td>
-          <div class="eco-name">LSASS + NTDS + Secrets</div>
-          <div class="eco-sub">DC Attack · Staging · Recon</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">COMPOSITE_L3_LSASS</li>
-            <li class="core">Lsass_Access_Or_Dump_Attempts</li>
-            <li class="core">NTDS.dit_Core_Detection</li>
-            <li class="core">NTDS.dit_DC_Attack_Hunt</li>
-            <li class="core">NTDS_Server_Staging</li>
-            <li class="core">SecretsRecon_Hunt</li>
-            <li class="core">Credential_Keyword_File_Hunt</li>
-            <li class="core">Password_Files_Credential_Recon</li>
-            <li class="core">Unsafe-Password-Stores</li>
-            <li>Composite_LSASS_Credential (x3)</li>
-            <li>Cousin_Discovery_Logon</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">SAM Hive Dump</span>
-          <span class="tag cousin">DCSync</span>
-          <span class="tag cousin">Credential Manager</span>
-          <span class="tag cousin">GPP Password</span>
-          <span class="tag cousin">LSASS Non-Dump Access</span>
-          <span class="tag cousin">Mimikatz Sekurlsa</span>
-        </td>
-        <td>
-          <span class="tag technique">T1003.001 LSASS Memory</span>
-          <span class="tag technique">T1003.003 NTDS</span>
-          <span class="tag technique">T1552 Unsecured Creds</span>
-          <span class="tag technique">T1003.002 SAM</span>
-          <span class="tag technique">T1087 Account Discovery</span>
-        </td>
-      </tr>
-
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(34,197,94,0.15);color:var(--cred)">Cred Access</span></td>
-        <td>
-          <div class="eco-name">Kerberos Attack Ecosystem</div>
-          <div class="eco-sub">Kerberoasting · AS-REP · PTH/PTT</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">KERBEROASTING_UNIFIED_Sentinel_MDE</li>
-            <li class="core">KERBEROASTING_CLIENT_HEURISTIC_MDE</li>
-            <li class="core">KERBEROASTING_TGS_ANOMALY_SENTINEL</li>
-            <li class="core">Kerberoasting_Hunt</li>
-            <li class="core">ENDPOINT_KERBEROS_SVC_RECON_PORT88</li>
-            <li class="core">PASS_THE_HASH_TICKET_NEW_HOST</li>
-            <li>Sensitive_Cert_Attack_Vectors</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">AS-REP Roasting</span>
-          <span class="tag cousin">Golden Ticket</span>
-          <span class="tag cousin">Silver Ticket</span>
-          <span class="tag cousin">Diamond Ticket</span>
-          <span class="tag cousin">ADCS ESC1-8</span>
-        </td>
-        <td>
-          <span class="tag technique">T1558.003 Kerberoasting</span>
-          <span class="tag technique">T1558.004 AS-REP Roast</span>
-          <span class="tag technique">T1550.003 Pass-the-Ticket</span>
-          <span class="tag technique">T1558.001 Golden Ticket</span>
-          <span class="tag technique">T1649 Steal Cert</span>
-        </td>
-      </tr>
-
-      <!-- ── LATERAL MOVEMENT ── -->
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(234,179,8,0.15);color:var(--lateral)">Lateral</span></td>
-        <td>
-          <div class="eco-name">SMB / RPC Lateral Movement</div>
-          <div class="eco-sub">PsExec · TaskExec · Critical Shares</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">SMB_Services_PsExec</li>
-            <li class="core">SMB_TaskExec_Svchosts (v2)</li>
-            <li class="core">SMB_RPC_Lateral_Movement_Hunt</li>
-            <li class="core">SMB_Critical_Share_Hunt</li>
-            <li>ADX_SMB_Svhosts_Harvester</li>
-            <li>SMB_Svhosts_Empire</li>
-            <li>SMB_Critical_Share_Fixed</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">DCOM Lateral</span>
-          <span class="tag cousin">WinRM Exec</span>
-          <span class="tag cousin">Pass-the-Hash via SMB</span>
-          <span class="tag cousin">SSH Lateral (Linux)</span>
-          <span class="tag cousin">Impacket Tooling</span>
-        </td>
-        <td>
-          <span class="tag technique">T1021.002 SMB/Admin</span>
-          <span class="tag technique">T1569.002 Service Exec</span>
-          <span class="tag technique">T1543.003 Windows Svc</span>
-          <span class="tag technique">T1570 Lateral Transfer</span>
-          <span class="tag technique">T1550.002 PTH</span>
-        </td>
-      </tr>
-
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(234,179,8,0.15);color:var(--lateral)">Lateral + Exec</span></td>
-        <td>
-          <div class="eco-name">WMI Ecosystem</div>
-          <div class="eco-sub">Fileless · Permanent Sub · Atomic</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">WMI_FILELESS_ATTACK</li>
-            <li class="core">WMI_Permanent_Subscription</li>
-            <li class="core">WmiPrvSE_Secondary</li>
-            <li>WMI-Atomic-Behavioural-Hunt-Pack</li>
-            <li>WMI_Fileless_Consumer</li>
-            <li>WMI_Fileless_Scrcons</li>
-            <li>WMI-L2_Remote_Process</li>
-            <li>WMI_Fileless_Execution</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">DCOM via WMI</span>
-          <span class="tag cousin">MOF File Abuse</span>
-          <span class="tag cousin">WMI Provider Host Masq</span>
-          <span class="tag cousin">WMI via PS Remoting</span>
-        </td>
-        <td>
-          <span class="tag technique">T1047 WMI</span>
-          <span class="tag technique">T1546.003 WMI Event Sub</span>
-          <span class="tag technique">T1059.001 PowerShell</span>
-          <span class="tag technique">T1021.003 DCOM</span>
-        </td>
-      </tr>
-
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(234,179,8,0.15);color:var(--lateral)">Lateral</span></td>
-        <td>
-          <div class="eco-name">RDP Ecosystem</div>
-          <div class="eco-sub">Post-Access File Drop</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">RDP_Following_Susp_File_Drop</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">RDP Session Hijack</span>
-          <span class="tag cousin">Sticky Keys Backdoor</span>
-          <span class="tag cousin">RDP Tunnel</span>
-          <span class="tag cousin">xFreeRDP / SharpRDP</span>
-        </td>
-        <td>
-          <span class="tag technique">T1021.001 RDP</span>
-          <span class="tag technique">T1546.008 Accessibility</span>
-          <span class="tag technique">T1563.002 RDP Hijack</span>
-        </td>
-      </tr>
-
-      <!-- ── IDENTITY / CLOUD ── -->
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(16,185,129,0.15);color:var(--identity)">Identity / Cloud</span></td>
-        <td>
-          <div class="eco-name">OAuth / Token Abuse + Azure</div>
-          <div class="eco-sub">Consent · Token Theft · SP Backdoor · Azure RunCommand</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">OAuth_Consent_Abuse (primary)</li>
-            <li class="core">OAuth_Token_Theft_Anomaly</li>
-            <li class="core">Service_Principal_Backdoor</li>
-            <li class="core">Azure_RunCommand_Abuse</li>
-            <li class="core">VM_Extension_Tampering_Network</li>
-            <li class="core">Sentinel_Susp_Malicious_Signins</li>
-            <li>OAuth_Threat_Hunter_Pack (full)</li>
-            <li>0Auth_App_Consent</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">Device Code Phishing</span>
-          <span class="tag cousin">Refresh Token Abuse</span>
-          <span class="tag cousin">SAML Golden Ticket</span>
-          <span class="tag cousin">Managed Identity Abuse</span>
-          <span class="tag cousin">App Impersonation</span>
-          <span class="tag cousin">Conditional Access Bypass</span>
-        </td>
-        <td>
-          <span class="tag technique">T1528 Steal App Token</span>
-          <span class="tag technique">T1550.001 App Access Token</span>
-          <span class="tag technique">T1078.004 Cloud Accounts</span>
-          <span class="tag technique">T1606.002 SAML Token</span>
-          <span class="tag technique">T1578 Modify Cloud Compute</span>
-          <span class="tag technique">T1136.003 Cloud Account</span>
-        </td>
-      </tr>
-
-      <!-- ── DISCOVERY ── -->
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(6,182,212,0.15);color:var(--discovery, #06b6d4)">Discovery</span></td>
-        <td>
-          <div class="eco-name">AD Recon + Browser Artefacts</div>
-          <div class="eco-sub">Cert Attack Vectors · Browser Extensions</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">05_AD_Recon_Discovery</li>
-            <li class="core">06_Local_SecretHunting</li>
-            <li class="core">MDE_Malicious_Browser_Extension_Hunt</li>
-            <li class="core">Malicious_Browser_Extension_Hunt</li>
-            <li>CVE_Internet_Facing_Devices</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">BloodHound Collector Detection</span>
-          <span class="tag cousin">LDAP Enumeration</span>
-          <span class="tag cousin">Net Commands</span>
-          <span class="tag cousin">ShareFinder</span>
-        </td>
-        <td>
-          <span class="tag technique">T1087.002 Domain Account</span>
-          <span class="tag technique">T1482 Domain Trust</span>
-          <span class="tag technique">T1518.001 Security Software</span>
-          <span class="tag technique">T1176 Browser Extensions</span>
-        </td>
-      </tr>
-
-      <!-- ── EXFILTRATION ── -->
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(249,115,22,0.15);color:var(--exfil)">Exfiltration</span></td>
-        <td>
-          <div class="eco-name">Clipboard + Data Exfil</div>
-          <div class="eco-sub">Clipboard Intercept · Credential Keyword Hunt</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">Data_Exfiltration_Clipboard_Events</li>
-            <li class="core">Credential_Keyword_File_Hunt</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">Staging + Archive + Outbound</span>
-          <span class="tag cousin">Cloud Sync Exfil (OneDrive/Box)</span>
-          <span class="tag cousin">DNS Exfil</span>
-          <span class="tag cousin">HTTPS Upload to Paste Sites</span>
-        </td>
-        <td>
-          <span class="tag technique">T1115 Clipboard Data</span>
-          <span class="tag technique">T1041 Exfil over C2</span>
-          <span class="tag technique">T1048 Exfil over Alt Protocol</span>
-          <span class="tag technique">T1567 Exfil to Web Service</span>
-        </td>
-      </tr>
-
-      <!-- ── RMM ── -->
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(132,204,22,0.15);color:var(--rmm)">RMM / Access</span></td>
-        <td>
-          <div class="eco-name">RMM Abuse Ecosystem</div>
-          <div class="eco-sub">LOLRMM · VPN First Use · Suspicious Drop</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">Unauthorized_RMM_Activity_LOLRMM</li>
-            <li class="core">RMM_Suspicious_Dropv2</li>
-            <li class="core">_First_Time_VPN_RMM_Hunt_V5</li>
-            <li class="core">C2_and_RMM_Behavioural_Abuse</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">AnyDesk/TeamViewer Silent Install</span>
-          <span class="tag cousin">ScreenConnect Abuse</span>
-          <span class="tag cousin">Atera Agent Deploy</span>
-          <span class="tag cousin">VPN Split Tunnel Abuse</span>
-        </td>
-        <td>
-          <span class="tag technique">T1219 Remote Access Software</span>
-          <span class="tag technique">T1133 External Remote Svcs</span>
-          <span class="tag technique">T1021 Remote Services</span>
-        </td>
-      </tr>
-
-      <!-- ── IMPACT ── -->
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(244,63,94,0.15);color:var(--impact)">Impact</span></td>
-        <td>
-          <div class="eco-name">Ransomware Cousin Ecosystem</div>
-          <div class="eco-sub">Encryption · Shadow Delete · Service Stop</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">Cousin_EncryptionVelocity</li>
-            <li class="core">Cousin_ShadowDeletion</li>
-            <li class="core">Cousin_ServiceStopPlus</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">Backup Deletion (wbadmin)</span>
-          <span class="tag cousin">Firewall Disable Pre-Encrypt</span>
-          <span class="tag cousin">Network Share Encryption</span>
-          <span class="tag cousin">MBR Wipe</span>
-          <span class="tag cousin">Ransom Note Drop</span>
-        </td>
-        <td>
-          <span class="tag technique">T1486 Data Encrypted</span>
-          <span class="tag technique">T1490 Inhibit Recovery</span>
-          <span class="tag technique">T1489 Service Stop</span>
-          <span class="tag technique">T1485 Data Destruction</span>
-        </td>
-      </tr>
-
-      <!-- ── CONTROL PLANE ── -->
-      <tr>
-        <td><span class="tactic-badge" style="background:rgba(99,102,241,0.15);color:var(--control)">Control Plane</span></td>
-        <td>
-          <div class="eco-name">Rogue / Unmanaged Device</div>
-          <div class="eco-sub">3 rule variants + strict mode</div>
-        </td>
-        <td>
-          <ul class="rule-list">
-            <li class="core">Rogue_Unmanaged_Device_Detection</li>
-            <li class="core">Rogue_Umanaged_DevicesV2</li>
-            <li class="core">Rogue_Device_Stricter_Rule</li>
-            <li>Control-Plane_Exposure (pack)</li>
-          </ul>
-        </td>
-        <td>
-          <span class="tag cousin">Shadow IT Cloud Resource</span>
-          <span class="tag cousin">Unauthorised Network Device</span>
-          <span class="tag cousin">Unmanaged Endpoint Enrol</span>
-          <span class="tag cousin">NAC Bypass</span>
-        </td>
-        <td>
-          <span class="tag technique">T1200 Hardware Additions</span>
-          <span class="tag technique">T1078 Valid Accounts</span>
-          <span class="tag technique">T1133 External Remote Svcs</span>
-        </td>
-      </tr>
-
-    </tbody>
-  </table>
+</div>
+<div class="ec">
+  <div class="eh">
+    <span class="etac tia">Initial Access</span>
+    <span class="etit">Phishing Chain — SafeLinks Click-Through · ClickFix Clipboard Injection</span>
+    <span class="est si">🔄 Iteration</span>
+  </div>
+  <div class="eb">
+    <div class="ed">SafeLinks click-through chain and ClickFix clipboard injection both in iteration tuning phase. BEC malicious click-through and SmartScreen rules stable. Post-click execution chain anchored — content-agnostic by design.</div>
+    <div class="rl"><span class="rtag core" data-rule="SafeLinks_ClickThrough_V2">★ SafeLinks_ClickThrough_V2</span><span class="rtag core" data-rule="ClickFix_Clipboard_Chain">★ ClickFix_Clipboard_Chain</span><span class="rtag" data-rule="BEC_Malicious_ClickThrough">BEC_Malicious_ClickThrough</span><span class="rtag" data-rule="Smartscreen_High_Risk">Smartscreen_High_Risk</span></div>
+    <div class="cs">
+      <div class="cl">Cousin Surfaces</div>
+      <div class="ct"><span class="ctag">SafeLinks 🔄</span><span class="ctag">ClickFix 🔄</span><span class="ctag gap">⚠ HTML Smuggling</span><span class="ctag gap">⚠ ISO/LNK Chain</span><span class="ctag gap">⚠ AiTM Proxy</span></div>
+    </div>
+    <div class="mt"><span>T1566.002</span><span>T1204.002</span><span>T1059.007</span></div>
+  </div>
+</div>
+<div class="ec">
+  <div class="eh">
+    <span class="etac tex">Execution</span>
+    <span class="etit">LOLBins Full Pack — rundll32 · mshta · certutil · regsvr32 · bitsadmin + LOLBAS</span>
+    <span class="est si">🔄 Iteration</span>
+  </div>
+  <div class="eb">
+    <div class="ed">rundll32 (5 execution models), mshta, certutil, regsvr32, bitsadmin all in iteration tuning. Most LOLBAS binaries modelled. Rundll32-aware Scheduled Task integration complete. LOLBin completion is roadmap P1.</div>
+    <div class="rl"><span class="rtag core" data-rule="LOLBINS_Ingress_Pack">★ LOLBINS_Ingress_Pack</span><span class="rtag core" data-rule="Powershell_Intent_First">★ Powershell_Intent_First</span><span class="rtag" data-rule="rundll32">rundll32 (5 models)</span><span class="rtag" data-rule="mshta">mshta</span><span class="rtag" data-rule="certutil">certutil</span><span class="rtag" data-rule="regsvr32">regsvr32</span><span class="rtag" data-rule="bitsadmin">bitsadmin</span><span class="rtag" data-rule="Multi_LOLBIN_Hunt">Multi_LOLBIN_Hunt</span><span class="rtag" data-rule="ASR_Blocked_Exec">ASR_Blocked_Exec</span></div>
+    <div class="cs">
+      <div class="cl">Cousin Surfaces</div>
+      <div class="ct"><span class="ctag">rundll32 🔄</span><span class="ctag">mshta 🔄</span><span class="ctag">certutil 🔄</span><span class="ctag">regsvr32 🔄</span><span class="ctag">bitsadmin 🔄</span><span class="ctag gap">⚠ ie4uinit</span><span class="ctag gap">⚠ SyncAppvPublishingServer</span><span class="ctag gap">⚠ odbcconf</span></div>
+    </div>
+    <div class="mt"><span>T1218</span><span>T1059.001</span><span>T1105</span><span>T1218.011</span></div>
+  </div>
+</div>
+<div class="ec">
+  <div class="eh">
+    <span class="etac tps">Persistence</span>
+    <span class="etit">Registry Persistence — Run Keys · LSA · Payload Stash · UAC Bypass</span>
+    <span class="est sv">✅ Validated</span>
+  </div>
+  <div class="eb">
+    <div class="ed">Run Keys and LSA Security rules ADX-validated and stable. Full ecosystem: boot persistence, LSA security, payload stash, registry drift/rewrite, UAC bypass via registry. 30-day entity-keyed temporal deception defeat.</div>
+    <div class="rl"><span class="rtag core" data-rule="Registry_Persistence_Boot">★ Registry_Persistence_Boot</span><span class="rtag core" data-rule="Registry_Persistence_LSA">★ Registry_Persistence_LSA</span><span class="rtag" data-rule="Registry_Payload_Stash">Registry_Payload_Stash</span><span class="rtag" data-rule="Registry_Drift_ReWrite">Registry_Drift_ReWrite</span><span class="rtag" data-rule="Registry_Persistence_UAC">Registry_Persistence_UAC</span></div>
+    <div class="cs">
+      <div class="cl">Cousin Surfaces</div>
+      <div class="ct"><span class="ctag">Run Keys ✅</span><span class="ctag">LSA Security ✅</span><span class="ctag">AppInit DLL ✅</span><span class="ctag gap">⚠ COM Object Hijack</span><span class="ctag gap">⚠ Time Provider DLL</span></div>
+    </div>
+    <div class="mt"><span>T1547.001</span><span>T1112</span><span>T1547.005</span><span>T1548.002</span></div>
+  </div>
+</div>
+<div class="ec">
+  <div class="eh">
+    <span class="etac tps">Persistence</span>
+    <span class="etit">Scheduled Task Ecosystem — TaskCache Silent · CLI · Rundll32-Aware v2</span>
+    <span class="est sv">✅ Validated</span>
+  </div>
+  <div class="eb">
+    <div class="ed">TaskCache COM API registry write detection (bypasses CLI logging), hardened Rundll32-aware v2 with 5 execution model classification. ADX-validated. 30-day entity-keyed temporal deception defeat.</div>
+    <div class="rl"><span class="rtag core" data-rule="TaskCache_Silent_Persistence">★ TaskCache_Silent_Persist</span><span class="rtag core" data-rule="ScheduledTask_Persistence">★ ScheduledTask_Persistence</span><span class="rtag core" data-rule="ScheduledTask_Rundll32_v2">★ ScheduledTask_Rundll32_v2</span><span class="rtag" data-rule="03_Persistence_Surface">03_Persistence_Surface</span></div>
+    <div class="cs">
+      <div class="cl">Cousin Surfaces</div>
+      <div class="ct"><span class="ctag">CLI schtasks ✅</span><span class="ctag">TaskCache COM ✅</span><span class="ctag">Rundll32-aware v2 ✅</span><span class="ctag gap">⚠ Register-ScheduledTask PS</span><span class="ctag gap">⚠ AT Command legacy</span></div>
+    </div>
+    <div class="mt"><span>T1053.005</span><span>T1053.002</span><span>T1197</span></div>
+  </div>
+</div>
+<div class="ec">
+  <div class="eh">
+    <span class="etac tev">Def Evasion</span>
+    <span class="etit">BYOVD / LOLDriver — Kernel Service Reg · Delayed Staged · MISP Supply Chain</span>
+    <span class="est si">🔄 Iteration</span>
+  </div>
+  <div class="eb">
+    <div class="ed">Kernel service registration (POC modelled). Delayed staging rule in iteration testing — also integrated into MISP for supply chain delayed driver load attack detection. Combined sideload+BYOVD chain rule stable. 30-day temporal deception defeat.</div>
+    <div class="rl"><span class="rtag core" data-rule="LOLDriver_Abuse_Kernel">★ LOLDriver_Abuse_Kernel</span><span class="rtag core" data-rule="BYOVD_Delayed_Staged">★ BYOVD_Delayed_Staged</span><span class="rtag core" data-rule="BYOVD_Combined_Rule">★ BYOVD_Combined_Rule</span><span class="rtag" data-rule="BYOVD_Service_Creation">BYOVD_Service_Creation</span><span class="rtag" data-rule="MISP_BYOVD_SupplyChain">🔗 MISP_BYOVD_SupplyChain</span></div>
+    <div class="cs">
+      <div class="cl">Cousin Surfaces</div>
+      <div class="ct"><span class="ctag">Kernel service reg 🔵</span><span class="ctag">Delayed staging 🔄</span><span class="ctag">MISP supply chain 🔗</span><span class="ctag gap">⚠ ProcExp driver abuse</span><span class="ctag gap">⚠ HVCI bypass</span></div>
+    </div>
+    <div class="mt"><span>T1014</span><span>T1562.001</span><span>T1068</span><span>T1543.003</span></div>
+  </div>
+</div>
+<div class="ec">
+  <div class="eh">
+    <span class="etac tev">Def Evasion</span>
+    <span class="etit">DLL Sideloading Chain — Signer Mismatch · Writable Path · MDE+Sentinel Unified</span>
+    <span class="est sv">✅ Validated</span>
+  </div>
+  <div class="eb">
+    <div class="ed">Signer mismatch and anomalous module load path detection. Unified MDE+Sentinel chain rule. Hardened v2 with broader extension coverage (.dat/.bin/.ocx) defeating extension disguise evasion.</div>
+    <div class="rl"><span class="rtag core" data-rule="DLL_Sideload_BYOVD_UNIFIED">★ DLL_Sideload_BYOVD_UNIFIED</span><span class="rtag core" data-rule="MDE_DLL_Sideloading_Chain">★ MDE_DLL_Sideloading_Chain</span><span class="rtag" data-rule="L3_DLL_Sideload_Sentinel">L3_DLL_Sideload_Sentinel</span></div>
+    <div class="cs">
+      <div class="cl">Cousin Surfaces</div>
+      <div class="ct"><span class="ctag">Signer mismatch ✅</span><span class="ctag">Writable path load ✅</span><span class="ctag gap">⚠ Phantom DLL</span><span class="ctag gap">⚠ Search order hijack</span></div>
+    </div>
+    <div class="mt"><span>T1574.002</span><span>T1574.001</span></div>
+  </div>
+</div>
+<div class="ec">
+  <div class="eh">
+    <span class="etac tev">Def Evasion</span>
+    <span class="etit">In-Memory Injection + AMSI — Process Injection · ETW Patch · WSL Proxy</span>
+    <span class="est sv">✅ Validated</span>
+  </div>
+  <div class="eb">
+    <div class="ed">AMSI bypass (AmsiScanBuffer reflection, Marshal operations, split-string), process injection via CreateRemoteThread, ETW patching, WSL Linux binary proxy. Full obfuscation pack ADX-validated.</div>
+    <div class="rl"><span class="rtag core" data-rule="AMSI_Bypass_Hunt">★ AMSI_Bypass_Hunt</span><span class="rtag core" data-rule="InMemory_Injection_Detection">★ InMemory_Injection</span><span class="rtag" data-rule="Polymorphic_Malware">Polymorphic_Malware</span><span class="rtag" data-rule="WSL_Hunt_Advanced">WSL_Hunt_Advanced</span><span class="rtag" data-rule="Obfuscation_pack">Obfuscation_pack</span></div>
+    <div class="cs">
+      <div class="cl">Cousin Surfaces</div>
+      <div class="ct"><span class="ctag">AMSI bypass ✅</span><span class="ctag">RemoteThread inject ✅</span><span class="ctag">ETW patch ✅</span><span class="ctag gap">⚠ Reflective DLL</span><span class="ctag gap">⚠ Process hollowing</span><span class="ctag gap">⚠ Heaven's Gate</span></div>
+    </div>
+    <div class="mt"><span>T1055</span><span>T1562.001</span><span>T1027.010</span></div>
+  </div>
+</div>
+<div class="ec">
+  <div class="eh">
+    <span class="etac tcr">Cred Access</span>
+    <span class="etit">LSASS + NTDS + Secrets — comsvcs MiniDump · DC Attack · Pass-the-Hash</span>
+    <span class="est si">🔄 Iteration</span>
+  </div>
+  <div class="eb">
+    <div class="ed">comsvcs.dll MiniDump composite in iteration phase. NTDS.dit extraction via VSS, SYSTEM hive save, DC-targeted staging stable. Pass-the-Hash variant in iteration testing. Credential keyword file hunting and password store hunting stable.</div>
+    <div class="rl"><span class="rtag core" data-rule="COMPOSITE_L3_LSASS">★ COMPOSITE_L3_LSASS (iter)</span><span class="rtag core" data-rule="NTDS_Core_Detection">★ NTDS.dit_Core</span><span class="rtag core" data-rule="NTDS_DC_Attack_Hunt">★ NTDS_DC_Attack_Hunt</span><span class="rtag" data-rule="LSASS_Access_Dump">LSASS_Access_Dump</span><span class="rtag" data-rule="Credential_Keyword_Hunt">Credential_Keyword_Hunt</span><span class="rtag" data-rule="Unsafe_Password_Stores">Unsafe-Password-Stores</span></div>
+    <div class="cs">
+      <div class="cl">Cousin Surfaces</div>
+      <div class="ct"><span class="ctag">comsvcs MiniDump 🔄</span><span class="ctag">NTDS VSS ✅</span><span class="ctag">SYSTEM hive ✅</span><span class="ctag gap">⚠ SAM hive dump</span><span class="ctag gap">⚠ DCSync</span><span class="ctag gap">⚠ ADCS cert theft</span></div>
+    </div>
+    <div class="mt"><span>T1003.001</span><span>T1003.003</span><span>T1552</span></div>
+  </div>
+</div>
+<div class="ec">
+  <div class="eh">
+    <span class="etac tcr">Cred Access</span>
+    <span class="etit">Kerberos Ecosystem — Kerberoasting · AS-REP · Pass-the-Hash (All Iteration)</span>
+    <span class="est si">🔄 Iteration</span>
+  </div>
+  <div class="eb">
+    <div class="ed">Kerberoasting TGS burst, AS-REP Roasting, and Pass-the-Hash all in iteration testing and tuning phase. Unified Sentinel+MDE Kerberoasting rule core stable. RC4 downgrade detection and rolling 30-day entity index active.</div>
+    <div class="rl"><span class="rtag core" data-rule="Kerberoasting_UNIFIED">★ Kerberoasting_UNIFIED (iter)</span><span class="rtag core" data-rule="TGS_Anomaly_Sentinel">★ TGS_Anomaly_Sentinel (iter)</span><span class="rtag" data-rule="Client_Heuristic_MDE">Client_Heuristic_MDE</span><span class="rtag" data-rule="PTH_New_Host">PTH_New_Host (iter)</span></div>
+    <div class="cs">
+      <div class="cl">Cousin Surfaces</div>
+      <div class="ct"><span class="ctag">Kerberoasting 🔄</span><span class="ctag">AS-REP 🔄</span><span class="ctag">PTH 🔄</span><span class="ctag gap">⚠ Golden Ticket</span><span class="ctag gap">⚠ Silver Ticket</span><span class="ctag gap">⚠ ADCS ESC1-8</span></div>
+    </div>
+    <div class="mt"><span>T1558.003</span><span>T1558.004</span><span>T1550.003</span></div>
+  </div>
+</div>
+<div class="ec">
+  <div class="eh">
+    <span class="etac tlt">Lateral Move</span>
+    <span class="etit">SMB / RPC Lateral — PsExec · Remote Task · Critical Shares</span>
+    <span class="est sv">✅ Validated</span>
+  </div>
+  <div class="eb">
+    <div class="ed">services.exe spawn chain via SMB PsExec, svchost(Schedule) via remote task execution, critical share access hunting, Empire SMB validated. ADX-harvested composite for multi-host scoping.</div>
+    <div class="rl"><span class="rtag core" data-rule="SMB_Services_PsExec">★ SMB_Services_PsExec</span><span class="rtag core" data-rule="SMB_TaskExec_Svchosts_v2">★ SMB_TaskExec_v2</span><span class="rtag" data-rule="SMB_RPC_Lateral_Hunt">SMB_RPC_Lateral_Hunt</span><span class="rtag" data-rule="SMB_Critical_Share">SMB_Critical_Share</span></div>
+    <div class="cs">
+      <div class="cl">Cousin Surfaces</div>
+      <div class="ct"><span class="ctag">SMB PsExec ✅</span><span class="ctag">Remote task ✅</span><span class="ctag gap">⚠ WinRM/Evil-WinRM</span><span class="ctag gap">⚠ DCOM lateral</span></div>
+    </div>
+    <div class="mt"><span>T1021.002</span><span>T1569.002</span><span>T1543.003</span></div>
+  </div>
+</div>
+<div class="ec">
+  <div class="eh">
+    <span class="etac tlt">Lateral + Exec</span>
+    <span class="etit">WMI Ecosystem — Fileless · Permanent Subscription · Remote Process (Full Family)</span>
+    <span class="est si">🔄 Iteration</span>
+  </div>
+  <div class="eb">
+    <div class="ed">Entire WMI family in iteration tuning phase. Fileless exec, permanent subscription (EventFilter+Consumer+Binding), remote process, WmiPrvSE secondary spawns all modelled. Scrcons provider detection stable.</div>
+    <div class="rl"><span class="rtag core" data-rule="WMI_FILELESS_ATTACK">★ WMI_FILELESS (iter)</span><span class="rtag core" data-rule="WMI_Permanent_Sub">★ WMI_Permanent_Sub (iter)</span><span class="rtag core" data-rule="WMI_Fileless_Scrcons">★ WMI_Scrcons (iter)</span><span class="rtag" data-rule="WMI_Remote_Process">WMI_Remote_Process</span><span class="rtag" data-rule="WMI_Atomic_Hunt">WMI_Atomic_Hunt</span></div>
+    <div class="cs">
+      <div class="cl">Cousin Surfaces</div>
+      <div class="ct"><span class="ctag">Fileless exec 🔄</span><span class="ctag">Perm subscription 🔄</span><span class="ctag">Remote process 🔄</span><span class="ctag gap">⚠ DCOM via WMI</span><span class="ctag gap">⚠ MOF file abuse</span></div>
+    </div>
+    <div class="mt"><span>T1047</span><span>T1546.003</span><span>T1021.003</span></div>
+  </div>
+</div>
+<div class="ec">
+  <div class="eh">
+    <span class="etac tcl">Identity/Cloud</span>
+    <span class="etit">OAuth / Token Abuse + Azure — Consent · Token Theft · SP Backdoor</span>
+    <span class="est sv">✅ Validated</span>
+  </div>
+  <div class="eb">
+    <div class="ed">OAuth consent abuse, token theft anomaly, service principal backdoor, Azure RunCommand, VM extension tampering. Full OAuth threat hunter pack stable and ADX-validated.</div>
+    <div class="rl"><span class="rtag core" data-rule="OAuth_Consent_Abuse">★ OAuth_Consent_Abuse</span><span class="rtag core" data-rule="OAuth_Token_Theft">★ OAuth_Token_Theft</span><span class="rtag core" data-rule="SP_Backdoor">★ SP_Backdoor</span><span class="rtag" data-rule="Azure_RunCommand_Abuse">Azure_RunCommand_Abuse</span><span class="rtag" data-rule="OAuth_ThreatHunter_Pack">OAuth_ThreatHunter_Pack</span></div>
+    <div class="cs">
+      <div class="cl">Cousin Surfaces</div>
+      <div class="ct"><span class="ctag">Consent ✅</span><span class="ctag">Token theft ✅</span><span class="ctag">SP backdoor ✅</span><span class="ctag">Azure RunCmd ✅</span><span class="ctag gap">⚠ Device code phishing</span><span class="ctag gap">⚠ SAML golden ticket</span></div>
+    </div>
+    <div class="mt"><span>T1528</span><span>T1550.001</span><span>T1078.004</span></div>
+  </div>
+</div>
+<div class="ec">
+  <div class="eh">
+    <span class="etac tmp">Impact</span>
+    <span class="etit">Ransomware Ecosystem — Encryption Velocity · VSS Deletion · Service Stop</span>
+    <span class="est si">🔄 Iteration</span>
+  </div>
+  <div class="eb">
+    <div class="ed">Local encryption velocity modelled (POC done — going to composite soon). VSS deletion in iteration testing lifecycle phase. Service stop chain stable. Network share encryption is Tier 1 cousin gap — WantToCry validates urgency.</div>
+    <div class="rl"><span class="rtag core" data-rule="Cousin_EncryptionVelocity">★ EncryptionVelocity 🔵→</span><span class="rtag core" data-rule="Cousin_ShadowDeletion">★ ShadowDeletion (iter)</span><span class="rtag" data-rule="Cousin_ServiceStop">Cousin_ServiceStop</span></div>
+    <div class="cs">
+      <div class="cl">Cousin Surfaces</div>
+      <div class="ct"><span class="ctag">Local encrypt 🔵</span><span class="ctag">VSS deletion 🔄</span><span class="ctag">Service stop ✅</span><span class="ctag gap">⚠ Network share encrypt</span><span class="ctag gap">⚠ Backup software kill</span></div>
+    </div>
+    <div class="mt"><span>T1486</span><span>T1490</span><span>T1489</span></div>
+  </div>
+</div>
+<div class="ec">
+  <div class="eh">
+    <span class="etac tc2">RMM/Access</span>
+    <span class="etit">RMM + First-Time VPN — LOLRMM 400+ Tools · Unmanaged Device</span>
+    <span class="est si">🔄 Iteration</span>
+  </div>
+  <div class="eb">
+    <div class="ed">LOLRMM detection and First-Time VPN both in iteration testing and tuning phase. Covers 400+ known RMM tools. Unmanaged device rule complete — in testing iteration phase. Three device variants from permissive to strict.</div>
+    <div class="rl"><span class="rtag core" data-rule="Unauthorized_RMM_LOLRMM">★ Unauthorized_RMM (iter)</span><span class="rtag core" data-rule="First_Time_VPN_RMM_V5">★ First_Time_VPN_V5 (iter)</span><span class="rtag core" data-rule="Rogue_Unmanaged_Device">★ Rogue_Unmanaged_Device (iter)</span><span class="rtag" data-rule="Control_Plane_Exposure">Control_Plane_Exposure</span></div>
+    <div class="cs">
+      <div class="cl">Cousin Surfaces</div>
+      <div class="ct"><span class="ctag">LOLRMM 🔄</span><span class="ctag">First-time VPN 🔄</span><span class="ctag">Unmanaged device 🔄</span><span class="ctag gap">⚠ AnyDesk silent install</span><span class="ctag gap">⚠ ScreenConnect abuse</span></div>
+    </div>
+    <div class="mt"><span>T1219</span><span>T1133</span><span>T1200</span></div>
+  </div>
+</div>
+</div>
 </div>
 
-<!-- ════════════════════════════════════════
-     TAB 2 — NOVEL TRADECRAFT
-════════════════════════════════════════ -->
+<div id="cousin" class="panel">
+<h2 style="margin-bottom:.35rem;font-size:1rem;color:#fff">Cousin Surface Adjacency Map</h2>
+<p style="color:var(--mut);font-size:.78rem;margin-bottom:1rem">Same adversary intent, different execution substrates. ✅ covered · 🔄 iteration · 🔵 POC · ⚠ gap. Attacker pivots freely between cousins — every unmapped gap is a free pivot surface.</p>
+<div class="cmap">
+<table>
+<tr><th style="width:140px">Intent</th><th>Primary ✅</th><th>Cousins ✅/🔄</th><th>Gaps ⚠</th><th>MITRE</th></tr>
+<tr><td style="font-weight:700;color:#fff">Remote Exec/Lateral</td><td style="color:#58a6ff;font-family:monospace;font-size:.7rem">SMB/PsExec · Remote task</td><td style="color:#d2a8ff;font-size:.7rem">WMI remote process 🔄</td><td style="color:#ff7b72;font-size:.7rem">WinRM · DCOM (MMC20) · SSH lateral</td><td><span style="font-size:.6rem;padding:.08rem .3rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1021.002</span> <span style="font-size:.6rem;padding:.08rem .3rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1047</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">Persistent Execution</td><td style="color:#58a6ff;font-family:monospace;font-size:.7rem">Registry Run Keys · schtasks CLI</td><td style="color:#d2a8ff;font-size:.7rem">TaskCache COM ✅ · LSA ✅ · AppInit ✅</td><td style="color:#ff7b72;font-size:.7rem">COM object hijack · AT cmd · Register-ScheduledTask PS</td><td><span style="font-size:.6rem;padding:.08rem .3rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1547.001</span> <span style="font-size:.6rem;padding:.08rem .3rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1053.005</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">Credential Harvest</td><td style="color:#58a6ff;font-family:monospace;font-size:.7rem">LSASS comsvcs 🔄 · Direct OpenProcess</td><td style="color:#d2a8ff;font-size:.7rem">NTDS.dit VSS ✅ · SYSTEM hive ✅</td><td style="color:#ff7b72;font-size:.7rem">SAM hive · DCSync · Golden Ticket · ADCS cert</td><td><span style="font-size:.6rem;padding:.08rem .3rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1003.001</span> <span style="font-size:.6rem;padding:.08rem .3rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1003.003</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">C2 Communication</td><td style="color:#58a6ff;font-family:monospace;font-size:.7rem">HTTPS jitter 🔄 · Named pipe 🔄</td><td style="color:#d2a8ff;font-size:.7rem">Blockchain RPC ✅ · RMM 🔄</td><td style="color:#ff7b72;font-size:.7rem">DNS tunnelling · ICMP C2 · Teams/Slack C2</td><td><span style="font-size:.6rem;padding:.08rem .3rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1071.001</span> <span style="font-size:.6rem;padding:.08rem .3rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1559.001</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">EDR Defeat</td><td style="color:#58a6ff;font-family:monospace;font-size:.7rem">BYOVD kernel 🔄 · AMSI bypass ✅</td><td style="color:#d2a8ff;font-size:.7rem">DLL sideload ✅ · ETW patch ✅</td><td style="color:#ff7b72;font-size:.7rem">Reflective DLL · Process hollowing · Heaven's Gate</td><td><span style="font-size:.6rem;padding:.08rem .3rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1068</span> <span style="font-size:.6rem;padding:.08rem .3rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1562.001</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">LOLBin Execution</td><td style="color:#58a6ff;font-family:monospace;font-size:.7rem">rundll32 · mshta · certutil (all 🔄)</td><td style="color:#d2a8ff;font-size:.7rem">regsvr32 🔄 · bitsadmin 🔄 · wscript ✅</td><td style="color:#ff7b72;font-size:.7rem">ie4uinit · SyncAppvPublishingServer · BYOI Deno</td><td><span style="font-size:.6rem;padding:.08rem .3rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1218</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">Ransomware Prep</td><td style="color:#58a6ff;font-family:monospace;font-size:.7rem">VSS deletion 🔄 · Service stop ✅</td><td style="color:#d2a8ff;font-size:.7rem">Encryption velocity 🔵 · bcdedit ✅</td><td style="color:#ff7b72;font-size:.7rem">Network share encrypt · Backup kill · MBR wipe</td><td><span style="font-size:.6rem;padding:.08rem .3rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1486</span> <span style="font-size:.6rem;padding:.08rem .3rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1490</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">Token/Identity Theft</td><td style="color:#58a6ff;font-family:monospace;font-size:.7rem">OAuth consent ✅ · Token theft ✅ · SP backdoor ✅</td><td style="color:#d2a8ff;font-size:.7rem">Azure RunCmd ✅</td><td style="color:#ff7b72;font-size:.7rem">Device code phishing · Refresh token abuse · SAML golden</td><td><span style="font-size:.6rem;padding:.08rem .3rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1528</span> <span style="font-size:.6rem;padding:.08rem .3rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1606.002</span></td></tr>
+</table>
+</div>
+</div>
+
+<div id="threat" class="panel">
+<h2 style="margin-bottom:.3rem;font-size:1rem;color:#fff">🔴 Active Threat Intelligence — 2026 Priority Hunts</h2>
+<p style="color:var(--mut);font-size:.78rem;margin-bottom:1.3rem">Curated from SOC Prime Weekly newsletters — selected for long-term detection engineering relevance, not just trending CVEs. Each represents sustained methodology warranting composite rule development and threat hunt operationalisation.</p>
+
+<div class="tcard" style="border-left:4px solid #da3633">
+<div class="thead2"><span class="tbadge" style="background:#2d0f0e;color:#ff7b72">APT · DPRK · Cython Native</span><span class="ttit">InvisibleFerret — Void Dokkaebi Cython-Compiled Malware</span><span class="tsrc">SOC Prime #022 · Void Dokkaebi / North Korea</span></div>
+<div class="tbody">
+<div class="tsec">Threat Profile</div>
+<div class="tdesc">Void Dokkaebi upgraded InvisibleFerret from Python scripts to Cython-compiled .pyd and .so native binaries — a single change that defeats all script-based detection while preserving credential theft, keylogging, clipboard monitoring, and cryptocurrency wallet hijacking. The compilation produces genuine native binaries; standard Python-based YARA and script-block monitoring miss this entirely. Detection must pivot to behaviour-anchored execution patterns invariant to compilation method.</div>
+<div class="mwrap"><div class="mermaid">
+flowchart LR
+    A("Initial Access\\nFake job interview\\nT1566.003") --> B("Stager Delivery\\n.py dropper or\\n.pyd binary\\nT1059.006")
+    B --> C{"InvisibleFerret\\nCython .pyd binary\\nNo script logging\\nT1027.003"}
+    C --> D("Cred Theft\\nBrowser stores\\nSSH keys\\nT1555")
+    C --> E("Keylogging\\nWin32 API hooks\\nT1056.001")
+    C --> F("Clipboard\\nMonitor+Swap\\nWallet hijack\\nT1115")
+    C --> G("C2 Callback\\nHTTPS beacon\\nKorean infra\\nT1071.001")
+    style C fill:#1a0a2e,stroke:#da3633,color:#ff7b72
+</div></div>
+<div class="tsec">Indicators of Attack (IOAs)</div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>Non-browser process accessing Chrome/Edge Login Data SQLite file</strong> — process opening %LOCALAPPDATA%/Google\Chrome\User Data\Default\Login Data from non-browser context</span></div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>SetWindowsHookEx WH_KEYBOARD_LL from non-UI process</strong> — global keyboard hook API call from process without UI thread</span></div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>.pyd file loaded from user-writable path</strong> — python.exe or direct DLL load of .pyd from AppData/Temp</span></div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>High-frequency GetClipboardData from non-UI process</strong> — clipboard polling at frequency inconsistent with legitimate app behaviour</span></div>
+<table class="iot">
+<tr><th>Type</th><th>Indicator</th><th>Note</th></tr>
+<tr><td class="itype">FilePath</td><td class="ival">%APPDATA%\\*.pyd / %TEMP%\\main*.pyd</td><td class="inote">Cython binary in writable path</td></tr>
+<tr><td class="itype">FileAccess</td><td class="ival">Chrome\\User Data\\Default\\Login Data (non-browser)</td><td class="inote">Browser credential store access</td></tr>
+<tr><td class="itype">Network</td><td class="ival">HTTPS POST every 30–90s to first-seen domain</td><td class="inote">C2 beacon — Korean-hosted infra pattern</td></tr>
+<tr><td class="itype">Registry</td><td class="ival">HKCU\\...\\Run → .pyd binary path</td><td class="inote">Persistence via Run key</td></tr>
+</table>
+<div class="tsec">Detection Strategy — Minimum Truth Anchor</div>
+<div class="tdesc" style="color:#58a6ff">Non-standard process accessing browser credential store files (Chrome Login Data, Firefox logins.json). This fires regardless of compilation method. Cousin surfaces: keylogging hook detection, clipboard burst from non-UI process. <strong>Status: POC → Browser_CredStore_Access_Hunt</strong></div>
+<div class="mt"><span>T1555.003</span><span>T1056.001</span><span>T1115</span><span>T1027.003</span><span>T1071.001</span></div>
+</div></div>
+
+<div class="tcard" style="border-left:4px solid #d29922">
+<div class="thead2"><span class="tbadge" style="background:#2d1f00;color:#e3b341">Ransomware · SMB · Remote Encrypt</span><span class="ttit">WantToCry — Remote SMB Encryption (Closes Tier 1 Cousin Gap)</span><span class="tsrc">SOC Prime #021 · SophosLabs</span></div>
+<div class="tbody">
+<div class="tsec">Threat Profile</div>
+<div class="tdesc">WantToCry ransomware abuses SMB for initial access then exfiltrates files before performing remote encryption via SMB writes to network shares. The victim's local process list shows nothing unusual — encryption is happening from the attacker's system writing over SMB. Standard local encryption velocity rules will never fire. This is the network share encryption cousin gap in the ransomware ecosystem: the highest-priority Tier 1 gap validated by a live 2026 threat.</div>
+<div class="mwrap"><div class="mermaid">
+flowchart TD
+    A("Initial Access\\nSMB exposed service\\nBrute force or creds\\nT1021.002") --> B("Exfil First\\nFiles copied out\\nDouble-extortion prep\\nT1041")
+    B --> C("SMB Write Flood\\nRemote encryption\\nvia network shares\\nT1486")
+    C --> D("Ransom Note Drop\\nWritten to folders\\nvia SMB\\nT1485")
+    D --> E("Victim Discovers\\nLocal process tree CLEAN\\nNo malware detected locally")
+    style E fill:#3d0000,stroke:#da3633,color:#ff9ea0
+    style C fill:#2d1000,stroke:#d29922,color:#e3b341
+</div></div>
+<div class="tsec">Indicators of Attack (IOAs)</div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>Mass SMB write velocity to network shares from single source IP</strong> — high-volume file write ops over SMB with extension changes across multiple share paths</span></div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>File extension uniformity change via SMB within short window</strong> — all files in a share renamed to same extension by remote host</span></div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>Ransom note pattern written in bulk to multiple directories via SMB</strong> — HOW_TO_DECRYPT / README_URGENT files written across share tree</span></div>
+<table class="iot">
+<tr><th>Type</th><th>Indicator</th><th>Note</th></tr>
+<tr><td class="itype">Network</td><td class="ival">SMB write &gt;1000 files/min from single source IP</td><td class="inote">Remote encryption velocity threshold</td></tr>
+<tr><td class="itype">FilePattern</td><td class="ival">*.wncry extension across share</td><td class="inote">WantToCry encrypted file extension</td></tr>
+<tr><td class="itype">FileWrite</td><td class="ival">HOW_TO_DECRYPT_*.txt written via SMB to &gt;5 dirs</td><td class="inote">Bulk ransom note placement</td></tr>
+<tr><td class="itype">Exfil</td><td class="ival">Large outbound transfer from same source before SMB flood</td><td class="inote">Double-extortion exfil precursor</td></tr>
+</table>
+<div class="tsec">Detection Strategy — Closes Tier 1 Cousin Gap</div>
+<div class="tdesc" style="color:#56d364">Minimum Truth Anchor: mass file rename with uniform extension change via SMB write from single source IP. Directly justifies SMB_NetworkShare_EncryptionVelocity rule — the cousin that local encryption velocity rules miss entirely. <strong>Status: 🔵 POC — SMB_NetworkShare_EncryptionVelocity</strong></div>
+<div class="mt"><span>T1021.002</span><span>T1486</span><span>T1041</span><span>T1490</span></div>
+</div></div>
+
+<div class="tcard" style="border-left:4px solid #7B2FBE">
+<div class="thead2"><span class="tbadge" style="background:#21033f;color:#d2a8ff">IIS · In-Memory · Cobalt Strike</span><span class="ttit">BLUEBEAM — ViewState Deserialization → In-Memory Web Shell → CS Beacon</span><span class="tsrc">SOC Prime #022 · KnowledgeDeliver exploitation</span></div>
+<div class="tbody">
+<div class="tsec">Threat Profile</div>
+<div class="tdesc">Attacker exploited shared ASP.NET machineKey to craft malicious ViewState payloads, deploying the BLUEBEAM web shell directly into IIS worker memory — no file written to disk. Subsequent activity: JavaScript tampering on served pages, file system ACL changes, and Cobalt Strike beacon delivery to visitor workstations. File-based IOC detection completely fails. Detection anchors on w3wp.exe process behaviour, not disk artefacts.</div>
+<div class="mwrap"><div class="mermaid">
+flowchart TD
+    A("ViewState POST\\nShared machineKey exploit\\nMalicious payload\\nT1190") --> B{"BLUEBEAM\\nIn-Memory Shell\\nIIS worker memory\\nNo disk write\\nT1505.003"}
+    B --> C("JS Tampering\\nWebsite .js modified\\nClient-side attack\\nT1027")
+    B --> D("ACL Changes\\nFile system perms\\npersistence prep\\nT1222")
+    B --> E("Cobalt Strike\\nBeacon to visitors\\nvia compromised site\\nT1071.001")
+    style B fill:#21033f,stroke:#7B2FBE,color:#d2a8ff
+</div></div>
+<div class="tsec">Indicators of Attack (IOAs)</div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>w3wp.exe spawning cmd.exe or powershell.exe</strong> — near-zero false positive: IIS worker process spawning execution primitives</span></div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>Oversized HTTP POST to ViewState endpoint</strong> — POST body significantly larger than baseline for that application endpoint</span></div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>w3wp.exe initiating outbound HTTPS connections</strong> — IIS worker making external connections is anomalous</span></div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>.js files in wwwroot modified outside deployment window</strong> — web root JavaScript modification post-hours</span></div>
+<table class="iot">
+<tr><th>Type</th><th>Indicator</th><th>Note</th></tr>
+<tr><td class="itype">Process</td><td class="ival">w3wp.exe → cmd.exe / powershell.exe</td><td class="inote">Web shell command chain — near-zero FP</td></tr>
+<tr><td class="itype">HTTP</td><td class="ival">POST to __VIEWSTATE field with body &gt;50KB</td><td class="inote">ViewState deserialization delivery</td></tr>
+<tr><td class="itype">File</td><td class="ival">*.js modified in wwwroot after hours</td><td class="inote">Client-side attack injection</td></tr>
+<tr><td class="itype">Network</td><td class="ival">Cobalt Strike HTTPS beacon from visitor workstations</td><td class="inote">Post-compromise CS delivery via site</td></tr>
+</table>
+<div class="tsec">Detection Strategy — Substrate-First Anchor</div>
+<div class="tdesc" style="color:#58a6ff">Minimum Truth Anchor: w3wp.exe spawning any execution primitive. Fires regardless of delivery method (file or in-memory web shell). Reinforcement: anomalous outbound connections from w3wp.exe. <strong>Status: 🔵 POC — w3wp_WebShell_SpawnChain</strong></div>
+<div class="mt"><span>T1190</span><span>T1505.003</span><span>T1071.001</span><span>T1027</span><span>T1222</span></div>
+</div></div>
+
+<div class="tcard" style="border-left:4px solid #1f6feb">
+<div class="thead2"><span class="tbadge" style="background:#0d2847;color:#58a6ff">APT · Ukraine · Multi-Stage</span><span class="ttit">UAC-0184 — HTA → bitsadmin → Plane9 DLL Sideload → Signed Utility Chain</span><span class="tsrc">SOC Prime #021 · UAC-0184 multi-stage intrusion</span></div>
+<div class="tbody">
+<div class="tsec">Threat Profile</div>
+<div class="tdesc">Multi-stage attack: HTA files delivered via bitsadmin and LNK shortcuts, payload staged in ZIP archive, DLL sideloading via Plane9 (legitimate 3D visualisation app), custom XOR+LZNT1 decoding to unpack signed utilities including PassMark Endpoint. This chain directly maps to existing framework detection surfaces — bitsadmin LOLBin, DLL sideloading (signer mismatch anchor), LNK execution — providing strong ecosystem validation. Novel element: Plane9.exe as sideload vehicle is caught by behaviour-first signer mismatch regardless of which signed binary is abused.</div>
+<div class="mwrap"><div class="mermaid">
+flowchart LR
+    A("HTA Delivery\\nT1218.005") --> B("bitsadmin\\nZIP Download\\nT1197")
+    B --> C("LNK Execution\\nT1547.009")
+    C --> D{"Plane9.exe\\nDLL Sideload\\ninput.dll\\nT1574.002"}
+    D --> E("XOR + LZNT1\\nIn-memory decode\\nT1027")
+    E --> F("PassMark Endpoint\\nSigned utility\\nfrom writable path\\nT1218")
+    style D fill:#1F4E79,stroke:#1f6feb,color:#58a6ff
+    style E fill:#21033f,stroke:#7B2FBE,color:#d2a8ff
+</div></div>
+<div class="tsec">Indicators of Attack (IOAs)</div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>bitsadmin downloading archive from non-Microsoft URL</strong> — BITS transfer job targeting external domain with .zip/.cab extension</span></div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>Plane9.exe loading DLL from same writable directory</strong> — signer mismatch between Plane9.exe and input.dll — DLL sideload truth anchor</span></div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>PassMark Endpoint executing from writable path</strong> — signed utility spawned from AppData/Temp rather than Program Files</span></div>
+<table class="iot">
+<tr><th>Type</th><th>Indicator</th><th>Note</th></tr>
+<tr><td class="itype">Process</td><td class="ival">bitsadmin.exe /transfer + http:// + .zip</td><td class="inote">Archive staging via BITS (existing rule)</td></tr>
+<tr><td class="itype">File</td><td class="ival">Plane9.exe + input.dll same writable dir</td><td class="inote">DLL sideload staging pattern</td></tr>
+<tr><td class="itype">ImageLoad</td><td class="ival">input.dll signer ≠ Plane9.exe signer</td><td class="inote">Signer mismatch anchor — existing rule fires</td></tr>
+<tr><td class="itype">Process</td><td class="ival">PassMarkEndpoint.exe from AppData/Temp</td><td class="inote">Signed binary from anomalous path</td></tr>
+</table>
+<div class="tsec">Framework Coverage Validation ✅</div>
+<div class="tdesc" style="color:#56d364">This chain is well-covered by existing composites: bitsadmin (LOLBINS_Ingress_Pack), DLL sideloading (MDE_DLL_Sideloading_Chain via signer mismatch), LNK execution (ClickFix chain variant). Strong ecosystem validation — the behaviour-first anchor catches Plane9.exe or any other signed binary used as sideload vehicle.</div>
+<div class="mt"><span>T1218.005</span><span>T1197</span><span>T1574.002</span><span>T1547.009</span><span>T1027</span></div>
+</div></div>
+
+<div class="tcard" style="border-left:4px solid #238636">
+<div class="thead2"><span class="tbadge" style="background:#04260f;color:#56d364">Supply Chain · BYOI · Novel Runtime</span><span class="ttit">DinDoor — Deno-Based RAT via GitHub/SourceForge Fake Installers</span><span class="tsrc">SOC Prime #022 · Novel Deno runtime BYOI attack</span></div>
+<div class="tbody">
+<div class="tsec">Threat Profile</div>
+<div class="tdesc">Counterfeit installers on GitHub and SourceForge install the Deno runtime via Scoop or WinGet, then execute a JavaScript RAT (DinDoor) capable of data theft, remote command execution, and P2P video streaming. This is a Bring-Your-Own-Interpreter attack — the attacker delivers the runtime alongside the payload. Deno is a legitimate modern JavaScript runtime with near-zero enterprise blocklist coverage. It directly fills the BYOI cousin gap in the LOLBin ecosystem.</div>
+<div class="mwrap"><div class="mermaid">
+flowchart LR
+    A("Fake Installer\\nGitHub/SourceForge\\nT1195.002") --> B("WinGet/Scoop\\nInstall Deno runtime\\nT1072")
+    B --> C{"DinDoor.js\\nJavaScript RAT\\nvia Deno\\nT1059.007"}
+    C --> D("Data Theft\\nFile exfil\\nT1005")
+    C --> E("Remote Exec\\nCmd execution\\nT1059")
+    C --> F("C2 Beacon\\nHTTPS callback\\nT1071.001")
+    style C fill:#04260f,stroke:#238636,color:#56d364
+    style B fill:#0a2200,stroke:#7ee787,color:#7ee787
+</div></div>
+<div class="tsec">Indicators of Attack (IOAs)</div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>WinGet or Scoop installing Deno runtime</strong> — package manager installing Deno in enterprise environment = BYOI staging indicator</span></div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>deno.exe executing .js or .ts files from writable path</strong> — Deno runtime in AppData/Temp executing JavaScript is the truth anchor</span></div>
+<div class="ioa"><span class="iob">▸</span><span class="iot2"><strong>deno.exe making outbound HTTPS connections to first-seen domain</strong> — Deno process with network activity shortly after install</span></div>
+<table class="iot">
+<tr><th>Type</th><th>Indicator</th><th>Note</th></tr>
+<tr><td class="itype">Process</td><td class="ival">winget.exe install deno / scoop install deno</td><td class="inote">BYOI runtime installation</td></tr>
+<tr><td class="itype">File</td><td class="ival">deno.exe in %APPDATA%\\...\\scoop\\apps\\deno</td><td class="inote">Deno installed to user path</td></tr>
+<tr><td class="itype">Process</td><td class="ival">deno.exe run *.js from %TEMP% or %APPDATA%</td><td class="inote">JavaScript RAT execution</td></tr>
+<tr><td class="itype">Network</td><td class="ival">deno.exe HTTPS POST to first-seen domain post-install</td><td class="inote">C2 callback from novel runtime</td></tr>
+</table>
+<div class="tsec">Detection Strategy — BYOI Surface</div>
+<div class="tdesc" style="color:#58a6ff">Minimum Truth Anchor: deno.exe executing JavaScript from writable path AND initiating network connections. Deno has zero legitimate enterprise use — first-seen deno.exe + network = near-certain IOC. Feeds BYOI cousin gap in LOLBin ecosystem. <strong>Status: 🔵 POC — DinDoor_Deno_BYOI_Detection</strong></div>
+<div class="mt"><span>T1195.002</span><span>T1072</span><span>T1059.007</span><span>T1071.001</span><span>T1005</span></div>
+</div></div>
+</div>
+
+
 <div id="novel" class="panel">
-
-  <div class="callout novel-callout">
-    <b>Novel Tradecraft Research:</b> These ecosystems represent emerging and custom-researched threat families with original detection authored specifically against them. This is original research — not lifted from vendor blogs. Each includes a dedicated POC hunt pack, threat analysis, and IR SOP where applicable. Repo: <b>Novel-Tradecraft-Research-Emerging-Attack-Ecosystems</b>
-  </div>
-
-  <div class="section-title novel-title">◆ SilverFox / ValleyRAT Ecosystem</div>
-  <div class="repo-label">Novel-Tradecraft-Research</div>
-
-  <div class="grid-2">
-    <div class="card novel-card">
-      <div class="card-title">
-        SilverFox BYOVD Chain
-        <span class="status-badge status-live">LIVE</span>
-      </div>
-      <div class="card-body">
-        SilverFox uses BYOVD (Bring Your Own Vulnerable Driver) to kill EDR before deploying ValleyRAT. Full attack chain: stager → driver load → EDR kill → RAT deploy. Three detection layers: core hunt, advanced rule, and BYOVD-specific variant.
-        <div class="card-rules">
-          <ul class="rule-list">
-            <li class="novel-rule">SilverFox-BYOVD-Core-Hunt</li>
-            <li class="novel-rule">SilverFox-BYOVD-Advanced-Hunt</li>
-            <li class="novel-rule">SilverFox_ValleyRAT_AdvancedRule</li>
-            <li class="novel-rule">SilverFox_ValleyRAT_Stager</li>
-            <li class="novel-rule">SilverFox_ValleyRAT_ScriptStager</li>
-            <li>Silverfox-ValleyRAT-core-hunt (Attack-POC repo)</li>
-            <li>SilverFox_ValleyRAT_Injection_Hunt</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <div class="card novel-card">
-      <div class="card-title">
-        SilverFox vs Polymorphic Malware
-        <span class="status-badge status-research">RESEARCH</span>
-      </div>
-      <div class="card-body">
-        Analysis of SilverFox BYOVD interaction with polymorphic malware — how signature-mutating payloads interact with vulnerable driver exploitation chains. Original threat research comparing two evasion paradigms.
-        <div class="card-rules">
-          <ul class="rule-list">
-            <li class="novel-rule">SilverFox-BYOVD-Vs-Polymorphic-Malware (analysis)</li>
-            <li class="novel-rule">Polymorphic_Malware (Attack-POC repo)</li>
-          </ul>
-          <div style="margin-top:6px">
-            <span class="tag technique">T1014 Rootkit</span>
-            <span class="tag technique">T1562.001 Impair Defences</span>
-            <span class="tag technique">T1027.001 Binary Padding</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card novel-card">
-      <div class="card-title">
-        ValleyRAT Detection Pack
-        <span class="status-badge status-live">LIVE</span>
-      </div>
-      <div class="card-body">
-        Multi-stage ValleyRAT detection covering injection behaviour, script stager, and RAT persistence mechanisms. Cross-platform between MDE and Sentinel. Includes README and threat profile.
-        <div class="card-rules">
-          <ul class="rule-list">
-            <li class="novel-rule">SilverFox ValleyRAT Detection Rules (folder)</li>
-          </ul>
-          <div style="margin-top:6px">
-            <span class="tag technique">T1055 Process Injection</span>
-            <span class="tag technique">T1059.005 VBScript</span>
-            <span class="tag technique">T1547 Boot Autostart</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-title novel-title">◆ EtherRAT / React2Shell — CVE-2025-55182</div>
-  <div class="repo-label">Novel-Tradecraft-Research</div>
-
-  <div class="grid-2">
-    <div class="card novel-card">
-      <div class="card-title">
-        React2Shell EtherRAT Full Pack
-        <span class="status-badge status-poc">POC</span>
-      </div>
-      <div class="card-body">
-        Original research and detection for EtherRAT delivered via React2Shell exploitation (CVE-2025-55182). Post-exploitation behaviour analysis + detection. Includes test handbook and IR SOP.
-        <div class="card-rules">
-          <ul class="rule-list">
-            <li class="novel-rule">React2Shell_CVE-2025-55182 (detection)</li>
-            <li class="novel-rule">React2Shell_EtherRAT_CVE-2025-55182_Hunt (folder)</li>
-            <li class="novel-rule">EtherRAT (Attack-POC repo folder)</li>
-          </ul>
-          <div style="margin-top:6px">
-            <span class="tag technique">T1190 Exploit Public App</span>
-            <span class="tag technique">T1059 Command Interpreter</span>
-            <span class="tag technique">T1071 App Layer Protocol</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card novel-card">
-      <div class="card-title">
-        PulsarRAT POC Detection
-        <span class="status-badge status-poc">POC</span>
-      </div>
-      <div class="card-body">
-        Early-stage POC detection for PulsarRAT — lightweight remote access tool with evasive comms. Detection authored against behavioural indicators rather than signatures.
-        <div class="card-rules">
-          <ul class="rule-list">
-            <li class="novel-rule">PulsarRAT_POC</li>
-          </ul>
-          <div style="margin-top:6px">
-            <span class="tag technique">T1071 App Layer Protocol</span>
-            <span class="tag technique">T1219 Remote Access Software</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-title novel-title">◆ Steganographic Loader Ecosystem</div>
-  <div class="repo-label">Novel-Tradecraft-Research + Attack-Ecosystems-and-POC</div>
-
-  <div class="grid-2">
-    <div class="card novel-card">
-      <div class="card-title">
-        Stego Threat Analysis + Hunter Pack
-        <span class="status-badge status-live">LIVE</span>
-      </div>
-      <div class="card-body">
-        Full ecosystem for detecting malicious payloads delivered via steganographic image loaders. Covers memory indicators, image inspection, loader chain detection, and IR SOP. Multi-phase detection approach.
-        <div class="card-rules">
-          <ul class="rule-list">
-            <li class="novel-rule">Stego-Image-Loader (core)</li>
-            <li class="novel-rule">Stego-Malicious-Image-Loader</li>
-            <li class="novel-rule">Stego_Loader_Basic_Hunt</li>
-            <li class="novel-rule">Stego_Memory_Indicators_Phase2</li>
-            <li class="novel-rule">Stego_Threat_Hunters_Incident_Response_SOP</li>
-            <li>Stego_Threat_Analysis_And_Hunter_Pack (folder)</li>
-          </ul>
-          <div style="margin-top:6px">
-            <span class="tag technique">T1027.003 Steganography</span>
-            <span class="tag technique">T1027 Obfuscated Files</span>
-            <span class="tag technique">T1055 Process Injection</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card novel-card">
-      <div class="card-title">
-        Hijacked Libraries Research
-        <span class="status-badge status-research">RESEARCH</span>
-      </div>
-      <div class="card-body">
-        Research dataset mapping hijack-able libraries (hijack-libs.csv) used as a threat modelling input for DLL hijack detection coverage. Feeds into the DLL sideloading ecosystem.
-        <div class="card-rules">
-          <ul class="rule-list">
-            <li class="novel-rule">hijack-libs.csv (threat model dataset)</li>
-            <li class="novel-rule">Threat Modelling Project #1.md</li>
-          </ul>
-          <div style="margin-top:6px">
-            <span class="tag technique">T1574.002 DLL Sideloading</span>
-            <span class="tag technique">T1574.001 DLL Search Order</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
+<h2 style="margin-bottom:.35rem;font-size:1rem;color:#fff">◆ Novel Tradecraft Research</h2>
+<p style="color:var(--mut);font-size:.78rem;margin-bottom:1rem">Original research not lifted from vendor blogs. Each includes kill chain, detection composites, and IR SOP. Repo: <strong>Novel-Tradecraft-Research-Emerging-Attack-Ecosystems</strong></p>
+<div class="egrid">
+<div class="ec" style="border-color:#da363355">
+<div class="eh"><span class="etac tnv">Novel · APT</span><span class="etit">SilverFox / ValleyRAT — BYOVD + Sideload Chain</span><span class="est sv">✅ Live</span></div>
+<div class="eb">
+<div class="ed">Chinese-nexus APT. Byte-flipping mutation defeats all signature controls. Seven detection rules across three tiers. Complete offensive/defensive analysis with byte-flipping vs polymorphism deep dive. Full IR SOP.</div>
+<div class="rl">
+<span class="rtag core" data-rule="SilverFox-BYOVD-Core-Hunt">★ SilverFox-BYOVD-Core</span>
+<span class="rtag core" data-rule="SilverFox-BYOVD-Advanced-Hunt">★ SilverFox-BYOVD-Advanced</span>
+<span class="rtag" data-rule="SilverFox_Stager">SilverFox_Stager</span>
+<span class="rtag" data-rule="SilverFox_Injection_Hunt">SilverFox_Injection</span>
+</div>
+<div class="mt"><span>T1014</span><span>T1562.001</span><span>T1027.001</span><span>T1574.002</span></div>
+</div></div>
+<div class="ec" style="border-color:#7B2FBE55">
+<div class="eh"><span class="etac tnv">Novel · CVE</span><span class="etit">EtherRAT / React2Shell — CVE-2025-55182 Blockchain C2</span><span class="est sp">🔵 POC</span></div>
+<div class="eb">
+<div class="ed">Blockchain C2 delivery via React2Shell IIS exploit. Ethereum transactions as C2 channel — no traditional network IOC. Test handbook and IR SOP included.</div>
+<div class="rl">
+<span class="rtag core" data-rule="React2Shell_CVE-2025-55182">★ React2Shell_CVE-2025-55182</span>
+<span class="rtag" data-rule="React2Shell_EtherRAT_Hunt">React2Shell_EtherRAT_Hunt</span>
+</div>
+<div class="mt"><span>T1190</span><span>T1059</span><span>T1071</span></div>
+</div></div>
+<div class="ec" style="border-color:#23863655">
+<div class="eh"><span class="etac tnv">Novel · Stego</span><span class="etit">Steganographic Loader Ecosystem — Multi-Phase Detection</span><span class="est sv">✅ Live</span></div>
+<div class="eb">
+<div class="ed">Multi-phase stego payload detection: image inspection, memory indicators, loader chain, scheduled task stego beacon, DNS stego, certutil LOLBAS image decode.</div>
+<div class="rl">
+<span class="rtag core" data-rule="Stego-Image-Loader">★ Stego-Image-Loader</span>
+<span class="rtag core" data-rule="Stego_Memory_Indicators">★ Stego_Memory_Indicators</span>
+<span class="rtag" data-rule="Stego_Loader_Basic">Stego_Loader_Basic</span>
+<span class="rtag" data-rule="Stego_IR_SOP">Stego_IR_SOP</span>
+</div>
+<div class="mt"><span>T1027.003</span><span>T1055</span><span>T1140</span></div>
+</div></div>
+</div>
 </div>
 
-<!-- ════════════════════════════════════════
-     TAB 3 — ROADMAP / PIPELINE
-════════════════════════════════════════ -->
-<div id="pipeline" class="panel">
-
-  <div class="callout pipeline-callout">
-    <b>Pipeline philosophy:</b> Rules are sequenced by ecosystem completion priority, not MITRE square count. An incomplete ecosystem with a mapped cousin gap is higher priority than a new standalone rule. The roadmap below reflects the logical build order — each row closes an existing cousin gap or opens a new ecosystem that feeds the existing detection architecture.
-  </div>
-
-  <div class="section-title pipeline-title">Phase 1 — Close Existing Ecosystem Gaps</div>
-
-  <div class="grid-2">
-    <div class="card pipeline-card">
-      <div class="card-title">Exfiltration Ecosystem <span class="status-badge status-pipeline">PIPELINE</span></div>
-      <div class="card-body">
-        Staging → archive creation → large outbound transfer composite. Currently only clipboard exfil is covered. Need: compression utility abuse, cloud sync exfil (OneDrive/SharePoint), HTTPS upload to paste sites, DNS exfil chain.
-        <div class="card-rules">
-          <div><span class="tag technique">T1041</span><span class="tag technique">T1048</span><span class="tag technique">T1567</span><span class="tag technique">T1052</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card pipeline-card">
-      <div class="card-title">RDP Full Ecosystem <span class="status-badge status-pipeline">PIPELINE</span></div>
-      <div class="card-body">
-        RDP file drop is covered. RDP session hijack, sticky keys backdoor, RDP tunnel via port forward, SharpRDP, xFreeRDP lateral movement — all unmapped. Cousin gap from the SMB/WMI lateral ecosystem.
-        <div class="card-rules">
-          <div><span class="tag technique">T1021.001</span><span class="tag technique">T1546.008</span><span class="tag technique">T1563.002</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card pipeline-card">
-      <div class="card-title">Backup System Targeting <span class="status-badge status-pipeline">PIPELINE</span></div>
-      <div class="card-body">
-        Shadow copy deletion cousin exists. No dedicated backup software process kill — Veeam, Backup Exec, Windows Server Backup. Pre-ransomware backup destruction is systematic. Need T1490 composite beyond VSS.
-        <div class="card-rules">
-          <div><span class="tag technique">T1490 Inhibit Recovery</span><span class="tag technique">T1485 Data Destruction</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card pipeline-card">
-      <div class="card-title">ADCS / Certificate Abuse <span class="status-badge status-pipeline">PIPELINE</span></div>
-      <div class="card-body">
-        Sensitive_Cert_Attack_Vectors exists as a single rule. Full ADCS ESC1-8 ecosystem needed. Certificate template abuse, unauthorised CA enrolment, certificate theft — a growing AD priv escalation vector.
-        <div class="card-rules">
-          <div><span class="tag technique">T1649 Steal Cert</span><span class="tag technique">T1552.004 Private Keys</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card pipeline-card">
-      <div class="card-title">WinRM / DCOM Lateral Cousins <span class="status-badge status-pipeline">PIPELINE</span></div>
-      <div class="card-body">
-        SMB and WMI lateral covered. WinRM (Evil-WinRM, PSRemoting) and DCOM (MMC20, ShellWindows) are the two remaining primary lateral movement paths without dedicated ecosystem rules.
-        <div class="card-rules">
-          <div><span class="tag technique">T1021.006 WinRM</span><span class="tag technique">T1021.003 DCOM</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card pipeline-card">
-      <div class="card-title">DNS Tunnelling C2 Cousin <span class="status-badge status-pipeline">PIPELINE</span></div>
-      <div class="card-body">
-        HTTPS and Named Pipe C2 covered. DNS tunnelling (iodine, dnscat2, DNScat) is the natural cousin — same intent, different protocol. Single detection rule closes the C2 ecosystem cousin gap.
-        <div class="card-rules">
-          <div><span class="tag technique">T1071.004 DNS</span><span class="tag technique">T1048.003 DNS Exfil</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section-title pipeline-title">Phase 2 — New Ecosystems</div>
-
-  <div class="grid-2">
-    <div class="card pipeline-card">
-      <div class="card-title">Initial Access — Phishing Attachment Chain <span class="status-badge status-pipeline">PIPELINE</span></div>
-      <div class="card-body">
-        SafeLinks click-through covered. Full attachment execution chain (ISO/LNK/OneNote/HTML smuggling) needs dedicated ecosystem. Entry point detection is the weakest part of current coverage.
-        <div class="card-rules">
-          <div><span class="tag technique">T1566.001</span><span class="tag technique">T1204.002</span><span class="tag technique">T1027.006 HTML Smuggling</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card pipeline-card">
-      <div class="card-title">Cloud Resource Abuse <span class="status-badge status-pipeline">PIPELINE</span></div>
-      <div class="card-body">
-        Beyond OAuth identity — Azure compute resource creation, cryptomining via hijacked cloud resources, S3/Blob storage data exfiltration, Lambda/Function abuse. Cloud coverage is identity-only currently.
-        <div class="card-rules">
-          <div><span class="tag technique">T1578</span><span class="tag technique">T1496</span><span class="tag technique">T1530</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card pipeline-card">
-      <div class="card-title">Golden / Silver / Diamond Ticket <span class="status-badge status-pipeline">PIPELINE</span></div>
-      <div class="card-body">
-        Kerberoasting ecosystem is now complete. The next Kerberos tier is ticket forgery — Golden Ticket (KRBTGT hash), Silver Ticket (service account), Diamond Ticket (modified TGT). Separate ecosystem from roasting.
-        <div class="card-rules">
-          <div><span class="tag technique">T1558.001 Golden</span><span class="tag technique">T1558.002 Silver</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card pipeline-card">
-      <div class="card-title">Supply Chain / Dependency Confusion <span class="status-badge status-research">RESEARCH</span></div>
-      <div class="card-body">
-        Hijack-libs.csv exists as a dataset. Dependency confusion, typosquatting package installs, compromised build pipeline detection — emerging attack vector with weak current tooling across the industry.
-        <div class="card-rules">
-          <div><span class="tag technique">T1195.002 Compromise SW Supply Chain</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card pipeline-card">
-      <div class="card-title">Risk-Based Hunt Operationalisation <span class="status-badge status-pipeline">PIPELINE</span></div>
-      <div class="card-body">
-        Risk_Based_Hunts folder exists. Formalise the methodology — asset criticality weighting, exploit-in-wild prioritisation, threat intel feed integration (ThreatView_Threatintel_Feed). Turn hunts into scheduled KQL workbooks.
-        <div class="card-rules">
-          <div><span class="tag technique">Cross-tactic · Risk-weighted</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card pipeline-card">
-      <div class="card-title">KQL Join Operator Framework <span class="status-badge status-research">RESEARCH</span></div>
-      <div class="card-body">
-        KQL-Join-Operator-Guide folder exists. This is infrastructure knowledge — formalise into reusable join patterns for multi-table composite rules. Feeds every ecosystem at engineering level.
-        <div class="card-rules">
-          <div><span class="tag technique">Detection Engineering · KQL Architecture</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
+<div id="ai" class="panel">
+<h2 style="margin-bottom:.35rem;font-size:1rem;color:#fff">🤖 AI-Assisted Threat Vectors — 2026 Research</h2>
+<p style="color:var(--mut);font-size:.78rem;margin-bottom:1rem">AI removes attacker friction — not the attack surface. Detection remains anchored on what the attacker <em>must do</em>, not how they generated the payload. MTF composites are natively resistant to AI-generated variants.</p>
+<div class="egrid">
+<div class="ec"><div class="eh"><span class="etac tai">AI · Phishing</span><span class="etit">LLM Spear-Phishing — Content-Agnostic Post-Click Chain</span><span class="est si">🔄 Iteration</span></div>
+<div class="eb"><div class="ed">AI-generated phishing defeats all content-based filters. Detection anchored on post-click execution chain (browser/mail client → script engine spawn). ClickFix composite partially covers this surface.</div>
+<div class="rl"><span class="rtag core" data-rule="ClickFix_Clipboard_Chain">★ ClickFix_Clipboard (existing 🔄)</span><span class="rtag" data-rule="LLM_Phishing_PostClick">LLM_Phishing_PostClick (POC)</span></div>
+<div class="mt"><span>T1566.002</span><span>T1204.002</span><span>T1059.001</span></div>
+</div></div>
+<div class="ec"><div class="eh"><span class="etac tai">AI · C2</span><span class="etit">AI-Adaptive C2 Jitter — Entity-Keyed Baseline Required</span><span class="est sp">🔵 POC</span></div>
+<div class="eb"><div class="ed">AI-tuned C2 operators retune jitter profiles to defeat static JitterRatio thresholds. Detection must evolve to entity-keyed adaptive baselines — deviation from entity's own historical profile.</div>
+<div class="rl"><span class="rtag core" data-rule="C2_HTTPS_Jitter_Beacon_v2">★ C2_HTTPS_Jitter_v2 (existing 🔄)</span><span class="rtag" data-rule="AI_Adaptive_Jitter">AI_Adaptive_Jitter_Baseline (POC)</span></div>
+<div class="mt"><span>T1071.001</span><span>T1090</span><span>T1571</span></div>
+</div></div>
+<div class="ec"><div class="eh"><span class="etac tai">AI · BEC</span><span class="etit">BEC 3.0 — Deepfake Voice → Identity Workflow Anomaly</span><span class="est sp">🔵 POC</span></div>
+<div class="eb"><div class="ed">AI deepfake impersonation defeats social engineering detection. Anchored on post-impersonation workflow anomaly: MFA method add + email forwarding rule + new payee + urgent transfer convergence.</div>
+<div class="rl"><span class="rtag" data-rule="BEC_3.0_Workflow_Anomaly">BEC_3.0_Workflow_Anomaly (POC)</span></div>
+<div class="mt"><span>T1534</span><span>T1078</span><span>T1114</span></div>
+</div></div>
+<div class="ec"><div class="eh"><span class="etac tai">AI · Malware</span><span class="etit">AI Polymorphic Malware — MTF Natively Resistant</span><span class="est sr">🔴 Research</span></div>
+<div class="eb"><div class="ed">LLM-generated malware variants produce unique hash on every compile. MTF is natively resistant — all behaviour anchors are hash-invariant by design. No additional rule required: the framework's architectural choice is the defence.</div>
+<div class="rl"><span class="rtag">All MTF composites (hash-invariant)</span></div>
+<div class="mt"><span>T1027</span><span>T1036</span></div>
+</div></div>
+</div>
 </div>
 
-<!-- ════════════════════════════════════════
-     TAB 4 — COVERAGE GAPS
-════════════════════════════════════════ -->
-<div id="missing" class="panel">
+<div id="roadmap" class="panel">
+<h2 style="margin-bottom:.3rem;font-size:1rem;color:#fff">Detection Engineering Roadmap</h2>
+<p style="color:var(--mut);font-size:.77rem;margin-bottom:1.3rem">Sequenced by ecosystem completion priority. Incomplete ecosystem with mapped cousin gap outranks new standalone rule. 🔄 Iteration = active testing, not yet promoted to production composite. Newsletter validation notes where live 2026 threats directly accelerate priority.</p>
 
-  <div class="callout">
-    <b>Gap identification methodology:</b> Gaps are identified by ecosystem shape, not MITRE square count. A gap exists where attack intent is covered on one substrate but cousin surfaces remain unmapped — meaning an adversary who pivots technique after a detection fires goes undetected. Gaps below are ranked by adversary pivot probability.
-  </div>
+<div class="rmph">
+<div class="rphhd"><span class="rpbdg" style="background:#04260f;color:#56d364">✅ In Production / Iteration</span><span class="rphtt">Active Rules — Production-Grade or Iteration Testing</span></div>
+<div class="rgrid">
+<div class="ri pdn"><div class="rit">✅ C2 HTTPS Jitter v2</div><div class="rid">Iteration tuning. Moving toward entity-keyed adaptive baseline to defeat AI-tuned operator profiles.</div></div>
+<div class="ri pdn"><div class="rit">✅ Named Pipe C2</div><div class="rid">Iteration tuning. Named pipe IPC correlation and C2 pattern matching.</div></div>
+<div class="ri pdn"><div class="rit">✅ Blockchain RPC C2</div><div class="rid">Stable. EtherRAT/blockchain C2 behavioural detection.</div></div>
+<div class="ri pdn"><div class="rit">✅ SafeLinks + ClickFix Chain</div><div class="rid">Iteration tuning. Both phishing delivery composites active.</div></div>
+<div class="ri pdn"><div class="rit">✅ rundll32 / mshta / certutil / regsvr32 / bitsadmin</div><div class="rid">All in iteration tuning. LOLBin core pack across all primary surfaces.</div></div>
+<div class="ri pdn"><div class="rit">✅ Registry Run Keys + LSA Security</div><div class="rid">ADX-validated and stable. Full registry persistence ecosystem.</div></div>
+<div class="ri pdn"><div class="rit">✅ Scheduled Task (CLI + TaskCache + Rundll32-aware)</div><div class="rid">ADX-validated. TaskCache COM API silent write detection complete.</div></div>
+<div class="ri pdn"><div class="rit">✅ BYOVD Delayed Staging + MISP Supply Chain</div><div class="rid">Iteration testing. Integrated into MISP for supply chain delayed driver load detection.</div></div>
+<div class="ri pdn"><div class="rit">✅ comsvcs MiniDump LSASS</div><div class="rid">Iteration phase. All invocation methods covered.</div></div>
+<div class="ri pdn"><div class="rit">✅ Kerberoasting + AS-REP + Pass-the-Hash</div><div class="rid">All three in iteration testing. RC4 downgrade detection active.</div></div>
+<div class="ri pdn"><div class="rit">✅ WMI Full Family (Fileless · Perm Sub · Remote Process)</div><div class="rid">Entire WMI family in iteration tuning phase.</div></div>
+<div class="ri pdn"><div class="rit">✅ SMB / RPC Lateral Movement</div><div class="rid">ADX-validated. PsExec and remote task execution chains complete.</div></div>
+<div class="ri pdn"><div class="rit">✅ OAuth / Token Abuse + Azure</div><div class="rid">ADX-validated. Consent, token theft, SP backdoor, Azure RunCommand.</div></div>
+<div class="ri pdn"><div class="rit">✅ DLL Sideloading Chain</div><div class="rid">ADX-validated. Signer mismatch anchor defeats all variant sideloads.</div></div>
+<div class="ri pdn"><div class="rit">✅ LOLRMM + First-Time VPN + Unmanaged Device</div><div class="rid">All in iteration testing. LOLRMM covers 400+ known tools.</div></div>
+<div class="ri pdn"><div class="rit">✅ Encryption Velocity (Local, POC→Composite)</div><div class="rid">POC done. Going to composite. VSS deletion in iteration testing.</div></div>
+</div></div>
 
-  <div class="section-title">Tier 1 — Adversary Will Pivot Here</div>
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">Exfiltration Chain <span class="tag missing-tag">MISSING ECOSYSTEM</span></div>
-      <div class="card-body">Clipboard exfil exists. Staging → compression → large outbound transfer chain is absent. Double-extortion ransomware exfils before encrypting — this is where the actual damage measurement happens.</div>
-    </div>
-    <div class="card">
-      <div class="card-title">RDP Full Ecosystem <span class="tag missing-tag">COUSIN GAP</span></div>
-      <div class="card-body">File drop post-RDP exists. Session hijack, sticky keys backdoor, SharpRDP, RDP tunnelling through port forwards — all gaps. RDP is the most common lateral movement vector in enterprise breaches.</div>
-    </div>
-    <div class="card">
-      <div class="card-title">WinRM / DCOM Lateral <span class="tag missing-tag">COUSIN GAP</span></div>
-      <div class="card-body">SMB and WMI lateral are fully mapped. WinRM (T1021.006) and DCOM (T1021.003) are the two remaining primary lateral paths. Evil-WinRM is standard post-exploitation tooling. Classic cousin gap in the lateral ecosystem.</div>
-    </div>
-    <div class="card">
-      <div class="card-title">DNS Tunnelling C2 <span class="tag missing-tag">COUSIN GAP</span></div>
-      <div class="card-body">HTTPS and Named Pipe C2 covered. DNS tunnelling is the natural fallback when HTTPS is blocked or detected. iodine, dnscat2, DNScat — same C2 intent, different protocol. Single rule closes this cousin gap.</div>
-    </div>
-    <div class="card">
-      <div class="card-title">Backup Software Targeting <span class="tag missing-tag">COUSIN GAP</span></div>
-      <div class="card-body">VSS/shadow deletion covered. Dedicated backup software process kill (Veeam Agent, wbadmin, ntbackup) is absent. Pre-ransomware backup destruction is now systematic — this fires before encryption velocity.</div>
-    </div>
-    <div class="card">
-      <div class="card-title">Network Share Encryption <span class="tag missing-tag">COUSIN GAP</span></div>
-      <div class="card-body">Local encryption velocity is covered. Ransomware increasingly encrypts network shares before local files. SMB write velocity to UNC paths is the missing cousin to the local encryption detection.</div>
-    </div>
-  </div>
+<div class="rmph">
+<div class="rphhd"><span class="rpbdg" style="background:#2d0f0e;color:#ff7b72">P0 — Close Tier 1 Cousin Gaps</span><span class="rphtt">Adversary Will Pivot Here — Validated by Live 2026 Threats</span></div>
+<div class="rgrid">
+<div class="ri pp0"><div class="rit">⚠ Network Share Encryption</div><div class="rid">WantToCry (SOC Prime #021) validates this gap in 2026. SMB write velocity + uniform extension change from single source IP. Cousin of EncryptionVelocity — local rules miss this entirely.</div></div>
+<div class="ri pp0"><div class="rit">⚠ BYOI — Deno/Python/Node Runtime RAT</div><div class="rid">DinDoor Deno RAT (SOC Prime #022) validates. deno.exe + network in enterprise = near-certain IOC. Feeds BYOI cousin gap in LOLBin ecosystem.</div></div>
+<div class="ri pp0"><div class="rit">⚠ Exfiltration Full Chain</div><div class="rid">Double-extortion actors exfil before encrypting. Only clipboard exfil currently covered. Archive creation + outbound volume threshold + cloud sync detection.</div></div>
+<div class="ri pp0"><div class="rit">⚠ DNS Tunnelling C2</div><div class="rid">HTTPS and Named Pipe covered. DNS is natural C2 fallback. High-entropy subdomain query burst closes this cousin gap.</div></div>
+<div class="ri pp0"><div class="rit">⚠ WinRM / Evil-WinRM Lateral</div><div class="rid">SMB and WMI fully covered. wsmprovhost.exe child spawn is the remaining primary lateral path with zero current coverage.</div></div>
+<div class="ri pp0"><div class="rit">⚠ Backup Software Kill</div><div class="rid">VSS deletion covered. Veeam/ntbackup process termination fires before encryption velocity — earlier detection window. Kyber Ransomware (#019) validates systematic backup destruction.</div></div>
+</div></div>
 
-  <div class="section-title">Tier 2 — Growing Attack Surface</div>
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title">ADCS Full Ecosystem <span class="tag missing-tag">PARTIAL</span></div>
-      <div class="card-body">Single cert detection rule exists. ESC1-8 template abuse, unauthorised CA enrolment, certificate theft for persistence — entire ADCS privilege escalation chain needs dedicated ecosystem.</div>
-    </div>
-    <div class="card">
-      <div class="card-title">Golden/Silver/Diamond Ticket <span class="tag missing-tag">MISSING</span></div>
-      <div class="card-body">Kerberoasting ecosystem is now complete and strong. The next tier — ticket forgery — has no coverage. Golden Ticket (KRBTGT), Silver Ticket (service), Diamond Ticket (modified TGT). Different substrate from roasting.</div>
-    </div>
-    <div class="card">
-      <div class="card-title">Cloud Resource Abuse <span class="tag missing-tag">PARTIAL</span></div>
-      <div class="card-body">OAuth/identity is well covered. Post-identity cloud resource abuse — compute creation, cryptomining, S3/Blob exfil, Lambda function abuse — is absent. Cloud coverage is identity-only currently.</div>
-    </div>
-    <div class="card">
-      <div class="card-title">Device Code Phishing <span class="tag missing-tag">COUSIN GAP</span></div>
-      <div class="card-body">OAuth consent abuse is covered. Device code phishing uses the legitimate OAuth device auth flow — different substrate, same token theft intent. Increasingly used against M365 environments.</div>
-    </div>
-    <div class="card">
-      <div class="card-title">COM Object Hijack Persistence <span class="tag missing-tag">COUSIN GAP</span></div>
-      <div class="card-body">Registry and ScheduledTask persistence fully covered. COM object hijack (T1546.015) is user-land persistent without registry run key writes — different substrate, same persistence intent. Natural cousin gap.</div>
-    </div>
-    <div class="card">
-      <div class="card-title">Supply Chain / Dependency Confusion <span class="tag missing-tag">RESEARCH ONLY</span></div>
-      <div class="card-body">Hijack-libs.csv dataset exists. Operationalised detection for dependency confusion, typosquatting, compromised build pipeline — absent. Growing attack vector with weak industry-wide tooling.</div>
-    </div>
-  </div>
+<div class="rmph">
+<div class="rphhd"><span class="rpbdg" style="background:#2d1f00;color:#e3b341">P1 — Ecosystem Expansion</span><span class="rphtt">Growing Attack Surface · Newsletter-Validated</span></div>
+<div class="rgrid">
+<div class="ri pp1"><div class="rit">⚠ ADCS ESC1-8 Full Ecosystem</div><div class="rid">Single cert rule exists. Template abuse, unauthorised CA enrolment, cert theft. Rapidly growing AD priv escalation vector.</div></div>
+<div class="ri pp1"><div class="rit">⚠ Golden / Silver / Diamond Ticket</div><div class="rid">Kerberoasting complete. Ticket forgery is zero coverage — different substrate from roasting. KRBTGT compromise = full domain.</div></div>
+<div class="ri pp1"><div class="rit">⚠ LOLBAS Full Completion</div><div class="rid">Core LOLBins covered. ie4uinit, SyncAppvPublishingServer, odbcconf, others remain. Chinese APT LOLBAS campaign (#021) validates expansion.</div></div>
+<div class="ri pp1"><div class="rit">⚠ BLUEBEAM w3wp WebShell Chain</div><div class="rid">SOC Prime #022 validates. w3wp.exe spawning execution primitive is near-zero FP — substrate-first minimum truth anchor.</div></div>
+<div class="ri pp1"><div class="rit">⚠ InvisibleFerret Browser CredStore</div><div class="rid">SOC Prime #022. Browser credential store access from non-browser process = hash-invariant anchor regardless of compilation method.</div></div>
+<div class="ri pp1"><div class="rit">🤖 AI Adaptive C2 Jitter</div><div class="rid">Upgrade C2_HTTPS_Jitter from static threshold to entity-keyed adaptive baseline. Google TIG (#016) confirms AI operational use in adversary workflows.</div></div>
+<div class="ri pp1"><div class="rit">⚠ DCOM Lateral Movement</div><div class="rid">DllHost.exe child spawn via DCOM — remaining primary lateral path alongside WinRM.</div></div>
+<div class="ri pp1"><div class="rit">⚠ Device Code Phishing</div><div class="rid">OAuth consent covered. Device code phishing uses legitimate auth flow — same token theft outcome via different cousin substrate.</div></div>
+</div></div>
 
+<div class="rmph">
+<div class="rphhd"><span class="rpbdg" style="background:#0d2244;color:#79c0ff">P2 — Infrastructure + Research</span></div>
+<div class="rgrid">
+<div class="ri pp2"><div class="rit">Detection-as-Code CI/CD Pipeline</div><div class="rid">ADX validation pipeline precursor exists. Formalise: GitHub Actions trigger → commit rule → ADX test → pass/fail gate → auto-promote.</div></div>
+<div class="ri pp2"><div class="rit">Supply Chain CI/CD Credential Theft</div><div class="rid">TeamPCP (#021) validates. Docker Hub, VS Code extension, GitHub Actions, PyPI credential theft ecosystem.</div></div>
+<div class="ri pp2"><div class="rit">Cloud Resource Abuse Ecosystem</div><div class="rid">Identity coverage strong; cloud resource abuse (compute creation, cryptomining, S3/Blob exfil) absent.</div></div>
+<div class="ri ppr"><div class="rit">Hunt Operationalisation Framework</div><div class="rid">Risk_Based_Hunts folder exists. Asset criticality weighting + threat intel feed integration + scheduled KQL workbooks.</div></div>
+</div></div>
 </div>
 
+
+<div id="gaps" class="panel">
+<h2 style="margin-bottom:.3rem;font-size:1rem;color:#fff">Coverage Gap Analysis</h2>
+<p style="color:var(--mut);font-size:.77rem;margin-bottom:1rem">Ranked by adversary pivot probability. Newsletter validation notes where a live 2026 threat directly confirms or accelerates gap priority.</p>
+<table class="gtab">
+<tr><th>Gap</th><th>Tier</th><th>Why Critical</th><th>2026 Validation</th><th>MITRE</th></tr>
+<tr><td style="font-weight:700;color:#fff">Network Share Encryption</td><td><span class="t1">T1 🔴</span></td><td style="color:var(--mut);font-size:.71rem">SMB-remote ransomware encrypts via network writes — local process tree is clean, no existing rule fires.</td><td style="color:#56d364;font-size:.71rem">✅ WantToCry (#021) — live 2026 attack pattern confirmed</td><td><span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1486</span> <span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1570</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">Exfiltration Chain</td><td><span class="t1">T1 🔴</span></td><td style="color:var(--mut);font-size:.71rem">Double-extortion baseline — exfil before encrypt. Only clipboard exfil covered currently.</td><td style="color:#e3b341;font-size:.71rem">⚠ ShinyHunters 7-Eleven (#022) confirms exfil-first methodology</td><td><span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1041</span> <span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1048</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">DNS Tunnelling C2</td><td><span class="t1">T1 🔴</span></td><td style="color:var(--mut);font-size:.71rem">HTTPS/Named Pipe covered. DNS is natural C2 fallback when HTTPS detected.</td><td style="color:#e3b341;font-size:.71rem">⚠ Hydra Saiga (#013) uses Telegram API C2 — non-HTTPS C2 validated</td><td><span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1071.004</span> <span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1048.003</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">WinRM / DCOM Lateral</td><td><span class="t1">T1 🔴</span></td><td style="color:var(--mut);font-size:.71rem">SMB and WMI covered. wsmprovhost.exe (WinRM) and DllHost.exe (DCOM) = two remaining primary lateral paths.</td><td style="color:#e3b341;font-size:.71rem">⚠ UAC-0184 (#021) tool chain pivots to WinRM-style access</td><td><span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1021.006</span> <span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1021.003</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">Backup Software Kill</td><td><span class="t1">T1 🔴</span></td><td style="color:var(--mut);font-size:.71rem">VSS deletion covered. Veeam/ntbackup termination fires before encryption velocity — earlier detection window.</td><td style="color:#56d364;font-size:.71rem">✅ Kyber Ransomware (#019) systematically terminates VMs and deletes shadows</td><td><span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1490</span> <span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1489</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">BYOI Runtime (Deno/Node/Python)</td><td><span class="t1">T1 🔴</span></td><td style="color:var(--mut);font-size:.71rem">Attacker delivers interpreter alongside payload — bypasses all LOLBin blocklisting.</td><td style="color:#56d364;font-size:.71rem">✅ DinDoor Deno RAT (#022) — live BYOI attack via WinGet/Scoop</td><td><span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1059.007</span> <span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1072</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">ADCS ESC1-8 Ecosystem</td><td><span class="t2">T2 🟡</span></td><td style="color:var(--mut);font-size:.71rem">Single cert rule exists. Full template abuse, unauthorised enrolment, cert-based persistence.</td><td style="color:var(--mut);font-size:.71rem">General trend — ADCS abuse replacing traditional AD exploitation</td><td><span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1649</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">Golden / Silver / Diamond Ticket</td><td><span class="t2">T2 🟡</span></td><td style="color:var(--mut);font-size:.71rem">Kerberoasting complete. Ticket forgery = zero coverage. KRBTGT compromise = full domain. Different substrate.</td><td style="color:#e3b341;font-size:.71rem">⚠ F5→Confluence (#022) active Kerberos/NTLM relay validates Kerberos ecosystem</td><td><span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1558.001</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">🤖 AI Adaptive C2 Jitter</td><td><span class="tn">2026 🔵</span></td><td style="color:var(--mut);font-size:.71rem">Static JitterRatio thresholds defeated by AI-tuned beacon profiles. Needs entity-keyed adaptive baseline.</td><td style="color:#56d364;font-size:.71rem">✅ Google TIG (#016) confirms AI operational adversary use is maturing rapidly</td><td><span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1071.001</span></td></tr>
+<tr><td style="font-weight:700;color:#fff">🤖 BEC 3.0 / Deepfake Identity</td><td><span class="tn">2026 🔵</span></td><td style="color:var(--mut);font-size:.71rem">AI deepfake impersonation defeats social engineering detection. Must anchor on post-action workflow anomaly: MFA add + forwarding rule + urgent transfer convergence.</td><td style="color:#56d364;font-size:.71rem">✅ BlackFile vishing extortion (#021) confirms AI-augmented social engineering at scale</td><td><span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1534</span> <span style="font-size:.6rem;padding:.08rem .32rem;border-radius:3px;background:#0d2847;border:1px solid #1f6feb33;color:#79c0ff;font-family:monospace">T1078</span></td></tr>
+</table>
+</div>
+
+
+<button class="stup" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 <script>
-function showTab(id, el) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  el.classList.add('active');
+mermaid.initialize({startOnLoad:true,theme:'dark',themeVariables:{
+  primaryColor:'#1c2128',primaryTextColor:'#c9d1d9',primaryBorderColor:'#21262d',
+  lineColor:'#58a6ff',secondaryColor:'#161b22',tertiaryColor:'#0d1117',
+  background:'#0d1117',mainBkg:'#1c2128',nodeBorder:'#21262d',
+  clusterBkg:'#161b22',titleColor:'#c9d1d9',edgeLabelBackground:'#161b22',fontSize:'11px'
+}});
+const LK='mtdf_links_v3';
+function ll(){try{return JSON.parse(localStorage.getItem(LK)||'{}')}catch{return{}}}
+function sl(l){localStorage.setItem(LK,JSON.stringify(l))}
+function al(){
+  const l=ll();let c=0;
+  document.querySelectorAll('.rtag').forEach(t=>{
+    const id=t.dataset.rule||t.textContent.trim();
+    if(l[id]){t.classList.add('linked');t.title='Open: '+l[id];c++;}
+    else{t.classList.remove('linked');t.title='Click to link';}
+  });
+  const lc=document.getElementById('lcount');
+  if(lc)lc.textContent=c>0?c+' linked':'';
 }
+function toggleEdit(){
+  const on=document.body.classList.toggle('edit-mode');
+  const b=document.getElementById('ebtn');
+  b.textContent=on?'💾 Done':'🔗 Edit Links';b.classList.toggle('on',on);
+  if(!on)al();
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('.rtag');if(!t)return;
+  const id=t.dataset.rule||t.textContent.trim().replace('★ ','');
+  if(document.body.classList.contains('edit-mode')){
+    const lnks=ll();
+    const url=prompt('Link to GitHub KQL file:\n"'+id+'"\n\nPaste URL (empty=remove):',lnks[id]||'');
+    if(url!==null){if(url.trim())lnks[id]=url.trim();else delete lnks[id];sl(lnks);al();}
+  }else{const lnks=ll();if(lnks[id])window.open(lnks[id],'_blank');}
+});
+function expLinks(){
+  const b=new Blob([JSON.stringify(ll(),null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='mtdf_links.json';a.click();
+}
+function impLinks(inp){
+  const f=inp.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{try{const l=JSON.parse(e.target.result);sl(l);al();alert('Imported '+Object.keys(l).length+' links.');}catch{alert('Invalid JSON');}};
+  r.readAsText(f);inp.value='';
+}
+function showTab(id,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById(id).classList.add('on');if(btn)btn.classList.add('on');
+}
+window.addEventListener('load',al);
 </script>
-
 </body>
 </html>

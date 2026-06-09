@@ -1136,10 +1136,9 @@ https://github.com/azdabat/Production-READY-Composite-Threat-Hunting-Rules/blob/
 ### Ecosystem Table — Composites + Cousins
 
 **Live Roadmap:** https://azdabat.github.io/Minimum-Truth-Detection-Framework-ADX-Validated-Composite-Rules/MITRE-MATRIX.html
-
 ---
 
-## 🗺️ God Mode Composite Roadmap
+## 🗺️ God Mode Composite Roadmap (Still under construction, but existing content can still be browsed)
 
 **[→ OPEN INTERACTIVE ROADMAP](https://azdabat.github.io/Minimum-Truth-Detection-Framework-ADX-Validated-Composite-Rules/MTDF-Composite-Roadmap.html)**
 

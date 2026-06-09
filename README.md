@@ -252,7 +252,7 @@ FinalScore                    = 160  →  CRITICAL
 
 Every detection begins with a choice: anchor on the **execution substrate itself**, or anchor on a **malicious primitive** performed by that substrate. Choosing the wrong strategy is a primary cause of detection failure at scale.
 
-```
+```GOD
 ┌─────────────────────────────────────────┬───────────────────────────────────────────┐
 │  SUBSTRATE-FIRST                        │  INTENT-FIRST                             │
 │                                         │                                           │
@@ -1139,69 +1139,6 @@ https://github.com/azdabat/Production-READY-Composite-Threat-Hunting-Rules/blob/
 
 ---
 
-## 🗺️ God Mode Composite Roadmap
-
-**[→ OPEN INTERACTIVE ROADMAP](https://azdabat.github.io/Minimum-Truth-Detection-Framework-ADX-Validated-Composite-Rules/MTDF-Composite-Roadmap.html)**
-
-The God Mode Composite Roadmap is the capstone artefact of the Minimum Truth Detection Framework — a complete, interactive reference mapping every major ATT&CK tactic to its **core baseline composite rule**, its **cousin technique ecosystem**, and a **full red team breakdown** of how each attack is deployed in the real world.
-
-This is not a vendor rule pack or an ATT&CK navigator heatmap. It is a living R&D document that answers three questions for every detection:
-
-- **Why is this composite shaped this way?** — the blue team rationale, minimum truth anchor, and reinforcement signal logic
-- **How does an attacker actually deploy this technique?** — CEH/OSCP level methodology, tool names, real malware families, full kill chain position
-- **What are the cousin attack surfaces?** — adjacent techniques that share substrate or intent primitives, each with their own composite and red team context
-
-### Coverage
-
-| Tactic | Core Composites | Cousin Rules |
-|---|---|---|
-| Execution | PowerShell, WMI, LOLBins | AMSI bypass, download cradles, mshta, rundll32, regsvr32 |
-| Persistence | Registry run keys, WMI subscriptions | Scheduled tasks, DLL sideloading |
-| Privilege Escalation | Process injection, token theft | UAC bypass, fodhelper chain |
-| Defense Evasion | BYOVD, EDR kill chain | Byte-flip mutation, callback deregistration |
-| Credential Access | LSASS memory dump | DCSync, Kerberoasting |
-| Discovery | Velocity sweep composite | BloodHound/LDAP enumeration |
-| Lateral Movement | Pass-the-Hash/Ticket | WMI remote execution, Impacket chains |
-| Collection | Archive staging | Pre-exfil compression patterns |
-| C2 | HTTPS beaconing | DNS tunnelling, blockchain C2 |
-| Exfiltration | Volume anomaly | Cloud storage exfil (rclone, MEGAcmd) |
-| Impact | Ransomware in-progress | VSS deletion anchor, encryption velocity |
-| ★ Novel Research | SilverFox/ValleyRAT BYOVD | EtherRAT blockchain C2, Steganographic loaders |
-
-### Novel Research Tab
-
-The roadmap includes a dedicated tab for original MTDF threat research — families with no vendor rule coverage, fully documented from kill chain through detection engineering:
-
-- **SilverFox / ValleyRAT** — 7-rule, 3-tier detection covering the complete BYOVD EDR kill chain including byte-flip hash mutation defence
-- **EtherRAT / React2Shell (CVE-2025-55182)** — Blockchain C2 detection via Ethereum RPC polling; the C2 channel is the public blockchain itself
-- **Steganographic Loader Ecosystem** — Multi-phase detection covering LSB image inspection, .NET in-memory execution, and full IR SOP
-
-```mermaid
-flowchart TD
-    A["🗺️ MTDF GOD MODE ROADMAP"] --> B["ATT&CK Ecosystem Tabs"]
-    A --> C["★ Novel Research Tab"]
-
-    B --> D["Core Baseline Composite\n🔵 Blue Team Rationale\nMinimum Truth Anchor"]
-    D --> E["Cousin Rule Cards\n🔴 Red Team Breakdowns\nTool · Malware · Kill Chain"]
-
-    C --> F["SilverFox / ValleyRAT\nBYOVD 7-Rule Chain"]
-    C --> G["EtherRAT / React2Shell\nBlockchain C2 CVE-2025-55182"]
-    C --> H["Stego Loader Ecosystem\nLSB Image Payload Delivery"]
-
-    E --> I["When · Why · How\nCEH/OSCP Level Detail\nReal Malware Families"]
-    F & G & H --> J["Original Detection Rules\nValidated · GitHub Published"]
-
-    style A fill:#0d0d14,stroke:#f59e0b,color:#f59e0b
-    style B fill:#0a1628,stroke:#00aaff,color:#00aaff
-    style C fill:#1a1000,stroke:#f59e0b,color:#f59e0b
-    style D fill:#0a1628,stroke:#00aaff,color:#7dd3fc
-    style E fill:#1a0a0e,stroke:#ff2244,color:#fca5a5
-    style I fill:#1a0a0e,stroke:#ff2244,color:#fca5a5
-    style F fill:#1a1000,stroke:#f59e0b,color:#fcd34d
-    style G fill:#1a1000,stroke:#f59e0b,color:#fcd34d
-    style H fill:#1a1000,stroke:#f59e0b,color:#fcd34d
-    style J fill:#0a1a0f,stroke:#00ff88,color:#00ff88
-```
 
 ---
 

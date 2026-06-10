@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTDF — Defense Evasion | TA0005</title>
+<link rel="stylesheet" href="mtdf.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title">
+        <span class="t-white">MTDF · </span>
+        <span class="t-red">DEFENSE EVASION</span>
+        <span class="t-dim"> · TA0005</span>
+      </div>
+      <div class="header-sub">LARGEST ATT&CK TACTIC BY SUB-TECHNIQUE COUNT · BYOVD · EDR KILL CHAINS · OBFUSCATION · LOG TAMPERING</div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-gold">TA0005</span>
+      <span class="badge badge-blue">7 ECOSYSTEMS</span>
+      <span class="badge badge-red">22+ COUSIN RULES</span>
+      <span class="badge badge-gold">BYOVD RESEARCH</span>
+    </div>
+  </div>
+</header>
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="execution.html" class="nav-link">Execution</a>
+    <a href="persistence.html" class="nav-link">Persistence</a>
+    <a href="privilege-escalation.html" class="nav-link">Privilege Escalation</a>
+    <a href="defense-evasion.html" class="nav-link active-red">Defense Evasion</a>
+    <a href="credential-access.html" class="nav-link">Credential Access</a>
+    <a href="discovery.html" class="nav-link">Discovery</a>
+    <a href="lateral-movement.html" class="nav-link">Lateral Movement</a>
+    <a href="collection.html" class="nav-link">Collection</a>
+    <a href="c2.html" class="nav-link">C2</a>
+    <a href="exfiltration.html" class="nav-link">Exfiltration</a>
+    <a href="impact.html" class="nav-link">Impact</a>
+    <a href="novel-research.html" class="nav-link active-gold">★ Novel Research</a>
+  </div>
+</nav>
+
+<div class="main">
+
+<div class="intro-box intro-box-red">
+  🛡️ DEFENSE EVASION — The largest ATT&CK tactic by sub-technique count. Attackers invest more effort here than anywhere else in the kill chain. <strong>Minimum truth doctrine:</strong> the act of obscuring, disabling, or confusing a defensive control is itself the signal — the evasion action precedes the actual malicious payload and is often catchable before damage occurs. BYOVD represents the apex of this tactic: kernel-level EDR neutralisation before payload deployment.
+</div>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-number t-red">7</div><div class="stat-label">Core Ecosystems</div></div>
+  <div class="stat-card"><div class="stat-number t-red">22+</div><div class="stat-label">Cousin Rules</div></div>
+  <div class="stat-card"><div class="stat-number t-gold">T1562</div><div class="stat-label">Primary TTP Family</div></div>
+  <div class="stat-card"><div class="stat-number t-purple">SUBSTRATE</div><div class="stat-label">Anchor Type</div></div>
+  <div class="stat-card"><div class="stat-number t-green">NOVEL</div><div class="stat-label">BYOVD Research</div></div>
+</div>
+
+<!-- COUSIN DOCTRINE CLUSTER -->
+<div style="background:var(--bg-card);border:1px solid var(--purple-border);border-radius:4px;padding:20px 24px;margin-bottom:32px;">
+  <div class="doctrine-label">⬡ DEFENSE EVASION COUSIN ECOSYSTEM CLUSTER — SHARED INTENT: NEUTRALISE DEFENSIVE VISIBILITY</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+    <div class="cn-node">BYOVD T1068</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">EDR Kill T1562.001</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Log Tamper T1070</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">AMSI Bypass T1562</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Masquerade T1036</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Obfuscation T1027</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Timestomp T1070.006</div>
+  </div>
+  <div style="font-family:var(--font-body);font-size:13px;color:var(--text-dim);font-style:italic;">All seven share the intent of reducing defender visibility. An attacker blocked from killing the EDR will attempt to blind it via log tampering. Blocked from log tampering will attempt masquerading to blend into noise. The cousin doctrine ensures the entire evasion cluster is covered, not just the most common technique.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ECOSYSTEM 1: BYOVD -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ecosystem open" id="eco-byovd">
+  <div class="eco-header" onclick="toggleEco('eco-byovd')">
+    <div class="eco-id">T1068 · T1562.001</div>
+    <div>
+      <div class="eco-title">BYOVD — Bring Your Own Vulnerable Driver</div>
+      <div class="eco-sub">DEFENSE EVASION · PRIVILEGE ESCALATION · SUBSTRATE-FIRST · MTDF NOVEL RESEARCH</div>
+    </div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">BYOVD Driver Load + EDR Kill Chain Composite — Kernel Callback Deregistration Anchor</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel + MDE · LOLDRIVER Composite</a>
+        <a href="https://attack.mitre.org/techniques/T1068/" class="link-ext" target="_blank">🔗 MITRE T1068</a>
+        <a href="https://attack.mitre.org/techniques/T1562/001/" class="link-ext" target="_blank">🔗 T1562.001</a>
+        <a href="https://loldrivers.io/" class="link-ext" target="_blank">🔗 LOLDrivers Project</a>
+        <a href="#" class="link-rd" onclick="return insertLink(this)">📄 SilverFox/ValleyRAT R&D Publication</a>
+        <a href="novel-research.html#silverfox" class="link-rd">📄 See Novel Research: SilverFox BYOVD</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM — Why BYOVD requires a dedicated composite</div>
+          <div class="panel-text">
+            BYOVD is the apex defense evasion technique: load a legitimate but vulnerable signed driver to gain kernel-level code execution, then use that ring-0 access to kill EDR processes or disable the kernel callbacks that EDR relies on for visibility.<br><br>
+            <strong>Minimum truth composite:</strong> signed driver loaded from non-system path + kernel callback deregistration attempt OR driver service creation by non-system process + immediate termination of security product process within 5 minutes.<br><br>
+            <strong>The 30-day Atomic Sentinel Layer</strong> is critical: a driver dropped and staged is caught even if execution is delayed by days — defeating the BYOVD staging pattern used by SilverFox/ValleyRAT.<br><br>
+            <strong>LOLDRIVER composite:</strong> cross-references loaded driver against MISP supply chain feed of known vulnerable driver hashes AND certificate thumbprints — immune to byte-flip hash mutation (see cousin rule).
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM — Why BYOVD is the attacker's EDR solution</div>
+          <div class="panel-text">
+            EDR products run protected processes at kernel level — user-space tools cannot terminate them. BYOVD bypasses this by exploiting a vulnerability in a signed, trusted driver to gain ring-0 (kernel) execution. From the kernel, <strong>everything is accessible</strong>: terminate any process, disable callbacks, read any memory, operate invisibly.<br><br>
+            <strong>Full SilverFox/ValleyRAT kill chain (MTDF original research):</strong><br>
+            1. Signed loader drops vulnerable driver (e.g. <code>gdrv.sys</code>, <code>iqvw64e.sys</code>, <code>zemana.sys</code>)<br>
+            2. Loader exploits driver vulnerability → kernel shellcode execution<br>
+            3. Kernel shellcode deregisters EDR callbacks (<code>PsSetCreateProcessNotifyRoutine</code>, <code>ObRegisterCallbacks</code>)<br>
+            4. EDR is completely blind — all subsequent payloads execute undetected<br>
+            5. BYOVD driver unloaded to reduce footprint<br>
+            6. ValleyRAT RAT deployed with full persistence<br><br>
+            <strong>EDR killer tools sold as-a-service:</strong> <a href="https://www.sentinelone.com/labs/spyboy-terminator-the-grim-reaper-for-edr/" class="link-ext" target="_blank">Spyboy Terminator</a>, AuKill, Terminator — purchased on criminal forums, deployed by ransomware operators with no kernel programming required.
+            <div class="tags-row">
+              <a href="novel-research.html" class="tag tag-gold">SilverFox Loader</a>
+              <a href="novel-research.html" class="tag tag-gold">ValleyRAT</a>
+              <span class="tag tag-red">BlackByte ransomware</span>
+              <a href="https://www.sentinelone.com/labs/spyboy-terminator-the-grim-reaper-for-edr/" class="tag tag-red" target="_blank">Spyboy Terminator</a>
+              <span class="tag tag-red">AuKill tool</span>
+              <a href="https://attack.mitre.org/groups/G0091/" class="tag tag-gold" target="_blank">Storm-0978</a>
+              <a href="https://attack.mitre.org/groups/G0114/" class="tag tag-gold" target="_blank">Scattered Spider</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES — BYOVD Ecosystem</div>
+      <div class="cousin-grid">
+
+        <div class="cousin-card" id="cc-byovd-kill">
+          <div class="cousin-header" onclick="toggleCousin('cc-byovd-kill')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">EDR / Security Tool Process Termination</div>
+              <div class="cousin-ttp-badge">T1562.001</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1562/001/" class="link-ext" target="_blank">🔗 T1562.001</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Defense Evasion (immediately pre-payload deployment)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Process termination of known security product names (<code>MsSense.exe</code>, <code>CSFalconService.exe</code>, <code>SentinelAgent.exe</code>, <code>CylanceSvc.exe</code>, <code>mbamservice.exe</code>) is a critical-severity event with almost no legitimate explanation. <strong>The composite correlates driver load events with subsequent security tool termination within 5 minutes</strong> — catching the BYOVD-to-EDR-kill chain as a unified event rather than two separate low-severity alerts. Alert immediately, trigger SOAR isolation response.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Standard Ransomware-as-a-Service pre-encryption sequence:</strong><br>
+                1. Achieve domain admin via credential theft<br>
+                2. Deploy EDR killer across domain via GPO or <a href="https://github.com/byt3bl33d3r/CrackMapExec" class="link-ext" target="_blank">CrackMapExec</a><br>
+                3. Confirm EDR blind across all hosts<br>
+                4. Deploy ransomware binary simultaneously<br><br>
+                <strong>The EDR killer market:</strong> Tools like AuKill (abuses Microsoft-signed drivers), Terminator (Zemana driver), and Spyboy are sold or rented — attackers without kernel programming skills purchase EDR kill capability.
+                <div class="tags-row">
+                  <span class="tag tag-red">AuKill</span>
+                  <span class="tag tag-red">Terminator</span>
+                  <a href="https://www.sentinelone.com/labs/spyboy-terminator-the-grim-reaper-for-edr/" class="tag tag-red" target="_blank">Spyboy</a>
+                  <span class="tag tag-gold">BlackCat/ALPHV</span>
+                  <span class="tag tag-gold">LockBit 3.0</span>
+                  <span class="tag tag-gold">BlackByte</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-byovd-byteflip">
+          <div class="cousin-header" onclick="toggleCousin('cc-byovd-byteflip')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">Byte-Flip Driver Mutation — Hash Evasion</div>
+              <div class="cousin-ttp-badge">T1027 · T1068</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · LOLDRIVER Composite</a>
+              <a href="novel-research.html" class="link-rd">📄 Novel Research: SilverFox Byte-Flip</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Defense Evasion (hash-based IOC bypass) → Privilege Escalation</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Attackers mutate known-vulnerable drivers by flipping bytes in non-critical sections — the hash changes, functionality preserved, all hash-based IOC blocks defeated. <strong>The MTDF LOLDRIVER composite shifts to behaviour-based substrate detection:</strong> driver signing certificate thumbprint (the vulnerable driver's cert remains valid even after byte mutation), driver import table analysis for known vulnerable API patterns, and kernel callback deregistration behaviour post-load. This is part of the original MTDF research — standard vendor detection relies entirely on hash lists which byte-flipping trivially defeats.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>The problem defenders have:</strong> <a href="https://loldrivers.io/" class="link-ext" target="_blank">LOLDrivers project</a> and MITRE publish hash lists of known vulnerable drivers. Blocking by hash is trivially bypassed: change a single byte in a padding section of the driver binary — the exploit still works, the hash is now unique and unblocked by every IOC-based control.<br><br>
+                <strong>Why MTDF catches it anyway:</strong> Certificate thumbprint detection. The driver's code-signing certificate cannot be changed without re-signing — and the vulnerable certificate is what identifies the driver family. Behaviour-based: any driver making <code>DeviceIoControl</code> calls that result in kernel callback deregistration is flagged regardless of hash.
+                <div class="tags-row">
+                  <a href="novel-research.html" class="tag tag-gold">SilverFox loader (MTDF research)</a>
+                  <span class="tag tag-red">Custom BYOVD tooling</span>
+                  <a href="https://attack.mitre.org/groups/G0091/" class="tag tag-gold" target="_blank">Storm-0978</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-byovd-loldrv">
+          <div class="cousin-header" onclick="toggleCousin('cc-byovd-loldrv')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">LOLDRIVER Master Composite — MISP Supply Chain Integration</div>
+              <div class="cousin-ttp-badge">T1068 · Supply Chain</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · LOLDRIVER KQL Master Rule</a>
+              <a href="https://loldrivers.io/" class="link-ext" target="_blank">🔗 LOLDrivers.io</a>
+              <a href="https://github.com/azdabat" class="link-rd" target="_blank">📄 MTDF MISP Supply Chain Lab</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Defense Evasion → Privilege Escalation (all BYOVD variants)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">The LOLDRIVER master composite is a tiered rule consolidating multiple detection layers: (1) hash-based matching against MISP supply chain feed of known vulnerable drivers, (2) certificate thumbprint matching defeating byte-flip evasion, (3) driver load path anomaly (non-system directory), (4) driver service creation by non-system process, (5) post-load kernel behaviour. The MISP integration ensures the IOC feed updates automatically — new vulnerable drivers discovered by the community are immediately reflected in detection without manual rule updates.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Why supply chain integration matters:</strong> New vulnerable drivers are discovered continuously — <a href="https://loldrivers.io/" class="link-ext" target="_blank">LOLDrivers.io</a> lists hundreds. Without automated feed integration, the defender is always reactive. The MTDF MISP lab closes this gap: threat intelligence production feeds directly into composite rule generation, creating a live defensive posture rather than a static ruleset.
+                <div class="tags-row">
+                  <span class="tag tag-blue">MISP Integration</span>
+                  <span class="tag tag-blue">STIX/TAXII Feed</span>
+                  <span class="tag tag-blue">Auto-updating IOC</span>
+                  <a href="https://loldrivers.io/" class="tag tag-red" target="_blank">LOLDrivers Feed</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ECOSYSTEM 2: Process Injection -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ecosystem" id="eco-inject">
+  <div class="eco-header" onclick="toggleEco('eco-inject')">
+    <div class="eco-id">T1055</div>
+    <div>
+      <div class="eco-title">Process Injection — Execute Inside Legitimate Process</div>
+      <div class="eco-sub">DEFENSE EVASION · PRIVILEGE ESCALATION · SUBSTRATE-FIRST DETECTION</div>
+    </div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="doctrine-cluster">
+      <div class="doctrine-label">⬡ INJECTION COUSIN CLUSTER — SHARED INTENT: EXECUTE CODE INSIDE LEGITIMATE PROCESS MEMORY</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
+        <div class="cn-node">Classic Inject T1055.001</div><div class="cn-arrow">⟷</div>
+        <div class="cn-node">Process Hollow T1055.012</div><div class="cn-arrow">⟷</div>
+        <div class="cn-node">Thread Hijack T1055.003</div><div class="cn-arrow">⟷</div>
+        <div class="cn-node">APC Inject T1055.004</div><div class="cn-arrow">⟷</div>
+        <div class="cn-node">PPID Spoof T1134.004</div><div class="cn-arrow">⟷</div>
+        <div class="cn-node">DLL Inject T1055.001</div>
+      </div>
+      <div style="font-family:var(--font-body);font-size:13px;color:var(--text-dim);font-style:italic;">All variants achieve the same outcome: malicious code executing inside a trusted process. The substrate-first minimum truth — OpenProcess + memory write + remote thread/APC queue — is structurally similar across all variants despite different API paths.</div>
+    </div>
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">Cross-Process Memory Write + Remote Thread Creation Substrate Anchor</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · MDE DeviceEvents</a>
+        <a href="https://attack.mitre.org/techniques/T1055/" class="link-ext" target="_blank">🔗 MITRE T1055</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">
+            Process injection is the substrate-first detection problem: malicious code executing inside another process has no visible command line. The <strong>minimum truth is the API call sequence</strong>: <code>OpenProcess → VirtualAllocEx → WriteProcessMemory → CreateRemoteThread</code>. MDE DeviceEvents surfaces these as individual telemetry events — the composite joins them on source/target PID within a 30-second window.<br><br>
+            <strong>High-fidelity reinforcement:</strong> target process is a system process (<code>lsass.exe</code>, <code>svchost.exe</code>, <code>explorer.exe</code>), source process has no legitimate cross-process reason to interact with target, or source process was itself spawned from an anomalous parent (the injection chain starts from the original execution event).
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text">
+            <strong>Why inject?</strong> Code running inside <code>explorer.exe</code> or <code>svchost.exe</code> appears to come from a trusted, signed process. Network connections from explorer look normal. AV/EDR that analyses process behaviour may not inspect the injected thread separately.<br><br>
+            <strong>OSCP-level chain (Cobalt Strike):</strong><br>
+            1. Initial beacon running as standard user<br>
+            2. <code>inject [PID] x64 [listener]</code> → Cobalt Strike allocates memory in <code>explorer.exe</code>, writes shellcode, creates remote thread<br>
+            3. Second beacon now runs inside explorer.exe — all subsequent C2 traffic attributed to trusted process<br>
+            4. <code>steal_token [PID]</code> — impersonate higher-privileged user token from memory<br><br>
+            Modern variants use <strong>direct syscalls</strong> (<a href="https://github.com/jthuraisamy/SysWhispers2" class="link-ext" target="_blank">SysWhispers2</a>) to bypass EDR API hooks — calling kernel functions directly without going through <code>ntdll.dll</code> where EDR hooks are placed.
+            <div class="tags-row">
+              <span class="tag tag-red">Cobalt Strike inject</span>
+              <span class="tag tag-red">Metasploit migrate</span>
+              <a href="https://github.com/TheWover/donut" class="tag tag-red" target="_blank">Donut shellcode</a>
+              <a href="https://github.com/jthuraisamy/SysWhispers2" class="tag tag-red" target="_blank">SysWhispers2</a>
+              <a href="https://attack.mitre.org/groups/G0007/" class="tag tag-gold" target="_blank">APT28</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES — Injection Ecosystem</div>
+      <div class="cousin-grid">
+
+        <div class="cousin-card" id="cc-inject-hollow">
+          <div class="cousin-header" onclick="toggleCousin('cc-inject-hollow')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">Process Hollowing — Legitimate Process Shell</div>
+              <div class="cousin-ttp-badge">T1055.012</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1055/012/" class="link-ext" target="_blank">🔗 T1055.012</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Defense Evasion → Execution (legitimate process shell)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Process hollowing creates a legitimate process in suspended state, unmaps its memory, and replaces it with malicious code before resuming. <strong>Minimum truth:</strong> <code>CreateProcess</code> with <code>CREATE_SUSPENDED</code> flag → <code>NtUnmapViewOfSection</code> → <code>VirtualAllocEx</code> → <code>WriteProcessMemory</code> → <code>ResumeThread</code>. The resulting process has a legitimate name and path but malicious executable in memory — PID and path match a trusted binary while the memory image does not.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Why hollowing over standard injection:</strong> The process name, path, and parent all match a legitimate Windows binary (e.g. <code>svchost.exe</code>). Task Manager shows a real svchost. The malicious code is only visible via memory forensics — the on-disk binary is legitimate, only the runtime memory image is replaced.<br><br>
+                Used heavily by banking trojans (Dridex, TrickBot) and sophisticated RATs. The hollowed process can be a child of a legitimate parent, making the process tree appear entirely normal.
+                <div class="tags-row">
+                  <span class="tag tag-red">Dridex</span>
+                  <span class="tag tag-red">TrickBot</span>
+                  <span class="tag tag-red">Ursnif</span>
+                  <a href="https://attack.mitre.org/groups/G0046/" class="tag tag-gold" target="_blank">FIN7</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-inject-apc">
+          <div class="cousin-header" onclick="toggleCousin('cc-inject-apc')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">APC Injection / Early Bird</div>
+              <div class="cousin-ttp-badge">T1055.004</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1055/004/" class="link-ext" target="_blank">🔗 T1055.004</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Defense Evasion (API hook bypass variant)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">APC (Asynchronous Procedure Call) injection queues shellcode to execute in the context of a thread in another process when that thread enters an alertable state. <strong>Early Bird variant:</strong> APC queued before the process's main thread executes — runs before most EDR hooks are established. Minimum truth: <code>NtQueueApcThread</code> or <code>QueueUserAPC</code> calls from an unexpected source process to a target process thread.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Why APC/Early Bird:</strong> Bypasses EDR user-mode hooks because the shellcode executes before EDR's hook initialisation completes (Early Bird variant). Does not use <code>CreateRemoteThread</code> — evades detection rules that specifically look for that API.<br><br>
+                Used by <a href="https://www.cybereason.com/blog/new-malware-arsenal-abusing-cloud-platforms-in-middle-east-targeted-attacks" class="link-ext" target="_blank">APT34</a> and Cobalt Strike's <code>spawnto</code> technique.
+                <div class="tags-row">
+                  <span class="tag tag-red">Cobalt Strike spawnto</span>
+                  <span class="tag tag-red">Early Bird PoC</span>
+                  <a href="https://attack.mitre.org/groups/G0049/" class="tag tag-gold" target="_blank">APT34</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-inject-ppid">
+          <div class="cousin-header" onclick="toggleCousin('cc-inject-ppid')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">PPID Spoofing — Parent Process Masquerade</div>
+              <div class="cousin-ttp-badge">T1134.004</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1134/004/" class="link-ext" target="_blank">🔗 T1134.004</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Defense Evasion (process tree manipulation)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">PPID spoofing creates a child process with a falsified parent PID — making <code>cmd.exe</code> spawned by malware appear as a child of <code>explorer.exe</code> in the process tree. <strong>Detection:</strong> process tree inconsistency — the stated PPID no longer exists, the process creation time is earlier than the stated parent's creation time, or the process session ID doesn't match the parent's session ID. MDE's process tree can surface these inconsistencies.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                Defeats detection rules based on parent-child process relationships (e.g. "Word spawning PowerShell"). By spoofing explorer.exe as the parent of the malicious process, the detection rule sees <code>explorer → powershell</code> which may be whitelisted, rather than <code>winword → powershell</code> which is highly suspicious.<br><br>
+                <strong>Tool:</strong> <a href="https://github.com/fortra/nanodump" class="link-ext" target="_blank">SelectMyParent</a>, Cobalt Strike's <code>ppid</code> setting in malleable profiles.
+                <div class="tags-row">
+                  <span class="tag tag-red">Cobalt Strike PPID</span>
+                  <span class="tag tag-red">SelectMyParent</span>
+                  <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ECOSYSTEM 3: Obfuscation -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ecosystem" id="eco-obfusc">
+  <div class="eco-header" onclick="toggleEco('eco-obfusc')">
+    <div class="eco-id">T1027 · T1140</div>
+    <div>
+      <div class="eco-title">Obfuscation & Deobfuscation/Decode</div>
+      <div class="eco-sub">DEFENSE EVASION · OBFUSCATED FILES OR INFORMATION</div>
+    </div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">High-Entropy Payload Execution + Decode Operation Anchor</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel + MDE</a>
+        <a href="https://attack.mitre.org/techniques/T1027/" class="link-ext" target="_blank">🔗 MITRE T1027</a>
+        <a href="https://attack.mitre.org/techniques/T1140/" class="link-ext" target="_blank">🔗 T1140 Deobfuscate/Decode</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">
+            Obfuscation detection targets the <strong>deobfuscation action</strong>, not the obfuscated content. The minimum truth: a process performing a decode operation (base64, XOR, RC4) on a blob that is then immediately written to disk or executed in memory. Script Block Logging captures PowerShell deobfuscation at runtime — the deobfuscated content is logged even if the script itself was encoded. Reinforce with: output entropy analysis, decode-to-execute timing (&lt;5 seconds), decode operation in TEMP directory.
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text">
+            <strong>Obfuscation layers serve two purposes:</strong> bypassing static signature detection AND obscuring intent from log inspection. Multiple layers are stacked: base64 → XOR → string substitution → character concatenation. <a href="https://github.com/danielbohannon/Invoke-Obfuscation" class="link-ext" target="_blank">Invoke-Obfuscation</a> generates thousands of functionally equivalent but syntactically unique PowerShell variants — each has a unique hash, none match signatures.<br><br>
+            <strong>Steganographic variant (MTDF original research):</strong> payload encoded in LSB of image file pixels — see <a href="novel-research.html" class="link-rd">Novel Research: Stego Loader Ecosystem</a>.
+            <div class="tags-row">
+              <a href="https://github.com/danielbohannon/Invoke-Obfuscation" class="tag tag-red" target="_blank">Invoke-Obfuscation</a>
+              <span class="tag tag-red">Chameleon PS obfuscator</span>
+              <span class="tag tag-red">AMSI bypass variants</span>
+              <a href="novel-research.html" class="tag tag-gold">Stego Loaders (MTDF)</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+      <div class="cousin-grid">
+
+        <div class="cousin-card" id="cc-obf-stealth">
+          <div class="cousin-header" onclick="toggleCousin('cc-obf-stealth')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">Steganographic Payload Concealment</div>
+              <div class="cousin-ttp-badge">T1027.003</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1027/003/" class="link-ext" target="_blank">🔗 T1027.003</a>
+              <a href="novel-research.html" class="link-rd">📄 Novel Research: Stego Loader Ecosystem</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Defense Evasion → Execution (payload hidden in image file)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Payload encoded in LSB of image pixel data — the image is valid, displays normally, passes all AV/DLP inspection. <strong>Detection: anomalous behaviour of the extraction script</strong> — a scripting engine opening an image file and then executing the parsed content. No signature possible on the image itself. See <a href="novel-research.html">MTDF Novel Research: Stego Loader Ecosystem</a> for the full multi-phase detection suite.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                Used by <a href="https://attack.mitre.org/groups/G0049/" class="link-ext" target="_blank">APT34 (OilRig)</a>, <a href="https://attack.mitre.org/groups/G0010/" class="link-ext" target="_blank">Turla</a>, and the Witchetty threat actor (Stegmap technique). Payload never exists on disk as a recognisable artifact — only inside the pixel data of a PNG or BMP file that appears to be a normal image.
+                <div class="tags-row">
+                  <span class="tag tag-red">Witchetty/Stegmap</span>
+                  <span class="tag tag-red">ZLoader stego variant</span>
+                  <a href="https://attack.mitre.org/groups/G0049/" class="tag tag-gold" target="_blank">APT34</a>
+                  <a href="https://attack.mitre.org/groups/G0010/" class="tag tag-gold" target="_blank">Turla</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ECOSYSTEM 4: Log Tampering / Indicator Removal -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ecosystem" id="eco-logs">
+  <div class="eco-header" onclick="toggleEco('eco-logs')">
+    <div class="eco-id">T1070 · T1070.001 · T1070.004</div>
+    <div>
+      <div class="eco-title">Indicator Removal — Log Tampering & Evidence Destruction</div>
+      <div class="eco-sub">DEFENSE EVASION · INDICATOR REMOVAL ON HOST</div>
+    </div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">Windows Event Log Clear / Modification Anchor</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel (Event ID 1102 / 104)</a>
+        <a href="https://attack.mitre.org/techniques/T1070/001/" class="link-ext" target="_blank">🔗 T1070.001 Clear Windows Event Logs</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">
+            Log clearing events are high-fidelity signals with very few legitimate explanations outside scheduled maintenance windows. <strong>Event ID 1102</strong> (Security log cleared) and <strong>Event ID 104</strong> (System log cleared) should alert immediately. The minimum truth composite also covers: wevtutil.exe clearing specific logs (<code>wevtutil cl Security</code>), PowerShell <code>Clear-EventLog</code> cmdlet, and direct log file deletion/modification.<br><br>
+            <strong>Cousin coverage:</strong> attackers who cannot clear logs will attempt to flood them with noise (log flooding as cousin) or disable auditing entirely (T1562.002) — both covered in this ecosystem.
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text">
+            <strong>Kill chain position:</strong> Post-exploitation cleanup, typically after lateral movement objectives are complete and before the attacker prepares to exit or when they realise they may have been detected.<br><br>
+            <strong>Why attackers clear logs:</strong> Remove evidence of lateral movement (4624 logon events), privilege escalation (4672 special privileges), process execution (4688), and LSASS access (4656). A clean Security log forces investigators to rely on EDR telemetry and network logs instead.<br><br>
+            <strong>Ransomware standard:</strong> Clearing logs is part of most ransomware operator playbooks — executed alongside VSS deletion before encryption to hamper incident response.
+            <div class="tags-row">
+              <span class="tag tag-red">wevtutil cl</span>
+              <span class="tag tag-red">Clear-EventLog PS</span>
+              <span class="tag tag-red">Most ransomware operators</span>
+              <a href="https://attack.mitre.org/groups/G0034/" class="tag tag-gold" target="_blank">Sandworm</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+      <div class="cousin-grid">
+
+        <div class="cousin-card" id="cc-logs-audit">
+          <div class="cousin-header" onclick="toggleCousin('cc-logs-audit')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">Audit Policy Disable / Modify</div>
+              <div class="cousin-ttp-badge">T1562.002</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1562/002/" class="link-ext" target="_blank">🔗 T1562.002</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Defense Evasion (prospective — before malicious action)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Disabling audit policy prevents events from being generated — subtler than clearing logs because there is no evidence of the change unless audit policy modification itself is audited (Event ID 4719). Monitor for <code>auditpol.exe /set /category:* /success:disable /failure:disable</code>, Group Policy modifications to audit settings, and registry changes to <code>HKLM\SYSTEM\CurrentControlSet\Services\EventLog</code>.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Prospective vs retrospective evasion:</strong> Log clearing is retrospective (removes existing evidence). Audit disable is prospective — stop generating evidence for future actions. Preferred by patient APT actors who plan to remain in the environment for extended periods and need sustained reduced visibility rather than periodic cleanup.
+                <div class="tags-row">
+                  <span class="tag tag-red">auditpol.exe abuse</span>
+                  <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29</a>
+                  <a href="https://attack.mitre.org/groups/G0010/" class="tag tag-gold" target="_blank">Turla</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-logs-timestomp">
+          <div class="cousin-header" onclick="toggleCousin('cc-logs-timestomp')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">Timestomping — File Metadata Manipulation</div>
+              <div class="cousin-ttp-badge">T1070.006</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1070/006/" class="link-ext" target="_blank">🔗 T1070.006</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Defense Evasion (forensic anti-analysis)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Timestomping modifies file MACE (Modified/Accessed/Created/Entry) timestamps to blend malicious files into the legitimate file landscape or confuse incident response timeline reconstruction. <strong>Detection:</strong> NTFS $STANDARD_INFORMATION and $FILE_NAME timestamp discrepancy — these are separate NTFS attributes and timestomping tools typically only modify $STANDARD_INFORMATION, leaving $FILE_NAME intact. MDE surfaces timestamp anomalies in file creation events.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                Used primarily by APT actors who plan for long-term access and forensic investigation resistance. Files backdated to match system file creation dates blend into the file landscape — a dropped DLL with a timestamp of 2019 appears less suspicious than one created at 3am today.<br><br>
+                <strong>Tool:</strong> Metasploit <code>timestomp</code>, Cobalt Strike's file attribute modification, custom PowerShell using <code>[System.IO.File]::SetCreationTime()</code>.
+                <div class="tags-row">
+                  <span class="tag tag-red">Metasploit timestomp</span>
+                  <span class="tag tag-red">Cobalt Strike file ops</span>
+                  <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29</a>
+                  <a href="https://attack.mitre.org/groups/G0010/" class="tag tag-gold" target="_blank">Turla</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ECOSYSTEM 5: Masquerading -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ecosystem" id="eco-masq">
+  <div class="eco-header" onclick="toggleEco('eco-masq')">
+    <div class="eco-id">T1036 · T1036.003 · T1036.005</div>
+    <div>
+      <div class="eco-title">Masquerading — Blend Into Legitimate Processes</div>
+      <div class="eco-sub">DEFENSE EVASION · MASQUERADING · NAME / PATH SPOOFING</div>
+    </div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">Process Name / Path Mismatch Anchor — Typosquat and Path Anomaly</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel + MDE</a>
+        <a href="https://attack.mitre.org/techniques/T1036/" class="link-ext" target="_blank">🔗 MITRE T1036</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">
+            Masquerading exploits analyst trust in familiar process names. <strong>Minimum truth:</strong> a process named like a known system binary but executing from a non-standard path (e.g. <code>svchost.exe</code> running from <code>C:\Users\Public\</code>), OR a process name that is a typosquat of a system binary (<code>scvhost.exe</code>, <code>lsass_.exe</code>, <code>svch0st.exe</code>). The composite cross-references process name against expected execution paths from a whitelist of known-good binaries.<br><br>
+            <strong>Reinforcement:</strong> process lacks the digital signature of the binary it is impersonating, the process icon/version information does not match, or the process is spawning from an unexpected parent.
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text">
+            <strong>Why masquerade:</strong> Analysts monitoring process lists for anomalies will scan past familiar names. A malicious binary named <code>svchost.exe</code> in the wrong directory will only be caught by path verification — which many analyst workflows skip.<br><br>
+            <strong>Common masquerade targets:</strong> <code>svchost.exe</code>, <code>lsass.exe</code>, <code>csrss.exe</code>, <code>explorer.exe</code>, <code>winlogon.exe</code> — all expected to run as SYSTEM, all expected to have multiple instances, all trusted enough to be mentally skipped by tired analysts.<br><br>
+            Also used for C2 malware naming: <code>MicrosoftEdgeUpdate.exe</code>, <code>GoogleUpdateHelper.exe</code> in scheduled tasks or startup entries.
+            <div class="tags-row">
+              <span class="tag tag-red">PlugX masquerade</span>
+              <span class="tag tag-red">Cobalt Strike process name</span>
+              <a href="https://attack.mitre.org/groups/G0027/" class="tag tag-gold" target="_blank">Threat Group-3390</a>
+              <a href="https://attack.mitre.org/groups/G0010/" class="tag tag-gold" target="_blank">Turla</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main -->
+
+<footer class="site-footer">
+  ALA DABAT · MTDF · DEFENSE EVASION TA0005 · <a href="execution.html" style="color:var(--blue-primary);text-decoration:none;">← Execution</a> · <a href="credential-access.html" style="color:var(--blue-primary);text-decoration:none;">Credential Access →</a><br>
+  <span class="t-red">RED TEAM CONTENT</span> — All methodology at CEH/OSCP/public disclosure level.
+</footer>
+
+<a href="#" class="scroll-top">↑</a>
+<script src="mtdf.js"></script>
+</body>
+</html>

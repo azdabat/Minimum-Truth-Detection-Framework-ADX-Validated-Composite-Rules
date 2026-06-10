@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTDF — Exfiltration | TA0010</title>
+<link rel="stylesheet" href="mtdf.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title"><span class="t-white">MTDF · </span><span class="t-red">EXFILTRATION</span><span class="t-dim"> · TA0010</span></div>
+      <div class="header-sub">DATA LEAVING THE ENVIRONMENT · VOLUME ANOMALY · CLOUD STORAGE EXFIL · DNS EXFIL · THROTTLED TRANSFER</div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-gold">TA0010</span>
+      <span class="badge badge-blue">4 ECOSYSTEMS</span>
+      <span class="badge badge-red">10+ COUSIN RULES</span>
+    </div>
+  </div>
+</header>
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="execution.html" class="nav-link">Execution</a>
+    <a href="persistence.html" class="nav-link">Persistence</a>
+    <a href="privilege-escalation.html" class="nav-link">Privilege Escalation</a>
+    <a href="defense-evasion.html" class="nav-link">Defense Evasion</a>
+    <a href="credential-access.html" class="nav-link">Credential Access</a>
+    <a href="discovery.html" class="nav-link">Discovery</a>
+    <a href="lateral-movement.html" class="nav-link">Lateral Movement</a>
+    <a href="collection.html" class="nav-link">Collection</a>
+    <a href="c2.html" class="nav-link">C2</a>
+    <a href="exfiltration.html" class="nav-link active-red">Exfiltration</a>
+    <a href="impact.html" class="nav-link">Impact</a>
+    <a href="novel-research.html" class="nav-link active-gold">★ Novel Research</a>
+  </div>
+</nav>
+<div class="main">
+
+<div class="intro-box intro-box-red">
+  📤 EXFILTRATION — The objective of most financially-motivated intrusions. <strong>Minimum truth doctrine:</strong> unusual volume of outbound data to a non-corporate destination, or data leaving via a protocol not normally used for outbound transfer. The cousin doctrine maps all exfil substrates — block cloud storage exfil and the attacker uses DNS exfiltration. Block large transfers and they throttle to stay under volume thresholds. Detection must cover the intent: data leaving unauthorised.
+</div>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-number t-red">4</div><div class="stat-label">Core Ecosystems</div></div>
+  <div class="stat-card"><div class="stat-number t-red">10+</div><div class="stat-label">Cousin Rules</div></div>
+  <div class="stat-card"><div class="stat-number t-gold">T1048</div><div class="stat-label">Primary TTP</div></div>
+</div>
+
+<div style="background:var(--bg-card);border:1px solid var(--purple-border);border-radius:4px;padding:20px 24px;margin-bottom:32px;">
+  <div class="doctrine-label">⬡ EXFILTRATION COUSIN CLUSTER — SHARED INTENT: MOVE STOLEN DATA TO ATTACKER-CONTROLLED INFRASTRUCTURE</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+    <div class="cn-node">Cloud Storage T1567.002</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Over C2 T1041</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Alt Protocol T1048</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">DNS Exfil T1048.003</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Scheduled T1029</div>
+  </div>
+  <div style="font-family:var(--font-body);font-size:13px;color:var(--text-dim);font-style:italic;">All five move data to attacker-controlled storage via different substrates. Block cloud storage and the attacker exfiltrates via DNS. Block large transfers and they throttle. The intent composite anchors on data volume anomaly from the host regardless of the destination or protocol.</div>
+</div>
+
+<!-- ECOSYSTEM 1: Volume Anomaly -->
+<div class="ecosystem open" id="eco-exfil-vol">
+  <div class="eco-header" onclick="toggleEco('eco-exfil-vol')">
+    <div class="eco-id">T1048 · T1567</div>
+    <div><div class="eco-title">Exfiltration Over Alternative Protocol / Cloud Storage</div><div class="eco-sub">EXFILTRATION · VOLUME ANOMALY · STATISTICAL DETECTION</div></div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">Outbound Data Volume Anomaly + Destination Reputation Composite</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel Network Analytics</a>
+        <a href="https://attack.mitre.org/techniques/T1048/" class="link-ext" target="_blank">🔗 T1048 Exfiltration Over Alt Protocol</a>
+        <a href="https://attack.mitre.org/techniques/T1567/002/" class="link-ext" target="_blank">🔗 T1567.002 Cloud Storage</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">Volume-based exfil detection anchors on statistical deviation from baseline: a host transferring &gt;3 standard deviations from its 30-day average outbound volume in a single session. <strong>Reinforcement:</strong> destination is a file-sharing or cloud storage domain (mega.nz, anonfiles, gofile.io, transfer.sh, file.io), destination domain is &lt;30 days old, transfer occurs outside business hours, process making the transfer is not a known corporate sync client.<br><br>The 30-day baseline is critical — without it, volume thresholds produce excessive false positives for legitimate large transfers.</div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text"><strong>Double-extortion exfil pattern (BlackCat/Cl0p/LockBit):</strong> Before encrypting, operators exfiltrate 50-500GB as proof and leverage. Tools: <a href="https://rclone.org/" class="link-ext" target="_blank">rclone</a> syncs to cloud storage, MEGAcmd uploads directly to MEGA, custom HTTPS upload scripts.<br><br><strong>Throttled exfil (evasion):</strong> Mature operators throttle transfer speed to stay under DLP volume thresholds — exfiltrating over 48-72 hours at 1-5 Mbps rather than a single high-volume burst. The per-hour volume stays below detection thresholds; only cumulative multi-day analysis reveals the pattern.
+            <div class="tags-row">
+              <a href="https://rclone.org/" class="tag tag-red" target="_blank">rclone</a>
+              <span class="tag tag-red">MEGAcmd</span><span class="tag tag-red">WinSCP</span>
+              <span class="tag tag-gold">BlackCat/ALPHV</span><span class="tag tag-gold">Cl0p</span>
+              <a href="https://attack.mitre.org/groups/G0046/" class="tag tag-gold" target="_blank">FIN7</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+      <div class="cousin-grid">
+
+        <div class="cousin-card" id="cc-exfil-dns">
+          <div class="cousin-header" onclick="toggleCousin('cc-exfil-dns')">
+            <div class="cousin-icon">🔴</div>
+            <div><div class="cousin-name">DNS Exfiltration — Data in Query Labels</div><div class="cousin-ttp-badge">T1048.003</div></div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1048/003/" class="link-ext" target="_blank">🔗 T1048.003</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Exfiltration (bypasses all HTTP/HTTPS DLP controls)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Data encoded in DNS query subdomain labels — each query carries ~60 bytes of encoded data. Slow but impossible to block without breaking DNS resolution. <strong>Detection:</strong> anomalous DNS query volume to a single domain (&gt;100 queries/minute), high entropy in subdomain labels, consistent query length across all queries to the same domain (automated encoding pattern), TXT record request volume anomaly. Requires DNS logging — many organisations log no DNS traffic at all.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text"><strong>Use case:</strong> Air-gapped or heavily DLP-controlled environments where HTTPS is inspected. Every file can be encoded in base32 and transmitted as DNS queries — rate limited only by DNS resolver performance. <a href="https://github.com/iagox86/dnscat2" class="link-ext" target="_blank">DNScat2</a> supports both C2 and file transfer over DNS.
+                <div class="tags-row">
+                  <a href="https://github.com/iagox86/dnscat2" class="tag tag-red" target="_blank">DNScat2</a>
+                  <span class="tag tag-red">iodine file transfer</span>
+                  <a href="https://attack.mitre.org/groups/G0010/" class="tag tag-gold" target="_blank">Turla</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-exfil-email">
+          <div class="cousin-header" onclick="toggleCousin('cc-exfil-email')">
+            <div class="cousin-icon">🔴</div>
+            <div><div class="cousin-name">Exfiltration via Email / Webmail</div><div class="cousin-ttp-badge">T1048 · T1567</div></div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Exfiltration (blends into legitimate email traffic)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Email exfiltration uses the corporate email infrastructure or external webmail against itself. <strong>Detection:</strong> anomalous outbound email volume from a single account (especially outside business hours), emails to personal accounts or free webmail providers with large attachments, emails to newly registered domains, Exchange/O365 email forwarding rules created to external addresses (T1114.003 — auto-forward to attacker-controlled mailbox).</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text"><strong>Auto-forward rule:</strong> With access to a compromised mailbox, create an inbox rule forwarding all incoming mail to an attacker-controlled address. The rule persists — even if the initial access is remediated, mail continues to be forwarded. Invisible to the victim. Used by <a href="https://attack.mitre.org/groups/G0016/" class="link-ext" target="_blank">APT29</a> against O365 environments for intelligence collection.
+                <div class="tags-row">
+                  <span class="tag tag-red">O365 forwarding rule</span>
+                  <span class="tag tag-red">Exchange transport rule</span>
+                  <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29 NOBELIUM</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<footer class="site-footer">
+  ALA DABAT · MTDF · EXFILTRATION TA0010 · <a href="c2.html" style="color:var(--blue-primary);text-decoration:none;">← C2</a> · <a href="impact.html" style="color:var(--blue-primary);text-decoration:none;">Impact →</a>
+</footer>
+<a href="#" class="scroll-top">↑</a>
+<script src="mtdf.js"></script>
+</body>
+</html>

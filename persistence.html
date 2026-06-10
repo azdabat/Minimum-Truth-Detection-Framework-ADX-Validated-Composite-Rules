@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTDF — Persistence | TA0003</title>
+<link rel="stylesheet" href="mtdf.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title"><span class="t-white">MTDF · </span><span class="t-blue">PERSISTENCE</span><span class="t-dim"> · TA0003</span></div>
+      <div class="header-sub">MECHANISMS THAT SURVIVE REBOOTS · REGISTRY · WMI SUBSCRIPTIONS · DLL SIDELOADING · BOOT MODIFICATION</div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-gold">TA0003</span>
+      <span class="badge badge-blue">6 ECOSYSTEMS</span>
+      <span class="badge badge-red">18+ COUSIN RULES</span>
+    </div>
+  </div>
+</header>
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="execution.html" class="nav-link">Execution</a>
+    <a href="persistence.html" class="nav-link active">Persistence</a>
+    <a href="privilege-escalation.html" class="nav-link">Privilege Escalation</a>
+    <a href="defense-evasion.html" class="nav-link">Defense Evasion</a>
+    <a href="credential-access.html" class="nav-link">Credential Access</a>
+    <a href="discovery.html" class="nav-link">Discovery</a>
+    <a href="lateral-movement.html" class="nav-link">Lateral Movement</a>
+    <a href="collection.html" class="nav-link">Collection</a>
+    <a href="c2.html" class="nav-link">C2</a>
+    <a href="exfiltration.html" class="nav-link">Exfiltration</a>
+    <a href="impact.html" class="nav-link">Impact</a>
+    <a href="novel-research.html" class="nav-link active-gold">★ Novel Research</a>
+  </div>
+</nav>
+<div class="main">
+
+<div class="intro-box intro-box-blue">
+  🔒 PERSISTENCE — Mechanisms that survive reboots, user logoff, AV scans, and some EDR wipes. <strong>Minimum truth doctrine:</strong> something modifies a startup mechanism. The <strong>30-day Atomic Sentinel Layer is critical here</strong> — persistence primitives are created hours or days before activation, and temporal deception is common. The cousin doctrine maps all autostart substrates: block a run key and the attacker moves to a scheduled task; block that and they use WMI subscription or DLL sideloading.
+</div>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-number t-blue">6</div><div class="stat-label">Core Ecosystems</div></div>
+  <div class="stat-card"><div class="stat-number t-red">18+</div><div class="stat-label">Cousin Rules</div></div>
+  <div class="stat-card"><div class="stat-number t-gold">T1547</div><div class="stat-label">Primary TTP Family</div></div>
+  <div class="stat-card"><div class="stat-number t-green">30-DAY</div><div class="stat-label">Primitive Index</div></div>
+</div>
+
+<div style="background:var(--bg-card);border:1px solid var(--purple-border);border-radius:4px;padding:20px 24px;margin-bottom:32px;">
+  <div class="doctrine-label">⬡ PERSISTENCE COUSIN CLUSTER — SHARED INTENT: SURVIVE REBOOT WITHOUT EXPLICIT ADMIN RE-EXECUTION</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+    <div class="cn-node">Run Keys T1547.001</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Sched Tasks T1053.005</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">WMI Subscription T1546.003</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">DLL Sideload T1574.001</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Services T1543.003</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Startup Folder T1547.001</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">COM Hijack T1546.015</div>
+  </div>
+  <div style="font-family:var(--font-body);font-size:13px;color:var(--text-dim);font-style:italic;">Block run keys → attacker uses scheduled tasks. Block tasks → uses WMI subscription. Block WMI → uses DLL sideloading or COM hijack. Every autostart substrate must be monitored as part of the cousin ecosystem.</div>
+</div>
+
+<!-- ECOSYSTEM 1: Registry Run Keys -->
+<div class="ecosystem open" id="eco-runkey">
+  <div class="eco-header" onclick="toggleEco('eco-runkey')">
+    <div class="eco-id">T1547.001</div>
+    <div><div class="eco-title">Registry Run Keys / Startup Folder</div><div class="eco-sub">PERSISTENCE · BOOT/LOGON AUTOSTART EXECUTION</div></div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">Run Key Write — Non-System Process + Anomalous Executable Path Anchor</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel + MDE</a>
+        <a href="https://attack.mitre.org/techniques/T1547/001/" class="link-ext" target="_blank">🔗 MITRE T1547.001</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">Run key writes are noisy — legitimate software uses them constantly. The composite anchors on <strong>path anomaly</strong>: run key values pointing to executables in TEMP, AppData, ProgramData, or user-writable paths. Key insight: combine the registry write event with the writing process. If a user-space process (Word, browser, non-IT tool) writes to HKCU/HKLM Run, that is structurally suspicious regardless of payload.<br><br><strong>Reinforcement:</strong> the pointed-to executable was created &lt;60 seconds before the registry write, or has a double extension (.pdf.exe), or the run key name mimics a legitimate software entry.</div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text">Run keys are commodity-malware standard. Used by virtually every RAT, banking trojan, and ransomware dropper as primary or backup persistence.<br><br><strong>Chain:</strong> Dropper lands payload in AppData → writes <code>HKCU\Software\Microsoft\Windows\CurrentVersion\Run\[random] = C:\Users\[user]\AppData\Roaming\[random].exe</code> → persists across reboots without admin rights.<br><br><strong>Evasion:</strong> naming the key after legitimate software (AdobeUpdate, ChromeHelper), using environment variable expansion (<code>%APPDATA%\payload.exe</code>) to obscure the full path.
+            <div class="tags-row">
+              <span class="tag tag-red">Remcos RAT</span><span class="tag tag-red">AgentTesla</span><span class="tag tag-red">Emotet</span><span class="tag tag-red">Qakbot</span>
+              <a href="https://attack.mitre.org/groups/G0092/" class="tag tag-gold" target="_blank">TA505</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+      <div class="cousin-grid">
+
+        <div class="cousin-card" id="cc-persist-dll">
+          <div class="cousin-header" onclick="toggleCousin('cc-persist-dll')">
+            <div class="cousin-icon">🔴</div>
+            <div><div class="cousin-name">DLL Search Order Hijacking / Sideloading</div><div class="cousin-ttp-badge">T1574.001 · T1574.002</div></div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1574/002/" class="link-ext" target="_blank">🔗 T1574.002 DLL Sideloading</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Persistence → Defense Evasion (executes via legitimate signed app)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">DLL sideloading places a malicious DLL in a directory where a legitimate application will load it in preference to the real system DLL. <strong>Minimum truth:</strong> a DLL with a known-system-DLL name appearing in a non-system path, loaded by a legitimate signed application. This cousin is also structurally linked to BYOVD — same substrate (DLL loading) but different intent vector (persistence via application trust rather than kernel exploitation).</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text"><strong>Classic chain:</strong> Drop malicious <code>version.dll</code> next to a signed Microsoft binary that loads version.dll (e.g. OneDriveSetup.exe). When the binary runs on startup → loads malicious DLL → DLL proxies all exports to real version.dll while executing the payload in a new thread. Application works normally. No registry modification. No scheduled task.<br><br>Extremely popular with Chinese APT groups — PlugX and ShadowPad both use DLL sideloading as primary persistence.
+                <div class="tags-row">
+                  <span class="tag tag-red">PlugX</span><span class="tag tag-red">ShadowPad</span><span class="tag tag-red">Winnti</span>
+                  <a href="https://attack.mitre.org/groups/G0045/" class="tag tag-gold" target="_blank">APT10</a>
+                  <a href="https://attack.mitre.org/groups/G0096/" class="tag tag-gold" target="_blank">APT41</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-persist-com">
+          <div class="cousin-header" onclick="toggleCousin('cc-persist-com')">
+            <div class="cousin-icon">🔴</div>
+            <div><div class="cousin-name">COM Object Hijacking — HKCU Registry</div><div class="cousin-ttp-badge">T1546.015</div></div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1546/015/" class="link-ext" target="_blank">🔗 T1546.015</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Persistence (no admin required, UAC bypass capable)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">COM hijacking writes a CLSID entry in HKCU (user-level, no admin required) that overrides the system HKLM entry. When a legitimate application loads that COM object, it loads the attacker's DLL instead. <strong>Detection:</strong> new CLSID entries in <code>HKCU\Software\Classes\CLSID</code> pointing to non-standard DLL paths, especially for CLSIDs known to be loaded by commonly executed applications (Explorer, Task Scheduler).</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text"><strong>Why COM hijacking:</strong> Requires no admin rights (HKCU writable by any user), survives reboots, appears as legitimate COM object loading by a trusted application, and can achieve UAC bypass when the hijacked COM object is used by an auto-elevating binary. Used in targeted attacks where the attacker wants to blend into normal Windows behaviour.
+                <div class="tags-row">
+                  <span class="tag tag-red">Empire COM persist</span>
+                  <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29</a>
+                  <a href="https://attack.mitre.org/groups/G0010/" class="tag tag-gold" target="_blank">Turla</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-persist-service">
+          <div class="cousin-header" onclick="toggleCousin('cc-persist-service')">
+            <div class="cousin-icon">🔴</div>
+            <div><div class="cousin-name">Malicious Service Installation</div><div class="cousin-ttp-badge">T1543.003</div></div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1543/003/" class="link-ext" target="_blank">🔗 T1543.003</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Persistence + Privilege Escalation (runs as SYSTEM)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Event 7045 (new service installed) combined with binary path pointing to a non-standard location is a high-fidelity signal. <strong>Composite:</strong> 7045 where the service binary path is in TEMP, AppData, or ProgramData, OR service name is random characters, OR service is deleted within 120 seconds of creation (PsExec-style transient service). Services run as SYSTEM by default — any malicious service achieves immediate privilege escalation.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">Used for both persistence (start on boot) and execution (immediate SYSTEM shell). PsExec-style lateral movement uses transient services — installed, used, deleted. For persistence: install service pointing to attacker binary with <code>start= auto</code> — executes as SYSTEM on every system boot without user interaction.
+                <div class="tags-row">
+                  <span class="tag tag-red">PsExec service pattern</span>
+                  <span class="tag tag-red">Cobalt Strike service persist</span>
+                  <a href="https://attack.mitre.org/groups/G0034/" class="tag tag-gold" target="_blank">Sandworm</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<footer class="site-footer">
+  ALA DABAT · MTDF · PERSISTENCE TA0003 · <a href="execution.html" style="color:var(--blue-primary);text-decoration:none;">← Execution</a> · <a href="privilege-escalation.html" style="color:var(--blue-primary);text-decoration:none;">Privilege Escalation →</a>
+</footer>
+<a href="#" class="scroll-top">↑</a>
+<script src="mtdf.js"></script>
+</body>
+</html>

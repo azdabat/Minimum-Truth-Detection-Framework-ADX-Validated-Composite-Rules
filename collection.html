@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTDF — Collection | TA0009</title>
+<link rel="stylesheet" href="mtdf.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title"><span class="t-white">MTDF · </span><span class="t-blue">COLLECTION</span><span class="t-dim"> · TA0009</span></div>
+      <div class="header-sub">DATA STAGING BEFORE EXFILTRATION · ARCHIVE CREATION · CLIPBOARD THEFT · EMAIL HARVESTING</div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-gold">TA0009</span>
+      <span class="badge badge-blue">4 ECOSYSTEMS</span>
+      <span class="badge badge-red">10+ COUSIN RULES</span>
+    </div>
+  </div>
+</header>
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="execution.html" class="nav-link">Execution</a>
+    <a href="persistence.html" class="nav-link">Persistence</a>
+    <a href="privilege-escalation.html" class="nav-link">Privilege Escalation</a>
+    <a href="defense-evasion.html" class="nav-link">Defense Evasion</a>
+    <a href="credential-access.html" class="nav-link">Credential Access</a>
+    <a href="discovery.html" class="nav-link">Discovery</a>
+    <a href="lateral-movement.html" class="nav-link">Lateral Movement</a>
+    <a href="collection.html" class="nav-link active">Collection</a>
+    <a href="c2.html" class="nav-link">C2</a>
+    <a href="exfiltration.html" class="nav-link">Exfiltration</a>
+    <a href="impact.html" class="nav-link">Impact</a>
+    <a href="novel-research.html" class="nav-link active-gold">★ Novel Research</a>
+  </div>
+</nav>
+<div class="main">
+
+<div class="intro-box intro-box-blue">
+  📦 COLLECTION — Aggregating target data before exfiltration. <strong>Minimum truth doctrine:</strong> bulk access to sensitive file types at anomalous velocity, or staging data in compressed archives in locations outside normal user working directories. Collection events precede exfiltration and are catchable before data leaves the environment.
+</div>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-number t-blue">4</div><div class="stat-label">Core Ecosystems</div></div>
+  <div class="stat-card"><div class="stat-number t-red">10+</div><div class="stat-label">Cousin Rules</div></div>
+  <div class="stat-card"><div class="stat-number t-gold">T1560</div><div class="stat-label">Primary TTP</div></div>
+</div>
+
+<!-- ECOSYSTEM 1: Archive Staging -->
+<div class="ecosystem open" id="eco-archive">
+  <div class="eco-header" onclick="toggleEco('eco-archive')">
+    <div class="eco-id">T1560.001</div>
+    <div><div class="eco-title">Data Staged in Archive — Pre-Exfil Compression</div><div class="eco-sub">COLLECTION · ARCHIVE COLLECTED DATA</div></div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">Archive Creation in Non-Standard Path + Sensitive File Type Inclusion Anchor</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · MDE FileCreated events</a>
+        <a href="https://attack.mitre.org/techniques/T1560/001/" class="link-ext" target="_blank">🔗 T1560.001</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">Attackers compress data before exfiltration to reduce transfer time and evade DLP controls. <strong>Minimum truth:</strong> archive utility (7zip, WinRAR, tar) creating archives in TEMP/ProgramData/network shares containing password-protected compressed files with sensitive file type inclusions (.docx, .xlsx, .pdf, .kdbx, .key, .pem, .pfx).<br><br>Correlate with subsequent outbound HTTPS/FTP connections from the same host within 60 minutes. Password-protected archives are a strong reinforcement signal — legitimate backup operations rarely use passwords.</div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text"><strong>Standard double-extortion exfil prep:</strong><br>
+            <code>7z a -p[password] staged.zip "C:\Users\*\Documents\*.docx" "C:\Users\*\Desktop\*.xlsx"</code><br><br>
+            Password protection defeats content inspection by DLP tools. The archive is then uploaded to a cloud service (Dropbox, Google Drive, MEGA) — indistinguishable from legitimate traffic without DLP that can inspect the upload endpoint and volume.<br><br>Ransomware operators (BlackCat, Cl0p, LockBit) exfiltrate 50-500GB before encryption as leverage for double extortion.
+            <div class="tags-row">
+              <span class="tag tag-red">7zip LOLBin</span><span class="tag tag-red">WinRAR</span>
+              <span class="tag tag-gold">BlackCat/ALPHV</span><span class="tag tag-gold">Cl0p</span>
+              <a href="https://attack.mitre.org/groups/G0046/" class="tag tag-gold" target="_blank">FIN7</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+      <div class="cousin-grid">
+
+        <div class="cousin-card" id="cc-coll-email">
+          <div class="cousin-header" onclick="toggleCousin('cc-coll-email')">
+            <div class="cousin-icon">🔴</div>
+            <div><div class="cousin-name">Email / Mailbox Collection — Exchange / O365</div><div class="cousin-ttp-badge">T1114.002</div></div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1114/002/" class="link-ext" target="_blank">🔗 T1114.002 Remote Email Collection</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Collection (high-value intelligence — M&A, legal, executive comms)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Email collection via Exchange or O365 Graph API provides high-value intelligence — M&A discussions, legal matters, executive communications, credentials in email body. <strong>Detection:</strong> anomalous EWS (Exchange Web Services) or Graph API mailbox access — large volume of email folder enumeration and message download by non-email-client user agents, mailbox access from unexpected source IPs or applications, Graph API <code>Mail.Read</code> permission exercise at volume.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text"><strong>O365 email exfil with compromised credentials:</strong> <a href="https://github.com/dafthack/MailSniper" class="link-ext" target="_blank">MailSniper</a> searches all mailboxes for keywords (password, VPN, secret) via EWS. <a href="https://github.com/fortra/impacket" class="link-ext" target="_blank">Ruler</a> automates Exchange interaction. With a Global Admin token, all employee mailboxes accessible via Graph API — often targeted for intelligence gathering before ransomware deployment.
+                <div class="tags-row">
+                  <a href="https://github.com/dafthack/MailSniper" class="tag tag-red" target="_blank">MailSniper</a>
+                  <span class="tag tag-red">Graph API abuse</span>
+                  <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29 (NOBELIUM)</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-coll-screen">
+          <div class="cousin-header" onclick="toggleCousin('cc-coll-screen')">
+            <div class="cousin-icon">🔴</div>
+            <div><div class="cousin-name">Screen Capture / Keylogging</div><div class="cousin-ttp-badge">T1113 · T1056.001</div></div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1113/" class="link-ext" target="_blank">🔗 T1113 Screen Capture</a>
+              <a href="https://attack.mitre.org/techniques/T1056/001/" class="link-ext" target="_blank">🔗 T1056.001 Keylogging</div>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Collection (credential harvest, intelligence, long-term dwell)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Screen capture and keylogging are indicators of long-term dwell and intelligence collection — characteristic of espionage actors. <strong>Detection:</strong> processes calling <code>BitBlt</code> or <code>CopyImage</code> GDI functions at regular intervals (screenshot polling), processes installing keyboard hooks via <code>SetWindowsHookEx</code> with <code>WH_KEYBOARD_LL</code> — especially from non-accessibility software processes. Periodic small file creation in TEMP at regular intervals (screenshot staging) is a behavioural indicator.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">Used by RATs for intelligence collection during extended dwell periods. Keyloggers harvest credentials entered after the initial compromise — catching VPN credentials, banking credentials, new passwords set after a suspected incident. Screen capture confirms the attacker is watching the right target before deploying final payload.
+                <div class="tags-row">
+                  <span class="tag tag-red">Cobalt Strike screenshot</span>
+                  <span class="tag tag-red">NjRAT keylogger</span>
+                  <span class="tag tag-red">AsyncRAT</span>
+                  <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29</a>
+                  <a href="https://attack.mitre.org/groups/G0010/" class="tag tag-gold" target="_blank">Turla</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<footer class="site-footer">
+  ALA DABAT · MTDF · COLLECTION TA0009 · <a href="lateral-movement.html" style="color:var(--blue-primary);text-decoration:none;">← Lateral Movement</a> · <a href="c2.html" style="color:var(--blue-primary);text-decoration:none;">C2 →</a>
+</footer>
+<a href="#" class="scroll-top">↑</a>
+<script src="mtdf.js"></script>
+</body>
+</html>

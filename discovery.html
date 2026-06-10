@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTDF — Discovery | TA0007</title>
+<link rel="stylesheet" href="mtdf.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title"><span class="t-white">MTDF · </span><span class="t-blue">DISCOVERY</span><span class="t-dim"> · TA0007</span></div>
+      <div class="header-sub">MAPPING THE ENVIRONMENT · VELOCITY-BASED DETECTION · BLOODHOUND · NETWORK SWEEPS</div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-gold">TA0007</span>
+      <span class="badge badge-blue">5 ECOSYSTEMS</span>
+      <span class="badge badge-red">14+ COUSIN RULES</span>
+    </div>
+  </div>
+</header>
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="execution.html" class="nav-link">Execution</a>
+    <a href="persistence.html" class="nav-link">Persistence</a>
+    <a href="privilege-escalation.html" class="nav-link">Privilege Escalation</a>
+    <a href="defense-evasion.html" class="nav-link">Defense Evasion</a>
+    <a href="credential-access.html" class="nav-link">Credential Access</a>
+    <a href="discovery.html" class="nav-link active">Discovery</a>
+    <a href="lateral-movement.html" class="nav-link">Lateral Movement</a>
+    <a href="collection.html" class="nav-link">Collection</a>
+    <a href="c2.html" class="nav-link">C2</a>
+    <a href="exfiltration.html" class="nav-link">Exfiltration</a>
+    <a href="impact.html" class="nav-link">Impact</a>
+    <a href="novel-research.html" class="nav-link active-gold">★ Novel Research</a>
+  </div>
+</nav>
+<div class="main">
+
+<div class="intro-box intro-box-blue">
+  🔍 DISCOVERY — Attackers map the environment before moving. <strong>Minimum truth doctrine:</strong> high-velocity automated enumeration is the signal — humans don't enumerate 500 hosts or run 10 discovery commands in 30 seconds. The velocity composite catches the pattern of post-exploitation enumeration regardless of which specific tools are used.
+</div>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-number t-blue">5</div><div class="stat-label">Core Ecosystems</div></div>
+  <div class="stat-card"><div class="stat-number t-red">14+</div><div class="stat-label">Cousin Rules</div></div>
+  <div class="stat-card"><div class="stat-number t-gold">VELOCITY</div><div class="stat-label">Anchor Type</div></div>
+</div>
+
+<!-- ECOSYSTEM 1: Discovery Velocity -->
+<div class="ecosystem open" id="eco-disc-vel">
+  <div class="eco-header" onclick="toggleEco('eco-disc-vel')">
+    <div class="eco-id">T1018 · T1082 · T1083</div>
+    <div><div class="eco-title">Network & Host Discovery Sweep — Velocity Composite</div><div class="eco-sub">DISCOVERY · REMOTE SYSTEM DISCOVERY · SYSTEM INFORMATION DISCOVERY</div></div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">Multi-Command Discovery Burst — 5+ Distinct Commands from Single Process in 120s</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel + MDE</a>
+        <a href="https://attack.mitre.org/techniques/T1018/" class="link-ext" target="_blank">🔗 T1018 Remote System Discovery</a>
+        <a href="https://attack.mitre.org/techniques/T1082/" class="link-ext" target="_blank">🔗 T1082 System Info Discovery</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">Individual discovery commands are completely normal. The composite anchors on <strong>velocity and chaining</strong>: 5+ distinct discovery commands executed by the same process within 120 seconds. This is structurally a script or automated tool — not a human admin.<br><br><strong>Discovery command taxonomy:</strong> <code>whoami</code>, <code>net user</code>, <code>net group</code>, <code>ipconfig</code>, <code>arp -a</code>, <code>netstat -an</code>, <code>systeminfo</code>, <code>tasklist</code>, <code>net share</code>, <code>net view</code>. Any 5+ from this set within 2 minutes = post-exploitation enumeration.</div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text"><strong>Standard post-exploitation runbook (Cobalt Strike/Empire):</strong> Automated situational awareness executes within seconds of beacon establishment: <code>whoami /all</code> → <code>net user /domain</code> → <code>net group "Domain Admins" /domain</code> → <code>ipconfig /all</code> → <code>arp -a</code> → <code>netstat -an</code> → <code>systeminfo</code>.<br><br>This burst pattern is <strong>identical across Cobalt Strike, Metasploit, Empire, and manual pentests</strong> — it is the fingerprint of post-exploitation enumeration regardless of tool.
+            <div class="tags-row">
+              <span class="tag tag-red">Cobalt Strike post-ex</span>
+              <span class="tag tag-red">Empire situational awareness</span>
+              <a href="https://github.com/BloodHoundAD/BloodHound" class="tag tag-red" target="_blank">BloodHound</a>
+              <span class="tag tag-gold">Most threat actor groups</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+      <div class="cousin-grid">
+
+        <div class="cousin-card" id="cc-disc-blood">
+          <div class="cousin-header" onclick="toggleCousin('cc-disc-blood')">
+            <div class="cousin-icon">🔴</div>
+            <div><div class="cousin-name">BloodHound AD Enumeration via LDAP</div><div class="cousin-ttp-badge">T1069.002 · T1087.002</div></div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1069/002/" class="link-ext" target="_blank">🔗 T1069.002</a>
+              <a href="https://github.com/BloodHoundAD/BloodHound" class="link-ext" target="_blank">🔗 BloodHound</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Discovery → Lateral Movement path planning</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">BloodHound ingests massive LDAP query volumes to map AD attack paths. <strong>Detection:</strong> anomalous LDAP query volume from a workstation (not a DC or management server), queries for sensitive attributes (<code>msds-allowedtodelegateto</code>, <code>AdminCount</code>, <code>SIDHistory</code>, <code>ms-DS-MachineAccountQuota</code>) in rapid succession, SAMR enumeration of domain groups from non-admin accounts. Threshold: &gt;500 LDAP queries from a single workstation in 5 minutes.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text"><strong>BloodHound is the attacker's GPS for AD.</strong> Running SharpHound collector takes 2-3 minutes and maps every attack path to Domain Admin — which users are local admins on which machines, which machines have unconstrained delegation, Kerberoastable accounts with crack priority, shortest path to DA. Transforms lateral movement from guesswork to shortest-path algorithm. Most enterprise compromises that reach Domain Admin used BloodHound or equivalent.
+                <div class="tags-row">
+                  <a href="https://github.com/BloodHoundAD/SharpHound" class="tag tag-red" target="_blank">SharpHound</a>
+                  <a href="https://github.com/BloodHoundAD/BloodHound" class="tag tag-red" target="_blank">BloodHound</a>
+                  <a href="https://github.com/dirkjanm/ldapdomaindump" class="link-ext tag tag-red" target="_blank">ldapdomaindump</a>
+                  <span class="tag tag-gold">Most APT groups</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-disc-netscan">
+          <div class="cousin-header" onclick="toggleCousin('cc-disc-netscan')">
+            <div class="cousin-icon">🔴</div>
+            <div><div class="cousin-name">Internal Network Port Scan</div><div class="cousin-ttp-badge">T1046</div></div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1046/" class="link-ext" target="_blank">🔗 T1046 Network Service Discovery</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Discovery → Lateral Movement target identification</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Internal port scanning from a compromised host: a workstation making TCP connections to 10+ distinct internal hosts on the same ports within a 5-minute window. <strong>Key ports:</strong> 445 (SMB), 3389 (RDP), 5985 (WinRM), 1433 (SQL), 22 (SSH), 80/443 (web). Scanning these ports internally identifies targets for lateral movement substrates — the discovery directly feeds the lateral movement cousin cluster.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">Post-exploitation network sweep to identify live hosts and open services. Tools: <code>nmap -sn 192.168.1.0/24</code> via Cobalt Strike SOCKS proxy, CrackMapExec for SMB/WinRM sweep, or simple PowerShell: <code>1..254 | % {Test-Connection -Count 1 192.168.1.$_ -AsJob}</code>. Identifies domain controllers (port 88/389), file servers (445), admin workstations (3389) — prioritisation for lateral movement.
+                <div class="tags-row">
+                  <span class="tag tag-red">Nmap via SOCKS</span>
+                  <a href="https://github.com/byt3bl33d3r/CrackMapExec" class="tag tag-red" target="_blank">CrackMapExec sweep</a>
+                  <span class="tag tag-red">Cobalt Strike portscan</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<footer class="site-footer">
+  ALA DABAT · MTDF · DISCOVERY TA0007 · <a href="credential-access.html" style="color:var(--blue-primary);text-decoration:none;">← Credential Access</a> · <a href="lateral-movement.html" style="color:var(--blue-primary);text-decoration:none;">Lateral Movement →</a>
+</footer>
+<a href="#" class="scroll-top">↑</a>
+<script src="mtdf.js"></script>
+</body>
+</html>

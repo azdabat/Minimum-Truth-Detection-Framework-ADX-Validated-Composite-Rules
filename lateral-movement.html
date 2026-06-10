@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTDF — Lateral Movement | TA0008</title>
+<link rel="stylesheet" href="mtdf.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title">
+        <span class="t-white">MTDF · </span>
+        <span class="t-purple">LATERAL MOVEMENT</span>
+        <span class="t-dim"> · TA0008</span>
+      </div>
+      <div class="header-sub">COUSIN DOCTRINE CENTREPIECE · SMB/DCOM/WINRM/WMI SUBSTRATE CLUSTER · PASS-THE-HASH · PASS-THE-TICKET</div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-gold">TA0008</span>
+      <span class="badge badge-purple">DOCTRINE CENTREPIECE</span>
+      <span class="badge badge-blue">6 ECOSYSTEMS</span>
+      <span class="badge badge-red">18+ COUSIN RULES</span>
+    </div>
+  </div>
+</header>
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="execution.html" class="nav-link">Execution</a>
+    <a href="persistence.html" class="nav-link">Persistence</a>
+    <a href="privilege-escalation.html" class="nav-link">Privilege Escalation</a>
+    <a href="defense-evasion.html" class="nav-link">Defense Evasion</a>
+    <a href="credential-access.html" class="nav-link">Credential Access</a>
+    <a href="discovery.html" class="nav-link">Discovery</a>
+    <a href="lateral-movement.html" class="nav-link active">Lateral Movement</a>
+    <a href="collection.html" class="nav-link">Collection</a>
+    <a href="c2.html" class="nav-link">C2</a>
+    <a href="exfiltration.html" class="nav-link">Exfiltration</a>
+    <a href="impact.html" class="nav-link">Impact</a>
+    <a href="novel-research.html" class="nav-link active-gold">★ Novel Research</a>
+  </div>
+</nav>
+
+<div class="main">
+
+<div class="intro-box intro-box-purple">
+  ↔️ LATERAL MOVEMENT — The <strong>Cousin Technique Doctrine centrepiece</strong>. Lateral movement is where the doctrine's value is most demonstrable: SMB, DCOM, WinRM, WMI, and SSH are operationally interchangeable for an attacker. Blocking one drives a pivot to the next. Detection must cover the <strong>shared intent</strong> — authenticated remote code execution — not individual protocol implementations. Pass-the-Hash and Pass-the-Ticket are the credential fuel that powers all lateral movement substrates.
+</div>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-number t-purple">6</div><div class="stat-label">Core Ecosystems</div></div>
+  <div class="stat-card"><div class="stat-number t-red">18+</div><div class="stat-label">Cousin Rules</div></div>
+  <div class="stat-card"><div class="stat-number t-gold">T1021</div><div class="stat-label">Primary TTP Family</div></div>
+  <div class="stat-card"><div class="stat-number t-purple">INTENT</div><div class="stat-label">Anchor Type</div></div>
+</div>
+
+<!-- MASTER COUSIN DOCTRINE CLUSTER -->
+<div style="background:var(--bg-card);border:2px solid var(--purple-border);border-radius:4px;padding:24px;margin-bottom:32px;">
+  <div style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--purple);letter-spacing:0.08em;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+    ⬡ LATERAL MOVEMENT MASTER COUSIN CLUSTER
+    <span style="flex:1;height:1px;background:var(--purple-border);display:block;"></span>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px;">
+    <div class="cn-node">SMB/PsExec<br><span style="font-size:8px;">T1021.002</span></div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">DCOM<br><span style="font-size:8px;">T1021.003</span></div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">WinRM<br><span style="font-size:8px;">T1021.006</span></div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">WMI Remote<br><span style="font-size:8px;">T1047</span></div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">SSH<br><span style="font-size:8px;">T1021.004</span></div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">RDP<br><span style="font-size:8px;">T1021.001</span></div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">VNC<br><span style="font-size:8px;">T1021.005</span></div>
+    <div style="margin-left:8px;"><div class="cn-intent">SHARED INTENT: Remote Code Execution via Authenticated Channel</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px;">
+    <div style="background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:3px;padding:14px;">
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--blue-primary);margin-bottom:8px;">🔵 DETECTION DOCTRINE</div>
+      <div style="font-family:var(--font-body);font-size:13px;color:var(--text-secondary);line-height:1.7;">The shared intent detection anchor: <strong>an authenticated connection to a host outside normal peer-to-peer patterns, followed by process execution on the destination</strong>. The specific protocol (SMB/DCOM/WinRM) becomes secondary — the behavioural pattern of authentication + remote execution from an unexpected source is the minimum truth that cuts across all substrates.</div>
+    </div>
+    <div style="background:var(--red-dim);border:1px solid var(--red-border);border-radius:3px;padding:14px;">
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--red-primary);margin-bottom:8px;">🔴 ATTACKER SUBSTRATE PIVOT</div>
+      <div style="font-family:var(--font-body);font-size:13px;color:var(--text-secondary);line-height:1.7;">Firewall blocks SMB port 445 → pivot to WinRM port 5985. WinRM blocked → use DCOM (random high ports). DCOM too noisy → use WMI (same auth, no service install). All blocked → pivot to RDP (3389) or VNC. A detection strategy that covers only SMB leaves 6 cousin substrates exposed.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ECOSYSTEM 1: SMB / PsExec -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ecosystem open" id="eco-smb">
+  <div class="eco-header" onclick="toggleEco('eco-smb')">
+    <div class="eco-id">T1021.002</div>
+    <div>
+      <div class="eco-title">SMB / Windows Admin Shares — PsExec Pattern</div>
+      <div class="eco-sub">LATERAL MOVEMENT · REMOTE SERVICES · SMB SUBSTRATE</div>
+    </div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">Admin Share Access + Service Install Composite — PsExec Pattern Anchor</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel + MDE</a>
+        <a href="https://attack.mitre.org/techniques/T1021/002/" class="link-ext" target="_blank">🔗 MITRE T1021.002</a>
+        <a href="https://docs.microsoft.com/en-us/sysinternals/downloads/psexec" class="link-ext" target="_blank">🔗 PsExec Documentation</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">
+            SMB lateral movement via admin shares produces a characteristic event chain: <strong>4624 type 3 logon → 5140 share access (C$ or ADMIN$) → 7045 service installation → 4697 service run</strong>. The composite joins these four events on source IP + destination host within a 120-second window.<br><br>
+            <strong>High-fidelity signal:</strong> a workstation (not a known management server) accessing ADMIN$ on another workstation using privileged credentials is nearly always malicious. Reinforce with: service binary written to ADMIN$ immediately before installation, service name randomised (8 random characters), service deleted within 60 seconds of execution.
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text">
+            <strong>PsExec attack chain (OSCP standard):</strong><br>
+            1. Attacker has NTLM hash or cleartext credential<br>
+            2. <code>psexec.py DOMAIN/admin@192.168.1.50 -hashes :NTLMhash</code><br>
+            3. Impacket drops service binary to ADMIN$, creates service, executes → SYSTEM shell<br>
+            4. Service deleted after execution to reduce footprint<br><br>
+            <strong>Modern evasion:</strong> Attackers using <a href="https://github.com/fortra/impacket" class="link-ext" target="_blank">Impacket's smbexec</a> avoid writing a binary to disk by executing commands directly via Service Control Manager — no file drop, only the service creation event.
+            <div class="tags-row">
+              <a href="https://learn.microsoft.com/en-us/sysinternals/downloads/psexec" class="tag tag-red" target="_blank">PsExec</a>
+              <a href="https://github.com/fortra/impacket" class="tag tag-red" target="_blank">Impacket psexec/smbexec</a>
+              <a href="https://github.com/byt3bl33d3r/CrackMapExec" class="tag tag-red" target="_blank">CrackMapExec SMB</a>
+              <a href="https://attack.mitre.org/groups/G0032/" class="tag tag-gold" target="_blank">Lazarus Group</a>
+              <a href="https://attack.mitre.org/groups/G0034/" class="tag tag-gold" target="_blank">Sandworm</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES — SMB Ecosystem</div>
+      <div class="cousin-grid">
+
+        <div class="cousin-card" id="cc-smb-dcom">
+          <div class="cousin-header" onclick="toggleCousin('cc-smb-dcom')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">DCOM Lateral Movement — MMC20/ShellWindows</div>
+              <div class="cousin-ttp-badge">T1021.003</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1021/003/" class="link-ext" target="_blank">🔗 T1021.003 DCOM</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Lateral Movement (SMB substitute when port 445 blocked)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">DCOM lateral movement uses Windows Distributed Component Object Model to invoke remote COM objects that execute commands. <strong>Detection:</strong> <code>mmc.exe</code> or <code>explorer.exe</code> on destination host spawning unexpected child processes after an inbound DCOM activation request (authentication event 4624 type 3 correlated with DCOM activation in DCOM event log). The DCOM <code>MMC20.Application</code> and <code>ShellWindows</code> objects are most commonly abused — monitor their activation from non-standard source hosts.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Why DCOM:</strong> Uses random high ports (RPC dynamic allocation) — harder to block via firewall than SMB port 445. No service installation (no event 7045). The execution appears as mmc.exe or explorer.exe spawning the command — appears legitimate.<br><br>
+                <strong>PowerShell execution via DCOM:</strong><br>
+                <code>$com = [System.Activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application","192.168.1.50"))</code><br>
+                <code>$com.Document.ActiveView.ExecuteShellCommand("powershell",$null,"-enc [payload]","7")</code>
+                <div class="tags-row">
+                  <a href="https://github.com/fortra/impacket" class="tag tag-red" target="_blank">Impacket dcomexec</a>
+                  <span class="tag tag-red">Cobalt Strike jump dcom</span>
+                  <span class="tag tag-red">PowerShell DCOM</span>
+                  <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-smb-winrm">
+          <div class="cousin-header" onclick="toggleCousin('cc-smb-winrm')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">WinRM Lateral Movement — PSRemoting</div>
+              <div class="cousin-ttp-badge">T1021.006</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1021/006/" class="link-ext" target="_blank">🔗 T1021.006 WinRM</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Lateral Movement (quiet, encrypted, no service install)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">WinRM lateral movement generates: 4624 type 3 logon on destination + <code>wsmprovhost.exe</code> spawning child processes. The key signal is <code>wsmprovhost.exe</code> — the WinRM provider host — spawning cmd.exe or PowerShell on the destination. Correlate with inbound port 5985 (HTTP) or 5986 (HTTPS) connections from unexpected source hosts. In most enterprises, legitimate WinRM sources are a small known set of management servers.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Why WinRM over PsExec:</strong> No service installation, no file write to ADMIN$, uses legitimate Windows Remote Management infrastructure (port 5985 looks like web traffic), encrypted by default. Cobalt Strike's <code>jump winrm64</code> deploys a beacon to a remote host over WinRM in a single command using a stolen credential or hash.<br><br>
+                <strong>Impacket:</strong> <code>winrm.py DOMAIN/admin@192.168.1.50 -hashes :hash</code> — interactive WinRM shell, all traffic encrypted.
+                <div class="tags-row">
+                  <span class="tag tag-red">Cobalt Strike jump winrm64</span>
+                  <a href="https://github.com/fortra/impacket" class="tag tag-red" target="_blank">Impacket winrm</a>
+                  <a href="https://github.com/Hackplayers/evil-winrm" class="tag tag-red" target="_blank">Evil-WinRM</a>
+                  <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-smb-rdp">
+          <div class="cousin-header" onclick="toggleCousin('cc-smb-rdp')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">RDP Lateral Movement — Hijacking & Shadowing</div>
+              <div class="cousin-ttp-badge">T1021.001</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1021/001/" class="link-ext" target="_blank">🔗 T1021.001 RDP</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Lateral Movement (GUI access, credential-based)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">RDP lateral movement generates 4624 logon type 10 (RemoteInteractive) events. <strong>Minimum truth:</strong> RDP logon from a workstation to another workstation (expected pattern: admin workstation → server, not workstation → workstation). Also monitor for RDP session hijacking via <code>tscon.exe</code> — allows taking over another user's disconnected RDP session without knowing their password.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>RDP session hijacking (no credentials needed):</strong> With SYSTEM privileges, <code>tscon.exe [session_id] /dest:[current_session]</code> takes over any disconnected RDP session. A domain admin who left an RDP session disconnected can be hijacked — attacker gains their session without knowing the password, MFA, or any credential.<br><br>
+                <strong>Ransomware operators</strong> frequently use RDP for interactive pre-deployment reconnaissance — mapping shares, identifying backup servers, manually running BloodHound.
+                <div class="tags-row">
+                  <span class="tag tag-red">tscon.exe hijack</span>
+                  <a href="https://github.com/byt3bl33d3r/CrackMapExec" class="tag tag-red" target="_blank">CrackMapExec RDP</a>
+                  <span class="tag tag-red">Ransomware operators</span>
+                  <a href="https://attack.mitre.org/groups/G0114/" class="tag tag-gold" target="_blank">Scattered Spider</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ECOSYSTEM 2: Pass-the-Hash / Pass-the-Ticket -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ecosystem" id="eco-pth">
+  <div class="eco-header" onclick="toggleEco('eco-pth')">
+    <div class="eco-id">T1550.002 · T1550.003</div>
+    <div>
+      <div class="eco-title">Pass-the-Hash / Pass-the-Ticket — Credential Material Abuse</div>
+      <div class="eco-sub">LATERAL MOVEMENT · USE ALTERNATE AUTHENTICATION MATERIAL</div>
+    </div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="doctrine-cluster">
+      <div class="doctrine-label">⬡ CREDENTIAL MATERIAL COUSIN CLUSTER — SHARED INTENT: AUTHENTICATE WITHOUT KNOWING PLAINTEXT PASSWORD</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
+        <div class="cn-node">Pass-the-Hash T1550.002</div><div class="cn-arrow">⟷</div>
+        <div class="cn-node">Pass-the-Ticket T1550.003</div><div class="cn-arrow">⟷</div>
+        <div class="cn-node">Overpass-the-Hash T1550.002</div><div class="cn-arrow">⟷</div>
+        <div class="cn-node">Golden Ticket T1558.001</div><div class="cn-arrow">⟷</div>
+        <div class="cn-node">Silver Ticket T1558.002</div>
+      </div>
+      <div style="font-family:var(--font-body);font-size:13px;color:var(--text-dim);font-style:italic;margin-top:8px;">All five use stolen credential material (hash or Kerberos ticket) to authenticate without knowing the plaintext password. The stolen material may come from any credential access technique — this ecosystem is the consumption layer of the credential access ecosystem.</div>
+    </div>
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">Anomalous Logon Source + Admin Share / Remote Service Access Composite</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel (Event ID 4624 type 3 + 5140)</a>
+        <a href="https://attack.mitre.org/techniques/T1550/002/" class="link-ext" target="_blank">🔗 T1550.002 PtH</a>
+        <a href="https://attack.mitre.org/techniques/T1550/003/" class="link-ext" target="_blank">🔗 T1550.003 PtT</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">
+            Pass-the-Hash produces a type 3 (network) NTLM logon using a hash rather than a password. Detection composite: <strong>4624 type 3 NTLM logon from unexpected source host for a privileged account, immediately followed by admin share access (C$, ADMIN$, IPC$) or remote service installation (7045)</strong> within a 60-second window.<br><br>
+            <strong>Cross-ecosystem correlation:</strong> The hash used here was likely stolen from LSASS in the credential access phase — the 30-day Atomic Sentinel Layer links the LSASS access event to this lateral movement event, providing full kill chain context in a single alert.
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text">
+            <strong>PtH chain (Impacket, OSCP standard):</strong><br>
+            <code>psexec.py DOMAIN/admin@192.168.1.50 -hashes :NTLMhash</code><br>
+            Authenticates with NTLM hash, drops service binary to ADMIN$, starts it, returns SYSTEM shell. No password needed — the hash itself is the authentication material.<br><br>
+            <strong>Pass-the-Ticket (Rubeus):</strong><br>
+            <code>Rubeus.exe ptt /ticket:[base64_ticket]</code><br>
+            Injects a stolen Kerberos TGT into the current logon session. All subsequent Kerberos authentications use the stolen ticket — completely transparent to the network, no NTLM traffic generated.
+            <div class="tags-row">
+              <a href="https://github.com/fortra/impacket" class="tag tag-red" target="_blank">Impacket psexec/smbexec</a>
+              <a href="https://github.com/gentilkiwi/mimikatz" class="tag tag-red" target="_blank">Mimikatz sekurlsa::pth</a>
+              <a href="https://github.com/GhostPack/Rubeus" class="tag tag-red" target="_blank">Rubeus ptt</a>
+              <a href="https://github.com/byt3bl33d3r/CrackMapExec" class="tag tag-red" target="_blank">CrackMapExec</a>
+              <a href="https://attack.mitre.org/groups/G0032/" class="tag tag-gold" target="_blank">Lazarus Group</a>
+              <a href="https://attack.mitre.org/groups/G0007/" class="tag tag-gold" target="_blank">APT28</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+      <div class="cousin-grid">
+
+        <div class="cousin-card" id="cc-pth-golden">
+          <div class="cousin-header" onclick="toggleCousin('cc-pth-golden')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">Golden Ticket — krbtgt Hash Exploitation</div>
+              <div class="cousin-ttp-badge">T1558.001</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1558/001/" class="link-ext" target="_blank">🔗 T1558.001 Golden Ticket</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Persistence + Lateral Movement (domain-wide, survives password resets)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Golden Tickets are Kerberos TGTs forged using the <code>krbtgt</code> account hash — valid for any service, any user, for up to 10 years. <strong>Detection signals:</strong> Kerberos tickets with anomalous lifetimes (&gt;10 hours default max), tickets for users that don't exist in AD, tickets with mismatched domain SIDs, or tickets renewed after the <code>krbtgt</code> password was reset (golden ticket survives one password reset, requires two). Monitor event 4769 for service tickets requested with RC4 encryption by accounts that should use AES256.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Why Golden Ticket is the ultimate persistence:</strong> With the <code>krbtgt</code> hash, the attacker can authenticate as any user to any service in the domain — including non-existent users with arbitrary group memberships. Persists through password resets of all user accounts (only resetting <code>krbtgt</code> twice invalidates existing tickets).<br><br>
+                <strong>Obtained via:</strong> <a href="https://github.com/gentilkiwi/mimikatz" class="link-ext" target="_blank">Mimikatz</a> <code>lsadump::dcsync /user:krbtgt</code> (DCSync) or direct NTDS.dit dump from a Domain Controller.
+                <div class="tags-row">
+                  <a href="https://github.com/gentilkiwi/mimikatz" class="tag tag-red" target="_blank">Mimikatz Golden Ticket</a>
+                  <a href="https://github.com/GhostPack/Rubeus" class="tag tag-red" target="_blank">Rubeus golden</a>
+                  <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29</a>
+                  <a href="https://attack.mitre.org/groups/G0032/" class="tag tag-gold" target="_blank">Lazarus</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-pth-silver">
+          <div class="cousin-header" onclick="toggleCousin('cc-pth-silver')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">Silver Ticket — Service Account Ticket Forgery</div>
+              <div class="cousin-ttp-badge">T1558.002</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1558/002/" class="link-ext" target="_blank">🔗 T1558.002 Silver Ticket</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Lateral Movement (targeted service access, stealthier than Golden)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Silver Tickets are forged Kerberos service tickets (TGS) for a specific service, using that service account's NTLM hash. <strong>Stealthier than Golden Tickets</strong> — never contacts the KDC (no 4769 event), the forged ticket goes directly to the service. Detection: service tickets appearing without a corresponding TGT request, service tickets for hosts that the authenticated user has no legitimate access to, or service ticket encryption anomalies.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Use case:</strong> Attacker has compromised a service account hash (e.g. SQL service account via Kerberoasting). Creates a Silver Ticket for the SQL service — can authenticate as any user to that SQL server without contacting the DC or KDC. The service validates the ticket locally using its own hash — DC is never involved, no authentication logs generated on DC.
+                <div class="tags-row">
+                  <a href="https://github.com/gentilkiwi/mimikatz" class="tag tag-red" target="_blank">Mimikatz Silver Ticket</a>
+                  <a href="https://github.com/GhostPack/Rubeus" class="tag tag-red" target="_blank">Rubeus silver</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-pth-overpass">
+          <div class="cousin-header" onclick="toggleCousin('cc-pth-overpass')">
+            <div class="cousin-icon">🔴</div>
+            <div>
+              <div class="cousin-name">Overpass-the-Hash — NTLM to Kerberos Conversion</div>
+              <div class="cousin-ttp-badge">T1550.002</div>
+            </div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1550/002/" class="link-ext" target="_blank">🔗 T1550.002</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Lateral Movement (Kerberos-only environments, NTLM blocked)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Overpass-the-Hash uses an NTLM hash to request a Kerberos TGT — converting NTLM credential material into a Kerberos ticket. <strong>Detection:</strong> a Kerberos TGT request (event 4768) immediately following an NTLM authentication, especially from a host where the user is not currently logged in interactively. The pattern shows the attacker obtaining a TGT for a user who isn't actually present on that machine.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">
+                <strong>Why Overpass-the-Hash:</strong> In environments that block NTLM (NTLMv1/v2 disabled, Kerberos enforced), standard PtH doesn't work. Overpass-the-Hash converts the stolen NTLM hash into a Kerberos ticket — bypassing the NTLM restriction. The result is a full Kerberos TGT that can be used for Pass-the-Ticket attacks across all Kerberos-enabled services.
+                <div class="tags-row">
+                  <a href="https://github.com/gentilkiwi/mimikatz" class="tag tag-red" target="_blank">Mimikatz sekurlsa::pth</a>
+                  <a href="https://github.com/GhostPack/Rubeus" class="tag tag-red" target="_blank">Rubeus asktgt</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- ECOSYSTEM 3: SSH Tunnelling / Linux Lateral -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ecosystem" id="eco-ssh">
+  <div class="eco-header" onclick="toggleEco('eco-ssh')">
+    <div class="eco-id">T1021.004 · T1572</div>
+    <div>
+      <div class="eco-title">SSH Tunnelling / Linux Lateral Movement</div>
+      <div class="eco-sub">LATERAL MOVEMENT · REMOTE SERVICES · PROTOCOL TUNNELLING</div>
+    </div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">SSH Anomalous Source / Dynamic Port Forward Anchor</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel + MDE</a>
+        <a href="https://attack.mitre.org/techniques/T1021/004/" class="link-ext" target="_blank">🔗 T1021.004 SSH</a>
+        <a href="https://attack.mitre.org/techniques/T1572/" class="link-ext" target="_blank">🔗 T1572 Protocol Tunnelling</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">
+            SSH is the SMB equivalent for Linux/Unix environments — the lateral movement substrate of choice. <strong>Minimum truth:</strong> SSH connections between internal hosts outside normal management patterns, SSH from a Windows host (unusual unless explicitly permitted), SSH with key authentication to multiple hosts in rapid succession (lateral movement sweep pattern), or SSH -D (dynamic port forward) or -L (local forward) flags creating tunnels.<br><br>
+            In hybrid Windows/Linux environments, SSH becomes a pivoting substrate to reach Linux servers from an initially compromised Windows host.
+          </div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text">
+            <strong>SSH dynamic tunnel (SOCKS proxy):</strong><br>
+            <code>ssh -D 1080 -N user@linux-server</code> → creates SOCKS5 proxy through the SSH session → all attacker traffic tunnelled through the compromised Linux host → appears as legitimate SSH management traffic.<br><br>
+            <strong>SSH key theft:</strong> Steal <code>~/.ssh/id_rsa</code> keys from compromised Linux hosts → use keys to authenticate to all other Linux servers those keys have access to → no password required, keys not rotated.
+            <div class="tags-row">
+              <span class="tag tag-red">SSH pivoting</span>
+              <a href="https://github.com/jpillora/chisel" class="tag tag-red" target="_blank">Chisel tunnel</a>
+              <a href="https://github.com/sensepost/reGeorg" class="tag tag-red" target="_blank">reGeorg</a>
+              <a href="https://attack.mitre.org/groups/G0034/" class="tag tag-gold" target="_blank">Sandworm</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end main -->
+
+<footer class="site-footer">
+  ALA DABAT · MTDF · LATERAL MOVEMENT TA0008 · <a href="credential-access.html" style="color:var(--blue-primary);text-decoration:none;">← Credential Access</a> · <a href="collection.html" style="color:var(--blue-primary);text-decoration:none;">Collection →</a><br>
+  <span class="t-red">RED TEAM CONTENT</span> — All methodology at CEH/OSCP/public disclosure level.
+</footer>
+
+<a href="#" class="scroll-top">↑</a>
+<script src="mtdf.js"></script>
+</body>
+</html>

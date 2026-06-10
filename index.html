@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTDF — Minimum Truth Detection Framework</title>
+<link rel="stylesheet" href="mtdf.css">
+<style>
+.hero {
+  padding: 64px 0 48px;
+  border-bottom: 1px solid var(--border-dim);
+  margin-bottom: 48px;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 5vw, 52px);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1.15;
+  margin-bottom: 20px;
+}
+
+.hero-desc {
+  font-family: var(--font-body);
+  font-size: 17px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  max-width: 860px;
+  margin-bottom: 28px;
+}
+
+.hero-links { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.hero-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  padding: 10px 20px;
+  border-radius: 2px;
+  text-decoration: none;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.btn-blue {
+  background: var(--blue-dim);
+  border: 1px solid var(--blue-border);
+  color: var(--blue-primary);
+}
+.btn-blue:hover { background: rgba(0,170,255,0.12); box-shadow: 0 0 16px rgba(0,170,255,0.15); }
+
+.btn-red {
+  background: var(--red-dim);
+  border: 1px solid var(--red-border);
+  color: var(--red-primary);
+}
+.btn-red:hover { background: rgba(255,34,68,0.12); }
+
+.btn-gold {
+  background: var(--gold-dim);
+  border: 1px solid rgba(245,158,11,0.3);
+  color: var(--gold);
+}
+.btn-gold:hover { background: rgba(245,158,11,0.15); }
+
+/* DOCTRINE SECTION */
+.doctrine-section {
+  background: var(--bg-card);
+  border: 1px solid var(--purple-border);
+  border-radius: 4px;
+  padding: 32px;
+  margin-bottom: 48px;
+}
+
+.doctrine-section-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--purple);
+  letter-spacing: 0.06em;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.doctrine-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--purple-border);
+}
+
+.doctrine-text {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.85;
+  margin-bottom: 20px;
+}
+
+.doctrine-text strong { color: var(--text-primary); }
+.doctrine-text em { color: var(--purple); font-style: normal; font-weight: 600; }
+
+.doctrine-comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+@media(max-width:760px){ .doctrine-comparison { grid-template-columns: 1fr; } }
+
+.doc-panel {
+  border-radius: 3px;
+  padding: 18px;
+}
+
+.doc-panel-mitre {
+  background: rgba(71,85,105,0.1);
+  border: 1px solid rgba(71,85,105,0.3);
+}
+
+.doc-panel-mtdf {
+  background: var(--purple-dim);
+  border: 1px solid var(--purple-border);
+}
+
+.doc-panel-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  margin-bottom: 12px;
+}
+
+.doc-panel-list {
+  list-style: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.doc-panel-list li::before {
+  content: '→ ';
+  color: var(--text-dim);
+}
+
+.doc-panel-mtdf .doc-panel-list li::before { color: var(--purple); }
+
+/* TACTIC GRID */
+.tactic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-bottom: 48px;
+}
+
+.tactic-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 3px;
+  padding: 18px 20px;
+  text-decoration: none;
+  transition: all 0.25s;
+  display: block;
+}
+
+.tactic-card:hover {
+  border-color: var(--blue-border);
+  background: var(--blue-dim);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0,170,255,0.08);
+}
+
+.tactic-card-id {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--gold);
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.tactic-card-name {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.tactic-card-desc {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.tactic-card-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tactic-stat {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 2px;
+}
+
+/* CLUSTER VISUAL */
+.cluster-visual {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-dim);
+  border-radius: 4px;
+  padding: 28px;
+  margin-bottom: 48px;
+}
+
+.cluster-visual-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cluster-example {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: var(--bg-card);
+  border-radius: 3px;
+  border: 1px solid var(--border-dim);
+}
+
+.cluster-ex-title {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--purple);
+  letter-spacing: 0.12em;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+
+.cluster-nodes {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.cn-node {
+  background: var(--purple-dim);
+  border: 1px solid var(--purple-border);
+  color: var(--purple);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 6px 12px;
+  border-radius: 2px;
+}
+
+.cn-arrow { color: var(--text-dim); font-size: 14px; }
+
+.cn-intent {
+  background: var(--gold-dim);
+  border: 1px solid rgba(245,158,11,0.2);
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 6px 12px;
+  border-radius: 2px;
+}
+
+.cn-note {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-dim);
+  font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title">
+        <span class="t-red">MINIMUM TRUTH</span>
+        <span class="t-white"> DETECTION FRAMEWORK</span>
+      </div>
+      <div class="header-sub">ALA DABAT · GITHUB.COM/AZDABAT · ADVERSARY-INFORMED COMPOSITE DETECTION ENGINEERING</div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-red">RED TEAM BREAKDOWNS</span>
+      <span class="badge badge-blue">BLUE TEAM COMPOSITES</span>
+      <span class="badge badge-purple">COUSIN TECHNIQUE DOCTRINE</span>
+      <span class="badge badge-gold">★ NOVEL RESEARCH</span>
+    </div>
+  </div>
+</header>
+
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="nav-link active">Home</a>
+    <a href="execution.html" class="nav-link">Execution</a>
+    <a href="persistence.html" class="nav-link">Persistence</a>
+    <a href="privilege-escalation.html" class="nav-link">Privilege Escalation</a>
+    <a href="defense-evasion.html" class="nav-link">Defense Evasion</a>
+    <a href="credential-access.html" class="nav-link">Credential Access</a>
+    <a href="discovery.html" class="nav-link">Discovery</a>
+    <a href="lateral-movement.html" class="nav-link">Lateral Movement</a>
+    <a href="collection.html" class="nav-link">Collection</a>
+    <a href="c2.html" class="nav-link">C2</a>
+    <a href="exfiltration.html" class="nav-link">Exfiltration</a>
+    <a href="impact.html" class="nav-link">Impact</a>
+    <a href="novel-research.html" class="nav-link active-gold">★ Novel Research</a>
+  </div>
+</nav>
+
+<div class="main">
+
+  <div class="hero">
+    <div class="hero-title">
+      <span class="t-red">GOD MODE</span>
+      <span class="t-white"> COMPOSITE</span><br>
+      <span class="t-blue">DETECTION ROADMAP</span>
+    </div>
+    <p class="hero-desc">
+      The complete, adversary-informed detection engineering reference for every ATT&CK tactic — mapping core baseline composites, cousin technique ecosystems, and full red team attack methodology to the detection rules that catch them. Built on the <strong>Minimum Truth Detection Framework</strong> doctrine: every rule anchored on the irreducible minimum event that must exist for an attack to be structurally real.
+    </p>
+    <div class="hero-links">
+      <a href="execution.html" class="hero-btn btn-blue">→ Start: Execution</a>
+      <a href="lateral-movement.html" class="hero-btn btn-blue">→ Lateral Movement</a>
+      <a href="defense-evasion.html" class="hero-btn btn-red">→ Defense Evasion</a>
+      <a href="novel-research.html" class="hero-btn btn-gold">★ Novel Research</a>
+      <a href="https://github.com/azdabat" class="hero-btn btn-gold" target="_blank">⬡ GitHub Portfolio</a>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-number t-blue">14</div><div class="stat-label">ATT&CK Ecosystems</div></div>
+    <div class="stat-card"><div class="stat-number t-red">100+</div><div class="stat-label">Composite Rules</div></div>
+    <div class="stat-card"><div class="stat-number t-purple">12</div><div class="stat-label">Tactic Files</div></div>
+    <div class="stat-card"><div class="stat-number t-gold">3</div><div class="stat-label">Novel Research Families</div></div>
+    <div class="stat-card"><div class="stat-number t-green">ADX</div><div class="stat-label">Docker Validated</div></div>
+    <div class="stat-card"><div class="stat-number t-blue">KQL</div><div class="stat-label">Sentinel + MDE</div></div>
+  </div>
+
+  <!-- COUSIN TECHNIQUE DOCTRINE -->
+  <div class="doctrine-section">
+    <div class="doctrine-section-title">⬡ The Cousin Technique Doctrine</div>
+    <div class="doctrine-text">
+      MITRE ATT&CK provides a taxonomy of adversary techniques — describing <strong>what attackers do</strong> during an intrusion. ATT&CK models techniques with vertical depth: technique → sub-technique. What it does <em>not</em> model is <em>substrate adjacency</em> — the reality that many ATT&CK techniques represent the same adversary intent executed across different operating system substrates.
+    </div>
+    <div class="doctrine-text">
+      For example, lateral movement techniques such as <strong>SMB (T1021.002)</strong>, <strong>DCOM (T1021.003)</strong>, and <strong>WinRM (T1021.006)</strong> are operationally interchangeable for attackers. An adversary may pivot dynamically between them depending on firewall restrictions, privileges, or endpoint controls in place. Treating these techniques as independent detection problems creates a <em>false sense of coverage</em> — a SOC that has an SMB rule but no DCOM or WinRM rule has a gap an attacker will find.
+    </div>
+    <div class="doctrine-text">
+      The <strong>Minimum Truth Detection Framework</strong> introduces the <em>Cousin Technique Doctrine</em> — a layer that sits on top of ATT&CK and models adjacent techniques as part of a <em>shared attack ecosystem</em>. This enables detection engineers to reason about coverage gaps between related substrates, designing detection strategies that target <strong>adversary intent</strong> rather than isolated technique identifiers.
+    </div>
+
+    <div class="doctrine-comparison">
+      <div class="doc-panel doc-panel-mitre">
+        <div class="doc-panel-title t-dim">MITRE ATT&CK — VERTICAL DEPTH MODEL</div>
+        <ul class="doc-panel-list">
+          <li>Technique → Sub-technique hierarchy</li>
+          <li>Each technique treated as independent</li>
+          <li>Coverage mapped by TTP ID</li>
+          <li>No substrate adjacency modelling</li>
+          <li>Rule-per-technique approach</li>
+          <li>Gap: same intent, different substrate = missed</li>
+        </ul>
+      </div>
+      <div class="doc-panel doc-panel-mtdf">
+        <div class="doc-panel-title t-purple">MTDF COUSIN DOCTRINE — SUBSTRATE ADJACENCY LAYER</div>
+        <ul class="doc-panel-list">
+          <li>Cousin ecosystem clusters by shared intent</li>
+          <li>Adjacent substrates explicitly modelled</li>
+          <li>Coverage mapped by adversary intent</li>
+          <li>Minimum truth anchors cross-substrate</li>
+          <li>Composite rules catch intent regardless of substrate</li>
+          <li>Coverage gaps between cousins are visible and tracked</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLUSTER EXAMPLES -->
+  <div class="cluster-visual">
+    <div class="cluster-visual-title">⬡ Cousin Ecosystem Examples — Substrate Adjacency</div>
+
+    <div class="cluster-example">
+      <div class="cluster-ex-title">Lateral Movement Cousin Cluster — Remote Service Execution</div>
+      <div class="cluster-nodes">
+        <div class="cn-node">SMB/PsExec T1021.002</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">DCOM T1021.003</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">WinRM T1021.006</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">WMI T1047</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">SSH T1021.004</div>
+        <div class="cn-intent">SHARED INTENT: Remote Code Execution via Authenticated Channel</div>
+      </div>
+      <div class="cn-note">An attacker blocked on SMB will try WinRM. Blocked on WinRM will try DCOM. The intent is identical — only the substrate changes. A detection covering all five cousin substrates is structurally superior to five independent rules.</div>
+    </div>
+
+    <div class="cluster-example">
+      <div class="cluster-ex-title">Execution Cousin Cluster — LOLBin Trusted Binary Abuse</div>
+      <div class="cluster-nodes">
+        <div class="cn-node">Certutil T1218</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">Mshta T1218.005</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">Regsvr32 T1218.010</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">Rundll32 T1218.011</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">MSBuild T1127.001</div>
+        <div class="cn-intent">SHARED INTENT: Execute Arbitrary Code via Microsoft-Signed Binary</div>
+      </div>
+      <div class="cn-note">All five are signed Microsoft binaries with no legitimate reason to execute remote or user-supplied payloads. AppLocker/WDAC blocklisting one drives the attacker to the next. The cousin rule family catches the intent pattern regardless of which binary is used.</div>
+    </div>
+
+    <div class="cluster-example">
+      <div class="cluster-ex-title">Defense Evasion Cousin Cluster — Process Injection Substrate</div>
+      <div class="cluster-nodes">
+        <div class="cn-node">Classic Injection T1055.001</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">Process Hollowing T1055.012</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">Thread Hijacking T1055.003</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">APC Injection T1055.004</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">PPID Spoofing T1134.004</div>
+        <div class="cn-intent">SHARED INTENT: Execute Code Inside Legitimate Process Memory Space</div>
+      </div>
+      <div class="cn-note">All five achieve the same outcome: malicious code runs inside a trusted process. The substrate-first minimum truth — OpenProcess + memory write + remote thread or APC queue — is structurally similar across all variants.</div>
+    </div>
+
+    <div class="cluster-example">
+      <div class="cluster-ex-title">Credential Access Cousin Cluster — OS Credential Dumping</div>
+      <div class="cluster-nodes">
+        <div class="cn-node">LSASS Memory T1003.001</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">DCSync T1003.006</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">SAM Database T1003.002</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">NTDS.dit T1003.003</div>
+        <div class="cn-arrow">⟷</div>
+        <div class="cn-node">Cached Creds T1003.005</div>
+        <div class="cn-intent">SHARED INTENT: Extract Credential Material from Windows Authentication Stores</div>
+      </div>
+      <div class="cn-note">Block LSASS direct memory access and the attacker pivots to DCSync. Block DCSync and they dump the SAM hive via registry export. Each cousin rule covers a different access path to the same credential material.</div>
+    </div>
+  </div>
+
+  <!-- TACTIC NAVIGATION GRID -->
+  <div style="margin-bottom:20px">
+    <div style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary);letter-spacing:0.05em;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
+      ATT&CK TACTIC FILES
+      <span style="flex:1;height:1px;background:var(--border-dim);display:block;"></span>
+    </div>
+  </div>
+
+  <div class="tactic-grid">
+
+    <a href="execution.html" class="tactic-card">
+      <div class="tactic-card-id">TA0002 · EXECUTION</div>
+      <div class="tactic-card-name">Execution</div>
+      <div class="tactic-card-desc">PowerShell, WMI, LOLBins, scripting interpreters, scheduled tasks. The moment code runs on a host.</div>
+      <div class="tactic-card-stats">
+        <span class="tactic-stat badge-blue">8 Ecosystems</span>
+        <span class="tactic-stat badge-red">24+ Cousins</span>
+      </div>
+    </a>
+
+    <a href="persistence.html" class="tactic-card">
+      <div class="tactic-card-id">TA0003 · PERSISTENCE</div>
+      <div class="tactic-card-name">Persistence</div>
+      <div class="tactic-card-desc">Registry run keys, WMI subscriptions, scheduled tasks, DLL sideloading, boot sector modification.</div>
+      <div class="tactic-card-stats">
+        <span class="tactic-stat badge-blue">6 Ecosystems</span>
+        <span class="tactic-stat badge-red">18+ Cousins</span>
+      </div>
+    </a>
+
+    <a href="privilege-escalation.html" class="tactic-card">
+      <div class="tactic-card-id">TA0004 · PRIVILEGE ESCALATION</div>
+      <div class="tactic-card-name">Privilege Escalation</div>
+      <div class="tactic-card-desc">Process injection, UAC bypass, token impersonation, named pipe abuse, exploit-based escalation.</div>
+      <div class="tactic-card-stats">
+        <span class="tactic-stat badge-blue">5 Ecosystems</span>
+        <span class="tactic-stat badge-red">15+ Cousins</span>
+      </div>
+    </a>
+
+    <a href="defense-evasion.html" class="tactic-card">
+      <div class="tactic-card-id">TA0005 · DEFENSE EVASION</div>
+      <div class="tactic-card-name">Defense Evasion</div>
+      <div class="tactic-card-desc">BYOVD, EDR kill chains, AMSI bypass, log tampering, obfuscation, timestomping, masquerading.</div>
+      <div class="tactic-card-stats">
+        <span class="tactic-stat badge-blue">7 Ecosystems</span>
+        <span class="tactic-stat badge-red">22+ Cousins</span>
+        <span class="tactic-stat badge-gold">BYOVD Research</span>
+      </div>
+    </a>
+
+    <a href="credential-access.html" class="tactic-card">
+      <div class="tactic-card-id">TA0006 · CREDENTIAL ACCESS</div>
+      <div class="tactic-card-name">Credential Access</div>
+      <div class="tactic-card-desc">LSASS dumping, DCSync, Kerberoasting, AS-REP Roasting, credential file theft, keylogging.</div>
+      <div class="tactic-card-stats">
+        <span class="tactic-stat badge-blue">6 Ecosystems</span>
+        <span class="tactic-stat badge-red">16+ Cousins</span>
+      </div>
+    </a>
+
+    <a href="discovery.html" class="tactic-card">
+      <div class="tactic-card-id">TA0007 · DISCOVERY</div>
+      <div class="tactic-card-name">Discovery</div>
+      <div class="tactic-card-desc">Network sweeps, BloodHound AD enumeration, port scanning, share enumeration, process/service discovery.</div>
+      <div class="tactic-card-stats">
+        <span class="tactic-stat badge-blue">5 Ecosystems</span>
+        <span class="tactic-stat badge-red">14+ Cousins</span>
+      </div>
+    </a>
+
+    <a href="lateral-movement.html" class="tactic-card">
+      <div class="tactic-card-id">TA0008 · LATERAL MOVEMENT</div>
+      <div class="tactic-card-name">Lateral Movement</div>
+      <div class="tactic-card-desc">SMB/DCOM/WinRM/WMI cousin cluster, pass-the-hash, pass-the-ticket, RDP abuse, SSH tunnelling.</div>
+      <div class="tactic-card-stats">
+        <span class="tactic-stat badge-blue">6 Ecosystems</span>
+        <span class="tactic-stat badge-red">18+ Cousins</span>
+        <span class="tactic-stat badge-purple">Doctrine Centrepiece</span>
+      </div>
+    </a>
+
+    <a href="collection.html" class="tactic-card">
+      <div class="tactic-card-id">TA0009 · COLLECTION</div>
+      <div class="tactic-card-name">Collection</div>
+      <div class="tactic-card-desc">Data staging, archive creation, clipboard theft, email collection, browser credential harvesting.</div>
+      <div class="tactic-card-stats">
+        <span class="tactic-stat badge-blue">4 Ecosystems</span>
+        <span class="tactic-stat badge-red">10+ Cousins</span>
+      </div>
+    </a>
+
+    <a href="c2.html" class="tactic-card">
+      <div class="tactic-card-id">TA0011 · COMMAND & CONTROL</div>
+      <div class="tactic-card-name">Command & Control</div>
+      <div class="tactic-card-desc">HTTPS beaconing, DNS tunnelling, blockchain C2, domain fronting, protocol tunnelling, C2 over legitimate services.</div>
+      <div class="tactic-card-stats">
+        <span class="tactic-stat badge-blue">5 Ecosystems</span>
+        <span class="tactic-stat badge-red">14+ Cousins</span>
+        <span class="tactic-stat badge-gold">EtherRAT Research</span>
+      </div>
+    </a>
+
+    <a href="exfiltration.html" class="tactic-card">
+      <div class="tactic-card-id">TA0010 · EXFILTRATION</div>
+      <div class="tactic-card-name">Exfiltration</div>
+      <div class="tactic-card-desc">Volume anomaly detection, cloud storage exfil, DNS exfil, protocol-based exfil, scheduled transfer.</div>
+      <div class="tactic-card-stats">
+        <span class="tactic-stat badge-blue">4 Ecosystems</span>
+        <span class="tactic-stat badge-red">10+ Cousins</span>
+      </div>
+    </a>
+
+    <a href="impact.html" class="tactic-card">
+      <div class="tactic-card-id">TA0040 · IMPACT</div>
+      <div class="tactic-card-name">Impact</div>
+      <div class="tactic-card-desc">Ransomware in-progress detection, VSS deletion, data destruction, service disruption, defacement.</div>
+      <div class="tactic-card-stats">
+        <span class="tactic-stat badge-blue">4 Ecosystems</span>
+        <span class="tactic-stat badge-red">10+ Cousins</span>
+      </div>
+    </a>
+
+    <a href="novel-research.html" class="tactic-card" style="border-color:rgba(245,158,11,0.2);">
+      <div class="tactic-card-id" style="color:var(--gold);">★ ORIGINAL MTDF RESEARCH</div>
+      <div class="tactic-card-name" style="color:var(--gold);">Novel Threat Research</div>
+      <div class="tactic-card-desc">SilverFox/ValleyRAT BYOVD, EtherRAT blockchain C2, Steganographic loaders. No vendor coverage. Original detection engineering.</div>
+      <div class="tactic-card-stats">
+        <span class="tactic-stat badge-gold">3 Families</span>
+        <span class="tactic-stat badge-green">15+ Original Rules</span>
+        <span class="tactic-stat badge-gold">IR SOPs</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- FRAMEWORK PRINCIPLES -->
+  <div style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:32px;margin-bottom:48px;">
+    <div style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--text-primary);letter-spacing:0.05em;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
+      MTDF CORE PRINCIPLES
+      <span style="flex:1;height:1px;background:var(--border-dim);display:block;"></span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">
+
+      <div style="background:var(--blue-dim);border:1px solid var(--blue-border);border-radius:3px;padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--blue-primary);letter-spacing:0.12em;margin-bottom:8px;">MINIMUM TRUTH ANCHORING</div>
+        <div style="font-family:var(--font-body);font-size:13px;color:var(--text-secondary);line-height:1.7;">Every composite rule anchors on the irreducible minimum event that must exist for an attack to be structurally real — substrate-first where no command line is visible, intent-first where the primitive implies capability.</div>
+      </div>
+
+      <div style="background:var(--red-dim);border:1px solid var(--red-border);border-radius:3px;padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--red-primary);letter-spacing:0.12em;margin-bottom:8px;">COUSIN TECHNIQUE COVERAGE</div>
+        <div style="font-family:var(--font-body);font-size:13px;color:var(--text-secondary);line-height:1.7;">Adjacent techniques sharing the same adversary intent are modelled as cousin ecosystems. Detection covers the intent cluster, not just the specific TTP — eliminating substrate pivot gaps.</div>
+      </div>
+
+      <div style="background:var(--purple-dim);border:1px solid var(--purple-border);border-radius:3px;padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--purple);letter-spacing:0.12em;margin-bottom:8px;">CUMULATIVE CONVERGENCE SCORING</div>
+        <div style="font-family:var(--font-body);font-size:13px;color:var(--text-secondary);line-height:1.7;">Binary alerting replaced by cumulative scoring. The anchor fires at low confidence; reinforcement signals elevate to high. Noise reduced ~30% in production without suppressing high-risk truth.</div>
+      </div>
+
+      <div style="background:var(--gold-dim);border:1px solid rgba(245,158,11,0.2);border-radius:3px;padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--gold);letter-spacing:0.12em;margin-bottom:8px;">30-DAY ATOMIC PRIMITIVE INDEX</div>
+        <div style="font-family:var(--font-body);font-size:13px;color:var(--text-secondary);line-height:1.7;">Entity-keyed primitive events tracked across 30 days. Defeats temporal deception — C2 jitter, delayed BYOVD staging, slow-burn APT persistence that time-windowed rules cannot address.</div>
+      </div>
+
+      <div style="background:var(--green-dim);border:1px solid rgba(0,255,136,0.2);border-radius:3px;padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--green);letter-spacing:0.12em;margin-bottom:8px;">ADX-DOCKER VALIDATION PIPELINE</div>
+        <div style="font-family:var(--font-body);font-size:13px;color:var(--text-secondary);line-height:1.7;">Automated telemetry ingestion pipeline validating composite rules against Empire and Atomic Red Team simulated attack telemetry. All rules are production-validated, not theoretical.</div>
+      </div>
+
+      <div style="background:rgba(0,0,0,0.2);border:1px solid var(--border-dim);border-radius:3px;padding:16px;">
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-dim);letter-spacing:0.12em;margin-bottom:8px;">MISP CTI INTEGRATION</div>
+        <div style="font-family:var(--font-body);font-size:13px;color:var(--text-secondary);line-height:1.7;">Private MISP lab integrating STIX/TAXII feeds into composite rule generation — closing the pipeline from raw IOC ingestion through to validated KQL output aligned to ATT&CK.</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  ALA DABAT · MINIMUM TRUTH DETECTION FRAMEWORK · <a href="https://github.com/azdabat" style="color:var(--blue-primary);text-decoration:none;" target="_blank">GITHUB.COM/AZDABAT</a><br>
+  ADVERSARY-INFORMED · COMPOSITE-FIRST · COUSIN TECHNIQUE DOCTRINE · ADX-DOCKER VALIDATED<br><br>
+  <span class="t-red">RED TEAM CONTENT</span> — All attack methodology at CEH/OSCP/public disclosure level. Techniques documented in MITRE ATT&CK, academic literature, and professional certification curricula.
+</footer>
+
+<a href="#" class="scroll-top" title="Back to top">↑</a>
+<script src="mtdf.js"></script>
+</body>
+</html>

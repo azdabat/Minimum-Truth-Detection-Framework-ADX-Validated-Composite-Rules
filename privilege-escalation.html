@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTDF — Privilege Escalation | TA0004</title>
+<link rel="stylesheet" href="mtdf.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title"><span class="t-white">MTDF · </span><span class="t-red">PRIVILEGE ESCALATION</span><span class="t-dim"> · TA0004</span></div>
+      <div class="header-sub">GAINING SYSTEM/ADMIN FROM USER CONTEXT · PROCESS INJECTION · UAC BYPASS · TOKEN IMPERSONATION</div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-gold">TA0004</span>
+      <span class="badge badge-blue">5 ECOSYSTEMS</span>
+      <span class="badge badge-red">15+ COUSIN RULES</span>
+    </div>
+  </div>
+</header>
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="execution.html" class="nav-link">Execution</a>
+    <a href="persistence.html" class="nav-link">Persistence</a>
+    <a href="privilege-escalation.html" class="nav-link active">Privilege Escalation</a>
+    <a href="defense-evasion.html" class="nav-link">Defense Evasion</a>
+    <a href="credential-access.html" class="nav-link">Credential Access</a>
+    <a href="discovery.html" class="nav-link">Discovery</a>
+    <a href="lateral-movement.html" class="nav-link">Lateral Movement</a>
+    <a href="collection.html" class="nav-link">Collection</a>
+    <a href="c2.html" class="nav-link">C2</a>
+    <a href="exfiltration.html" class="nav-link">Exfiltration</a>
+    <a href="impact.html" class="nav-link">Impact</a>
+    <a href="novel-research.html" class="nav-link active-gold">★ Novel Research</a>
+  </div>
+</nav>
+<div class="main">
+
+<div class="intro-box intro-box-red">
+  ⬆️ PRIVILEGE ESCALATION — Gaining SYSTEM or administrator from a standard user context. <strong>Minimum truth doctrine:</strong> a process running as a low-privileged user spawns a child or acquires a token running at higher integrity without an explicit authorised admin action. The cousin doctrine maps all escalation substrates: block UAC bypass via fodhelper and the attacker uses eventvwr or ComputerDefaults. Block named pipe impersonation and they attempt token theft via a different impersonation vector.
+</div>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-number t-red">5</div><div class="stat-label">Core Ecosystems</div></div>
+  <div class="stat-card"><div class="stat-number t-red">15+</div><div class="stat-label">Cousin Rules</div></div>
+  <div class="stat-card"><div class="stat-number t-gold">T1055</div><div class="stat-label">Primary TTP</div></div>
+</div>
+
+<div style="background:var(--bg-card);border:1px solid var(--purple-border);border-radius:4px;padding:20px 24px;margin-bottom:32px;">
+  <div class="doctrine-label">⬡ PRIVILEGE ESCALATION COUSIN CLUSTER — SHARED INTENT: EXECUTE CODE AT HIGHER INTEGRITY LEVEL</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+    <div class="cn-node">Process Inject T1055</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">UAC Bypass T1548.002</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Token Impersonation T1134</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Named Pipe T1134.001</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">BYOVD T1068</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Exploit T1068</div>
+  </div>
+</div>
+
+<!-- ECOSYSTEM 1: UAC Bypass -->
+<div class="ecosystem open" id="eco-uac">
+  <div class="eco-header" onclick="toggleEco('eco-uac')">
+    <div class="eco-id">T1548.002</div>
+    <div><div class="eco-title">UAC Bypass — Auto-Elevation Abuse</div><div class="eco-sub">PRIVILEGE ESCALATION · DEFENSE EVASION · ABUSE ELEVATION CONTROL MECHANISM</div></div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">Auto-Elevating Binary Spawning Unexpected Child — Registry COM Hijack Pre-Exec</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · MDE</a>
+        <a href="https://attack.mitre.org/techniques/T1548/002/" class="link-ext" target="_blank">🔗 T1548.002 UAC Bypass</a>
+        <a href="https://github.com/hfiref0x/UACME" class="link-ext" target="_blank">🔗 UACME — UAC Bypass Methods</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">UAC bypass techniques elevate from medium to high integrity without triggering the UAC prompt. <strong>Minimum truth:</strong> an auto-elevating binary (fodhelper.exe, eventvwr.exe, ComputerDefaults.exe, sdclt.exe) spawning an unexpected child process, OR a HKCU registry write to a COM object or file association immediately before one of these auto-elevating binaries executes.<br><br>The two-stage detection: (1) HKCU COM hijack write → (2) auto-elevating binary execution within 60 seconds. Catching stage 1 allows intervention before elevation occurs.</div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text"><strong>Fodhelper bypass (OSCP standard, no admin needed):</strong><br>
+            1. Write malicious command to <code>HKCU\Software\Classes\ms-settings\shell\open\command</code><br>
+            2. Execute <code>fodhelper.exe</code> — auto-elevates and reads this registry key<br>
+            3. Payload executes at high integrity — no UAC prompt shown<br><br>
+            Works on default Windows 10/11. The auto-elevating binary provides the privilege escalation vector — the attacker only needs to write to HKCU (no admin required). Over 60 different UAC bypass methods documented in <a href="https://github.com/hfiref0x/UACME" class="link-ext" target="_blank">UACME</a>.
+            <div class="tags-row">
+              <a href="https://github.com/hfiref0x/UACME" class="tag tag-red" target="_blank">UACME</a>
+              <span class="tag tag-red">Empire bypassuac</span>
+              <span class="tag tag-red">Metasploit getsystem</span>
+              <span class="tag tag-red">fodhelper/eventvwr/sdclt bypass</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES</div>
+      <div class="cousin-grid">
+
+        <div class="cousin-card" id="cc-priv-token">
+          <div class="cousin-header" onclick="toggleCousin('cc-priv-token')">
+            <div class="cousin-icon">🔴</div>
+            <div><div class="cousin-name">Token Impersonation / Named Pipe Privilege Escalation</div><div class="cousin-ttp-badge">T1134 · T1134.001</div></div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1134/" class="link-ext" target="_blank">🔗 T1134 Access Token Manipulation</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Privilege Escalation (service account → SYSTEM)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Token impersonation via named pipes exploits the Windows impersonation mechanism: create a named pipe server, trick a SYSTEM service into connecting to it, impersonate the SYSTEM token from the connection. <strong>Detection:</strong> non-SYSTEM processes calling <code>ImpersonateNamedPipeClient</code> or <code>NtImpersonateThread</code>, or processes with <code>SeImpersonatePrivilege</code> enabled that should not have it (IIS worker processes, SQL service accounts).</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text"><strong>Potato attacks (JuicyPotato, RoguePotato, PrintSpoofer):</strong> All abuse Windows token impersonation to escalate from a service account with SeImpersonatePrivilege to SYSTEM. If you have code execution as IIS (Network Service) or SQL Server service account, Potato-class attacks reliably achieve SYSTEM on most Windows versions without patching.
+                <div class="tags-row">
+                  <a href="https://github.com/ohpe/juicy-potato" class="tag tag-red" target="_blank">JuicyPotato</a>
+                  <a href="https://github.com/antonioCoco/RoguePotato" class="tag tag-red" target="_blank">RoguePotato</a>
+                  <a href="https://github.com/itm4n/PrintSpoofer" class="tag tag-red" target="_blank">PrintSpoofer</a>
+                  <span class="tag tag-red">GodPotato</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-priv-unquoted">
+          <div class="cousin-header" onclick="toggleCousin('cc-priv-unquoted')">
+            <div class="cousin-icon">🔴</div>
+            <div><div class="cousin-name">Unquoted Service Path Hijacking</div><div class="cousin-ttp-badge">T1574.009</div></div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1574/009/" class="link-ext" target="_blank">🔗 T1574.009</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: Privilege Escalation (persistent, executes on service start)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Windows services with unquoted paths containing spaces allow DLL/exe planting in intermediate path positions. If a service path is <code>C:\Program Files\My App\service.exe</code> (unquoted), Windows will try <code>C:\Program.exe</code> first. If an attacker can write to <code>C:\</code> or <code>C:\Program Files\</code> they can plant a binary that executes as SYSTEM on service restart. <strong>Detection:</strong> new executables created in directories matching unquoted service path intermediaries.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">Common in enterprise environments with legacy third-party software. Enumerated with: <code>wmic service get name,displayname,pathname,startmode | findstr /i "auto" | findstr /i /v "c:\windows\\" | findstr /i /v '\"'</code>. A reliable OSCP privilege escalation on unpatched Windows systems.
+                <div class="tags-row">
+                  <span class="tag tag-red">OSCP privesc technique</span>
+                  <span class="tag tag-red">PowerUp Get-ServiceUnquoted</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<footer class="site-footer">
+  ALA DABAT · MTDF · PRIVILEGE ESCALATION TA0004 · <a href="persistence.html" style="color:var(--blue-primary);text-decoration:none;">← Persistence</a> · <a href="defense-evasion.html" style="color:var(--blue-primary);text-decoration:none;">Defense Evasion →</a>
+</footer>
+<a href="#" class="scroll-top">↑</a>
+<script src="mtdf.js"></script>
+</body>
+</html>

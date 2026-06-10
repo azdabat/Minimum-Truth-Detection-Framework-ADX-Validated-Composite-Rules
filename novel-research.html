@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTDF — Novel Research | Original Threat Families</title>
+<link rel="stylesheet" href="mtdf.css">
+<style>
+.research-hero {
+  background: linear-gradient(135deg, #1a1000 0%, #0a0812 50%, #001a0a 100%);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: 4px;
+  padding: 32px;
+  margin-bottom: 40px;
+  position: relative;
+  overflow: hidden;
+}
+.research-hero::before {
+  content: '★ ORIGINAL RESEARCH';
+  position: absolute;
+  top: 16px; right: 20px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.2em;
+  opacity: 0.5;
+}
+.research-hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(16px, 3vw, 24px);
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+.research-hero-desc {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  max-width: 900px;
+}
+
+.tier-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--green);
+  background: var(--green-dim);
+  border: 1px solid rgba(0,255,136,0.2);
+  padding: 3px 10px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.detection-tier {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-dim);
+  border-radius: 3px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.detection-tier-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--green);
+  letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+
+.detection-tier-desc {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.detection-tier-desc code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-mid);
+  padding: 1px 5px;
+  border-radius: 2px;
+  color: var(--blue-text);
+}
+
+.kill-chain-flow {
+  background: var(--bg-card);
+  border: 1px solid var(--border-dim);
+  border-radius: 3px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.kill-chain-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.kc-step-num {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--red-primary);
+  background: var(--red-dim);
+  border: 1px solid var(--red-border);
+  width: 24px;
+  height: 24px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.kc-step-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.kc-step-text strong { color: var(--text-primary); }
+.kc-step-text code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-mid);
+  padding: 1px 5px;
+  border-radius: 2px;
+  color: var(--blue-text);
+}
+
+.evasion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.evasion-item {
+  background: var(--red-dim);
+  border: 1px solid var(--red-border);
+  border-radius: 3px;
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--red-text);
+  letter-spacing: 0.06em;
+}
+
+.evasion-num {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--red-primary);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title">
+        <span class="t-gold">★ NOVEL RESEARCH</span>
+        <span class="t-white"> — ORIGINAL MTDF THREAT FAMILIES</span>
+      </div>
+      <div class="header-sub">SILVERFOX / VALLEYRAT · ETHERRAT / REACT2SHELL CVE-2025-55182 · STEGANOGRAPHIC LOADER ECOSYSTEM · NO VENDOR COVERAGE</div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-gold">ORIGINAL RESEARCH</span>
+      <span class="badge badge-green">3 THREAT FAMILIES</span>
+      <span class="badge badge-green">15+ ORIGINAL RULES</span>
+      <span class="badge badge-blue">3 IR SOPs</span>
+    </div>
+  </div>
+</header>
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="execution.html" class="nav-link">Execution</a>
+    <a href="persistence.html" class="nav-link">Persistence</a>
+    <a href="privilege-escalation.html" class="nav-link">Privilege Escalation</a>
+    <a href="defense-evasion.html" class="nav-link">Defense Evasion</a>
+    <a href="credential-access.html" class="nav-link">Credential Access</a>
+    <a href="discovery.html" class="nav-link">Discovery</a>
+    <a href="lateral-movement.html" class="nav-link">Lateral Movement</a>
+    <a href="collection.html" class="nav-link">Collection</a>
+    <a href="c2.html" class="nav-link">C2</a>
+    <a href="exfiltration.html" class="nav-link">Exfiltration</a>
+    <a href="impact.html" class="nav-link">Impact</a>
+    <a href="novel-research.html" class="nav-link active-gold">★ Novel Research</a>
+  </div>
+</nav>
+<div class="main">
+
+<div class="research-hero">
+  <div class="research-hero-title">Original MTDF Threat Research</div>
+  <div class="research-hero-desc">
+    The following threat families represent original detection engineering research — threat actors and malware families for which no vendor rule pack coverage exists at time of research. All detection rules are original, validated against simulated attack telemetry using the MTDF ADX-Docker pipeline, and published at <a href="https://github.com/azdabat" style="color:var(--gold);" target="_blank">github.com/azdabat</a>. Each family is documented from kill chain through detection engineering — understanding why an attack works structurally is the prerequisite for building detection that works.
+  </div>
+</div>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-number t-gold">3</div><div class="stat-label">Novel Families</div></div>
+  <div class="stat-card"><div class="stat-number t-red">15+</div><div class="stat-label">Original Rules</div></div>
+  <div class="stat-card"><div class="stat-number t-blue">3</div><div class="stat-label">IR SOPs</div></div>
+  <div class="stat-card"><div class="stat-number t-green">ADX</div><div class="stat-label">Docker Validated</div></div>
+  <div class="stat-card"><div class="stat-number t-gold">0</div><div class="stat-label">Vendor Pack Coverage</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- NOVEL RESEARCH #1: SilverFox / ValleyRAT -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="novel-card open" id="silverfox">
+  <div class="novel-header" onclick="toggleNovel('silverfox')">
+    <div class="novel-badge">NOVEL RESEARCH #1</div>
+    <div class="novel-title">SilverFox / ValleyRAT — BYOVD EDR Kill Chain</div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="novel-body">
+
+    <div class="links-row" style="margin-bottom:20px;">
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 SilverFox-BYOVD-Core-Hunt.kql</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 SilverFox-BYOVD-Advanced-Hunt.kql</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 SilverFox_ValleyRAT_Stager.kql</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 SilverFox_ValleyRAT_ScriptStager.kql</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 SilverFox_ValleyRAT_AdvancedRule.kql</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 SilverFox-BYOVD-Vs-Polymorphic-Malware README</a>
+      <a href="https://github.com/azdabat" class="link-rd" target="_blank">📄 View Full Repository on GitHub</a>
+    </div>
+
+    <div class="two-col" style="margin-bottom:24px;">
+      <div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--gold);letter-spacing:0.12em;margin-bottom:12px;text-transform:uppercase;">Threat Overview</div>
+        <div style="font-family:var(--font-body);font-size:14px;color:var(--text-secondary);line-height:1.8;">
+          <strong style="color:var(--text-primary);">Actor:</strong> Chinese-nexus threat group targeting finance, cryptocurrency, and enterprise Windows environments in targeted campaigns.<br><br>
+          <strong style="color:var(--text-primary);">Classification:</strong> Multi-stage RAT with BYOVD kernel-level EDR kill chain. SilverFox is the loader — ValleyRAT is the final payload.<br><br>
+          <strong style="color:var(--text-primary);">Why it matters:</strong> Seven distinct evasion layers operating in sequence. Each layer individually is detectable — together they form a chain designed to defeat defence-in-depth at every stage. Signature-based controls fail entirely.
+        </div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--red-primary);letter-spacing:0.12em;margin-bottom:12px;text-transform:uppercase;">Evasion Layer Analysis</div>
+        <div class="evasion-grid">
+          <div class="evasion-item"><div class="evasion-num">1</div>Signed Loader<br>(trusted cert)</div>
+          <div class="evasion-item"><div class="evasion-num">2</div>DLL Sideload<br>(LOLBin trust)</div>
+          <div class="evasion-item"><div class="evasion-num">3</div>BYOVD Driver<br>(MS-signed)</div>
+          <div class="evasion-item"><div class="evasion-num">4</div>Kernel Callback<br>Deregistration</div>
+          <div class="evasion-item"><div class="evasion-num">5</div>EDR Blind<br>(no telemetry)</div>
+          <div class="evasion-item"><div class="evasion-num">6</div>Byte-flip Hash<br>Mutation</div>
+          <div class="evasion-item"><div class="evasion-num">7</div>Encrypted C2<br>(HTTPS + JA3)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- RED TEAM KILL CHAIN -->
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--red-primary);letter-spacing:0.15em;margin-bottom:14px;text-transform:uppercase;">🔴 FULL KILL CHAIN — Attacker Perspective</div>
+    <div class="kill-chain-flow">
+      <div class="kill-chain-step">
+        <div class="kc-step-num">1</div>
+        <div class="kc-step-text"><strong>Initial Delivery:</strong> Phishing delivers a <strong>signed loader binary</strong> (legitimate code-signing certificate, custom packer). Binary appears as a legitimate installer or update package. Hash is unique — not in any IOC database.</div>
+      </div>
+      <div class="kill-chain-step">
+        <div class="kc-step-num">2</div>
+        <div class="kc-step-text"><strong>DLL Sideloading:</strong> Signed loader drops a malicious DLL alongside a legitimate Microsoft-signed binary. When that binary executes, it loads the malicious DLL via Windows DLL search order. The executing process is signed and trusted — EDR sees a legitimate application loading a DLL.</div>
+      </div>
+      <div class="kill-chain-step">
+        <div class="kc-step-num">3</div>
+        <div class="kc-step-text"><strong>Vulnerable Driver Drop:</strong> Sideloaded DLL drops a known-vulnerable signed kernel driver (e.g. <code>gdrv.sys</code> — Gigabyte driver, <code>iqvw64e.sys</code> — Intel Network Adapter). Driver is Microsoft-signed (or signed by a trusted hardware vendor). <strong>Byte-flipping applied to the binary</strong> before drop — hash is now unique, defeating all hash-based IOC blocks. Certificate thumbprint remains unchanged.</div>
+      </div>
+      <div class="kill-chain-step">
+        <div class="kc-step-num">4</div>
+        <div class="kc-step-text"><strong>BYOVD Exploitation:</strong> Driver vulnerability exploited to gain kernel-mode code execution (ring-0). From the kernel, attacker executes shellcode that calls <code>PsSetCreateProcessNotifyRoutine</code> with a NULL pointer to deregister EDR process-creation callbacks, and <code>ObRegisterCallbacks</code> deregistration to remove EDR object access callbacks. EDR is now completely blind — it cannot see new process creation, memory reads, or network connections.</div>
+      </div>
+      <div class="kill-chain-step">
+        <div class="kc-step-num">5</div>
+        <div class="kc-step-text"><strong>Driver Unload:</strong> BYOVD driver unloaded immediately after callback deregistration to reduce forensic footprint. The EDR remains blind even after the driver is removed — the kernel callbacks were already deregistered.</div>
+      </div>
+      <div class="kill-chain-step">
+        <div class="kc-step-num">6</div>
+        <div class="kc-step-text"><strong>ValleyRAT Deployment:</strong> With EDR neutralised, ValleyRAT RAT deployed with full persistence (registry run key, scheduled task, or WMI subscription). RAT establishes HTTPS C2 with custom JA3 profile mimicking legitimate browser. Beacon interval 2-4 hours with 30% jitter — evades statistical beaconing detection.</div>
+      </div>
+      <div class="kill-chain-step">
+        <div class="kc-step-num">7</div>
+        <div class="kc-step-text"><strong>Long-Term Persistence:</strong> ValleyRAT provides modular plugin capability — keylogging, screen capture, credential theft, lateral movement. Actor conducts intelligence collection over weeks or months. No obvious destructive activity — designed for long-term persistent access.</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- BLUE TEAM DETECTION -->
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--blue-primary);letter-spacing:0.15em;margin-bottom:14px;text-transform:uppercase;">🔵 DETECTION COVERAGE — 7 Rules, 3 Validation Tiers</div>
+
+    <div class="detection-tier">
+      <div class="tier-label">TIER 1 — STAGER DETECTION</div>
+      <div class="detection-tier-title">SilverFox_ValleyRAT_Stager.kql + SilverFox_ValleyRAT_ScriptStager.kql</div>
+      <div class="detection-tier-desc">Signed loader anomaly composite: legitimate code-signing certificate on a binary executing from a user-writable path, combined with parent process anomaly (browser, email client) and DLL sideload detection. The sideloaded DLL is loaded by a legitimate signed application — detection anchors on the DLL appearing in a non-standard path alongside the legitimate binary, combined with subsequent network or child process activity.</div>
+    </div>
+
+    <div class="detection-tier">
+      <div class="tier-label">TIER 2 — BYOVD CHAIN DETECTION</div>
+      <div class="detection-tier-title">SilverFox-BYOVD-Core-Hunt.kql + SilverFox-BYOVD-Advanced-Hunt.kql</div>
+      <div class="detection-tier-desc">
+        <strong>Core rule:</strong> vulnerable driver service creation from a non-system process → driver file written to non-system path → driver loaded → kernel callback deregistration attempt (DeviceIoControl to driver handle with known exploit IOCTL codes).<br><br>
+        <strong>Advanced rule:</strong> certificate thumbprint matching — the vulnerable driver's code-signing certificate thumbprint is matched regardless of file hash mutation. Byte-flip evasion defeated: the certificate thumbprint cannot be changed without re-signing, and the known-vulnerable certificate is the identifying artefact.<br><br>
+        <strong>30-day Atomic Sentinel Layer:</strong> driver drop event tracked independently — a driver staged and not immediately loaded is caught when it is eventually executed, even days later. Defeats the staged BYOVD pattern.
+      </div>
+    </div>
+
+    <div class="detection-tier">
+      <div class="tier-label">TIER 3 — VALLEYRAT RAT DETECTION</div>
+      <div class="detection-tier-title">SilverFox_ValleyRAT_AdvancedRule.kql</div>
+      <div class="detection-tier-desc">ValleyRAT post-EDR-kill behaviour: process injection into a system process (PPID spoofed to appear as legitimate parent), C2 beaconing with statistical periodicity analysis (2-4 hour intervals, jitter-tolerant composite), persistent connection to Ethereum or custom C2 infrastructure. Module loading behaviour — ValleyRAT's plugin architecture loads additional DLLs into the host process on demand.</div>
+    </div>
+
+    <div class="detection-tier">
+      <div class="tier-label">SPECIAL RESEARCH — BYOVD VS POLYMORPHIC MALWARE</div>
+      <div class="detection-tier-title">SilverFox-BYOVD-Vs-Polymorphic-Malware README + LOLDRIVER Master Composite</div>
+      <div class="detection-tier-desc">Original research publication documenting why all signature-based controls fail against SilverFox/ValleyRAT: (1) signed loader — trusted cert, (2) LOLBin sideload — known-good application, (3) Microsoft-signed vulnerable driver, (4) byte-flip hash mutation — unique hash, (5) encrypted C2 — no payload inspection possible, (6) kernel-blind EDR — no telemetry generated. The LOLDRIVER master composite (MISP-integrated) provides the behaviour-based substrate detection that defeats all seven evasion layers.</div>
+    </div>
+
+    <div class="links-row" style="margin-top:16px;">
+      <a href="defense-evasion.html#eco-byovd" class="link-ext">🔗 See Defense Evasion: BYOVD Ecosystem</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- NOVEL RESEARCH #2: EtherRAT / React2Shell -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="novel-card open" id="etherrat">
+  <div class="novel-header" onclick="toggleNovel('etherrat')">
+    <div class="novel-badge">NOVEL RESEARCH #2</div>
+    <div class="novel-title">EtherRAT / React2Shell — Blockchain C2 via CVE-2025-55182</div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="novel-body">
+
+    <div class="links-row" style="margin-bottom:20px;">
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 React2Shell_CVE-2025-55182.kql</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 React2Shell_CVE-2025-55182_AnalyticMode.kql</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 React2Shell_CVE-2025-55182_HuntMode.kql</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 React2Shell_CVE-2025-55182_L3_Hunt_V.kql</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 React2Shell + EtherRAT Combined Detection</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 Test Handbook.md</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 Threat Modelling Attacks.md</a>
+      <a href="https://github.com/azdabat" class="link-rd" target="_blank">📄 Full Repository: React2Shell_EtherRAT</a>
+    </div>
+
+    <div class="intro-box intro-box-gold" style="margin-bottom:20px;">
+      ⚡ WHY THIS MATTERS — EtherRAT delivers C2 via the Ethereum blockchain. There is no C2 server to sinkhole, no domain to block, no IP to blacklist. The C2 infrastructure IS the public blockchain. This represents a fundamental shift in C2 architecture that defeats all traditional C2 detection approaches based on domain/IP reputation, domain age, or sinkholing.
+    </div>
+
+    <div class="two-col" style="margin-bottom:24px;">
+      <div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--gold);letter-spacing:0.12em;margin-bottom:12px;">CVE-2025-55182 — REACT2SHELL IIS EXPLOIT</div>
+        <div style="font-family:var(--font-body);font-size:14px;color:var(--text-secondary);line-height:1.8;">
+          <strong style="color:var(--text-primary);">Vulnerability:</strong> React2Shell IIS exploit chain allowing remote code execution on IIS web servers via malformed React component rendering request.<br><br>
+          <strong style="color:var(--text-primary);">Impact:</strong> Unauthenticated RCE on IIS → SYSTEM-level code execution → EtherRAT deployment → persistent blockchain C2.<br><br>
+          <strong style="color:var(--text-primary);">Attack surface:</strong> Any IIS server running the vulnerable React rendering component, including enterprise intranet applications, SharePoint installations, and custom web applications.
+        </div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--gold);letter-spacing:0.12em;margin-bottom:12px;">ETHERRAT — BLOCKCHAIN C2 ARCHITECTURE</div>
+        <div style="font-family:var(--font-body);font-size:14px;color:var(--text-secondary);line-height:1.8;">
+          <strong style="color:var(--text-primary);">C2 mechanism:</strong> Commands embedded in Ethereum transaction <code>input data</code> field. EtherRAT polls a public blockchain API (Infura, Alchemy) at regular intervals for transactions addressed to its designated wallet.<br><br>
+          <strong style="color:var(--text-primary);">Why uncensorable:</strong> The Ethereum blockchain is a distributed, censorship-resistant public ledger. No single entity can remove a transaction or block the attacker's address. The C2 channel cannot be taken down — it can only be detected.
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--red-primary);letter-spacing:0.15em;margin-bottom:14px;text-transform:uppercase;">🔴 FULL KILL CHAIN — Why Blockchain C2 Is a Step Change</div>
+    <div class="kill-chain-flow">
+      <div class="kill-chain-step">
+        <div class="kc-step-num">1</div>
+        <div class="kc-step-text"><strong>Exploitation:</strong> Attacker sends malformed React rendering request to target IIS server → CVE-2025-55182 triggers → <code>w3wp.exe</code> (IIS worker process) executes attacker shellcode → SYSTEM-level code execution achieved without authentication.</div>
+      </div>
+      <div class="kill-chain-step">
+        <div class="kc-step-num">2</div>
+        <div class="kc-step-text"><strong>EtherRAT Deployment:</strong> Shellcode downloads and executes EtherRAT from a staging server (one-time connection — staging server can be taken down after delivery with no impact on ongoing C2). EtherRAT establishes on the target system and begins polling.</div>
+      </div>
+      <div class="kill-chain-step">
+        <div class="kc-step-num">3</div>
+        <div class="kc-step-text"><strong>Blockchain Polling:</strong> EtherRAT polls a public Ethereum API endpoint (<code>mainnet.infura.io</code> or <code>eth-mainnet.alchemyapi.io</code>) at randomised intervals. All traffic is HTTPS to a legitimate blockchain infrastructure provider — indistinguishable from legitimate blockchain application traffic. No dedicated C2 server exists.</div>
+      </div>
+      <div class="kill-chain-step">
+        <div class="kc-step-num">4</div>
+        <div class="kc-step-text"><strong>Command Delivery:</strong> Attacker sends an Ethereum transaction (cost: fractions of a cent in gas fees) to EtherRAT's designated wallet address, with the encoded command in the transaction <code>input data</code> field. The transaction is immediately visible on the public blockchain — anyone can read it, but only EtherRAT knows to look for it and how to decode it.</div>
+      </div>
+      <div class="kill-chain-step">
+        <div class="kc-step-num">5</div>
+        <div class="kc-step-text"><strong>Command Execution:</strong> EtherRAT detects the new transaction, decodes the command from <code>input data</code>, executes it on the target system, encodes the output in a new transaction sent back to the attacker's monitoring address. Full bidirectional C2 entirely via public blockchain infrastructure.</div>
+      </div>
+      <div class="kill-chain-step">
+        <div class="kc-step-num">6</div>
+        <div class="kc-step-text"><strong>Persistence:</strong> EtherRAT installs persistence (scheduled task or WMI subscription). Even if the initial IIS vulnerability is patched, the RAT continues operating. The C2 channel remains active indefinitely — the Ethereum blockchain cannot be taken down or the attacker's address blocked without blockchain-level governance changes.</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--blue-primary);letter-spacing:0.15em;margin-bottom:14px;text-transform:uppercase;">🔵 DETECTION COVERAGE — React2Shell + EtherRAT Multi-Layer</div>
+
+    <div class="detection-tier">
+      <div class="tier-label">IIS EXPLOIT DETECTION — React2Shell CVE-2025-55182</div>
+      <div class="detection-tier-title">React2Shell_CVE-2025-55182.kql + L3 Hunt Variant</div>
+      <div class="detection-tier-desc">
+        <strong>Exploit detection:</strong> <code>w3wp.exe</code> (IIS worker process) spawning cmd.exe, PowerShell, or any non-IIS child process — high-fidelity signal with very low false positive rate. Reinforcement: IIS request log entries matching exploit path pattern, anomalous HTTP response codes from IIS application pools, <code>w3wp.exe</code> initiating outbound network connections (staging server download).<br><br>
+        <strong>Analytic mode vs Hunt mode:</strong> Analytic rule (scheduled, lower threshold, higher FP tolerance for coverage) and Hunt mode rule (higher threshold, for proactive threat hunting sessions) provided as separate KQL variants.
+      </div>
+    </div>
+
+    <div class="detection-tier">
+      <div class="tier-label">BLOCKCHAIN C2 DETECTION — EtherRAT Polling</div>
+      <div class="detection-tier-title">React2Shell + EtherRAT Combined Detection</div>
+      <div class="detection-tier-desc">
+        <strong>Blockchain API polling detection:</strong> Outbound HTTPS connections to known Ethereum API providers (<code>mainnet.infura.io</code>, <code>eth-mainnet.alchemyapi.io</code>, <code>rpc.ankr.com/eth</code>) from non-developer host processes — specifically from IIS worker processes, Windows services, or scheduled task processes. Regular interval polling (beaconing pattern detection applied to blockchain API calls).<br><br>
+        <strong>Transaction parsing detection:</strong> Processes reading and executing content parsed from JSON responses containing Ethereum transaction <code>input</code> fields — the decode-to-execute pattern that is structurally identical to the PowerShell download cradle pattern but using blockchain API responses as the delivery mechanism.<br><br>
+        <strong>Why standard C2 detection fails:</strong> No malicious domain. No suspicious IP. HTTPS to Infura.io — a legitimate, widely-used Ethereum infrastructure provider used by thousands of legitimate blockchain applications. Domain/IP reputation-based detection is completely blind.
+      </div>
+    </div>
+
+    <div class="detection-tier">
+      <div class="tier-label">INCIDENT RESPONSE — IR SOP</div>
+      <div class="detection-tier-title">Test Handbook.md + Threat Modelling Attacks.md</div>
+      <div class="detection-tier-desc">
+        Full incident response procedure for EtherRAT/React2Shell compromise: evidence collection sequence (IIS logs, w3wp.exe memory dump, network traffic capture for blockchain API calls), IOC extraction (EtherRAT wallet address from process memory → monitor blockchain for all transactions to/from that address → complete C2 communication history publicly visible on Ethereum blockchain), persistence mechanism removal, and post-incident monitoring for re-infection via alternative initial access vectors.
+      </div>
+    </div>
+
+    <div class="links-row" style="margin-top:16px;">
+      <a href="c2.html#cc-c2-blockchain" class="link-ext">🔗 See C2: Blockchain C2 Cousin Rule</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- NOVEL RESEARCH #3: Steganographic Loaders -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="novel-card open" id="stego">
+  <div class="novel-header" onclick="toggleNovel('stego')">
+    <div class="novel-badge">NOVEL RESEARCH #3</div>
+    <div class="novel-title">Steganographic Loader Ecosystem — Image-Based Payload Delivery</div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="novel-body">
+
+    <div class="links-row" style="margin-bottom:20px;">
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 Stego-Image-Loader.kql</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 Stego_Image_Based_Loader.kql</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 Stego_Image_Loader_Phase2.kql</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 Stego_.NET_In_Memory_Hunt.kql</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 Stego_Attack_Report.md</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 Stego_Threat_Hunters_Incident_Response_SOP.md</a>
+      <a href="#" class="link-rule" onclick="return insertLink(this)">📎 Web-Based Stego-Loader Explained.md</a>
+      <a href="https://github.com/azdabat" class="link-rd" target="_blank">📄 Full Repository: Stego_Threat_Analysis_And_Hunter_Pack</a>
+    </div>
+
+    <div class="intro-box intro-box-blue" style="margin-bottom:20px;">
+      🔵 DETECTION PRINCIPLE — Steganographic payloads cannot be detected by scanning the carrier image — it is a valid, displayable image with correct headers. Detection is entirely behavioural: the anomalous action of a scripting engine reading an image file and executing the parsed result. No signature of the image itself is possible or useful.
+    </div>
+
+    <div class="two-col" style="margin-bottom:24px;">
+      <div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--gold);letter-spacing:0.12em;margin-bottom:12px;">THE TECHNIQUE</div>
+        <div style="font-family:var(--font-body);font-size:14px;color:var(--text-secondary);line-height:1.8;">
+          Malicious payload encoded in the least-significant bits (LSB) of image pixel data (PNG/BMP/JPEG). The carrier image is a valid image file that displays normally — correct headers, valid colour data, viewable in any image viewer.<br><br>
+          The payload is invisible to the human eye and to all signature-based security controls. No embedded PE, no obvious malicious strings, no detection by hash or YARA signatures that scan file content.
+        </div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-mono);font-size:10px;color:var(--red-primary);letter-spacing:0.12em;margin-bottom:12px;">WHY IT EVADES</div>
+        <div style="font-family:var(--font-body);font-size:14px;color:var(--text-secondary);line-height:1.8;">
+          No malicious file ever exists on disk — payload only materialises in memory after LSB extraction. Network DLP inspects the image download and sees a legitimate PNG. Email gateway scans the attachment and finds a valid image. AV scans the file and finds no malicious signatures. The only detectable artifact is the extraction script's behaviour.
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--red-primary);letter-spacing:0.15em;margin-bottom:14px;text-transform:uppercase;">🔴 FULL KILL CHAIN — Multi-Phase Delivery</div>
+    <div class="kill-chain-flow">
+      <div class="kill-chain-step">
+        <div class="kc-step-num">1</div>
+        <div class="kc-step-text"><strong>Delivery:</strong> Phishing email, compromised website, or drive-by download delivers the carrier image file (or links to a hosted image). The image displays normally if viewed — a corporate logo, a banner, an invoice header image. No suspicious file extension, no warning from email gateway.</div>
+      </div>
+      <div class="kill-chain-step">
+        <div class="kc-step-num">2</div>
+        <div class="kc-step-text"><strong>Dropper Execution:</strong> A small dropper script (VBS, PowerShell, or a LOLBin) downloads or reads the image file and begins LSB extraction. The dropper may itself be delivered via a separate phishing mechanism or be embedded in a malicious Office document. The dropper reads the image pixel data using native image APIs or .NET System.Drawing.</div>
+      </div>
+      <div class="kill-chain-step">
+        <div class="kc-step-num">3</div>
+        <div class="kc-step-text"><strong>LSB Extraction:</strong> Dropper reads each pixel's least-significant bit, assembles them into bytes, decodes from base64 or XOR-encoded payload. The extracted data is shellcode or a full PE (executable) — loaded directly into memory via VirtualAlloc/WriteProcessMemory. No decoded file is ever written to disk.</div>
+      </div>
+      <div class="kill-chain-step">
+        <div class="kc-step-num">4</div>
+        <div class="kc-step-text"><strong>In-Memory Execution:</strong> Payload executes entirely in memory — Cobalt Strike shellcode, a RAT, or a next-stage loader. If .NET-based, loaded via <code>Assembly.Load()</code> from the decoded byte array — the .NET in-memory load leaves a specific telemetry footprint detectable by the Stego_.NET_In_Memory_Hunt.kql rule.</div>
+      </div>
+      <div class="kill-chain-step">
+        <div class="kc-step-num">5</div>
+        <div class="kc-step-text"><strong>Persistence and C2:</strong> In-memory payload establishes persistence and C2 using standard techniques. The steganographic delivery chain has left no forensic artifacts — no malicious files on disk, no suspicious network traffic during delivery (the image download was legitimate), no signature matches.</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--blue-primary);letter-spacing:0.15em;margin-bottom:14px;text-transform:uppercase;">🔵 DETECTION COVERAGE — Multi-Phase Detection Suite</div>
+
+    <div class="detection-tier">
+      <div class="tier-label">PHASE 1 — IMAGE ACCESS ANOMALY</div>
+      <div class="detection-tier-title">Stego-Image-Loader.kql + Stego_Image_Based_Loader.kql</div>
+      <div class="detection-tier-desc">
+        <strong>Minimum truth:</strong> A scripting engine (PowerShell, VBScript, cscript.exe) or a non-image-editing process opening an image file (PNG/BMP/JPEG/GIF) and then executing or loading content derived from that file access within 30 seconds.<br><br>
+        <strong>Reinforcement:</strong> Image file accessed from TEMP or AppData (not a user's documents folder), image file downloaded immediately before access (browser or BITS download then immediate script access), process making the access was spawned from an Office application or phishing delivery vector.<br><br>
+        Statistical entropy analysis of the image file itself is supplementary — LSB-encoded images have slightly higher pixel value entropy in the LSB layer than natural images, detectable via post-alert forensic analysis.
+      </div>
+    </div>
+
+    <div class="detection-tier">
+      <div class="tier-label">PHASE 2 — IN-MEMORY EXECUTION</div>
+      <div class="detection-tier-title">Stego_Image_Loader_Phase2.kql + Stego_.NET_In_Memory_Hunt.kql</div>
+      <div class="detection-tier-desc">
+        <strong>Phase 2 anchor:</strong> The image-reading process or its child executing shellcode from a memory region that was populated by data read from an image file. MDE DeviceEvents surfaces <code>VirtualAlloc</code> + <code>WriteProcessMemory</code> + execute sequence from a process that previously performed image file reads.<br><br>
+        <strong>.NET in-memory variant:</strong> <code>Assembly.Load()</code> called from a process that read image pixel data — the byte array origin can be traced to the image read operation in process telemetry. The .NET assembly loaded has no corresponding file on disk — the MDE "image load" event shows no file path.
+      </div>
+    </div>
+
+    <div class="detection-tier">
+      <div class="tier-label">INCIDENT RESPONSE</div>
+      <div class="detection-tier-title">Stego_Threat_Hunters_Incident_Response_SOP.md + Stego_Attack_Report.md</div>
+      <div class="detection-tier-desc">
+        Full IR procedure for confirmed stego-loader compromise: evidence collection (process memory dump of the extraction script's runtime — the decoded payload may still be in process heap), extraction of the carrier image for forensic LSB analysis, network traffic capture for C2 identification, and scope assessment (how many hosts received the same carrier image from the same delivery mechanism). Web-Based Stego-Loader Explained.md documents the web-delivery variant where the image is served from a compromised website rather than delivered via email.
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--gold);letter-spacing:0.12em;margin-bottom:10px;">KNOWN THREAT ACTORS USING STEGANOGRAPHIC TECHNIQUES</div>
+      <div class="tags-row">
+        <span class="tag tag-red">Witchetty/Stegmap (LuoYu)</span>
+        <span class="tag tag-red">ZLoader stego variant</span>
+        <span class="tag tag-red">Duqu 2.0</span>
+        <a href="https://attack.mitre.org/groups/G0049/" class="tag tag-gold" target="_blank">APT34 (OilRig)</a>
+        <a href="https://attack.mitre.org/groups/G0010/" class="tag tag-gold" target="_blank">Turla</a>
+        <a href="https://attack.mitre.org/groups/G0096/" class="tag tag-gold" target="_blank">APT41</a>
+        <span class="tag tag-blue">No vendor rule coverage at time of research</span>
+      </div>
+    </div>
+
+    <div class="links-row" style="margin-top:16px;">
+      <a href="defense-evasion.html#cc-obf-stealth" class="link-ext">🔗 See Defense Evasion: Steganographic Payload Concealment</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADDITIONAL RESEARCH -->
+<div style="background:var(--bg-card);border:1px solid var(--border-dim);border-radius:4px;padding:24px;margin-top:32px;">
+  <div style="font-family:var(--font-display);font-size:13px;font-weight:700;color:var(--text-primary);letter-spacing:0.05em;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+    ADDITIONAL RESEARCH ARTEFACTS
+    <span style="flex:1;height:1px;background:var(--border-dim);display:block;"></span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">
+
+    <div style="background:var(--bg-secondary);border:1px solid var(--border-dim);border-radius:3px;padding:14px;">
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--blue-primary);margin-bottom:8px;">PULSAR RAT POC</div>
+      <div style="font-family:var(--font-body);font-size:13px;color:var(--text-secondary);line-height:1.6;">Proof-of-concept detection for PulsarRAT command and control infrastructure. KQL rule covering PulsarRAT beaconing patterns and process injection technique.</div>
+      <div class="links-row" style="margin-top:8px;">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 PulsarRAT_POC.kql</a>
+      </div>
+    </div>
+
+    <div style="background:var(--bg-secondary);border:1px solid var(--border-dim);border-radius:3px;padding:14px;">
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--gold);margin-bottom:8px;">HIJACKED LIBRARIES — SUPPLY CHAIN</div>
+      <div style="font-family:var(--font-body);font-size:13px;color:var(--text-secondary);line-height:1.6;">Supply chain attack detection covering hijacked library distribution (SolarWinds-style, 3CX-style). IOC list of compromised package versions integrated via MISP supply chain feed.</div>
+      <div class="links-row" style="margin-top:8px;">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 hijack-libs.csv · MISP Feed</a>
+      </div>
+    </div>
+
+    <div style="background:var(--bg-secondary);border:1px solid var(--border-dim);border-radius:3px;padding:14px;">
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--purple);margin-bottom:8px;">THREAT MODELLING PROJECT</div>
+      <div style="font-family:var(--font-body);font-size:13px;color:var(--text-secondary);line-height:1.6;">STRIDE-aligned threat modelling documentation for enterprise web application attack surfaces. Covers AI/LLM-specific threat classes including prompt injection, model abuse, and agentic architecture risks.</div>
+      <div class="links-row" style="margin-top:8px;">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 Threat Modelling Project #1.md</a>
+      </div>
+    </div>
+
+    <div style="background:var(--bg-secondary);border:1px solid var(--border-dim);border-radius:3px;padding:14px;">
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--green);margin-bottom:8px;">GHOST PIXELS — PURPLE TEAM PLAYBOOK</div>
+      <div style="font-family:var(--font-body);font-size:13px;color:var(--text-secondary);line-height:1.6;">Full purple team engagement playbook for steganographic loader detection validation. Attack simulation procedures, detection validation steps, and coverage gap analysis methodology.</div>
+      <div class="links-row" style="margin-top:8px;">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 Ghost Pixels Purple Team Playbook</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</div>
+
+<footer class="site-footer">
+  ALA DABAT · MINIMUM TRUTH DETECTION FRAMEWORK · <a href="https://github.com/azdabat" style="color:var(--blue-primary);text-decoration:none;" target="_blank">GITHUB.COM/AZDABAT</a><br>
+  ADVERSARY-INFORMED · COMPOSITE-FIRST · COUSIN TECHNIQUE DOCTRINE · ADX-DOCKER VALIDATED · ORIGINAL RESEARCH<br><br>
+  <span class="t-red">RED TEAM CONTENT</span> — All attack methodology at CEH/OSCP/public disclosure level. Techniques documented in MITRE ATT&CK, academic literature, and professional certification curricula.<br>
+  All original research is the intellectual property of Ala Dabat. Published for the security community under responsible disclosure principles.
+</footer>
+
+<a href="#" class="scroll-top">↑</a>
+<script src="mtdf.js"></script>
+</body>
+</html>

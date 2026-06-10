@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MTDF — Command & Control | TA0011</title>
+<link rel="stylesheet" href="mtdf.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title"><span class="t-white">MTDF · </span><span class="t-red">COMMAND &amp; CONTROL</span><span class="t-dim"> · TA0011</span></div>
+      <div class="header-sub">THE ATTACKER'S LIFELINE · HTTPS BEACONING · DNS TUNNELLING · BLOCKCHAIN C2 · DOMAIN FRONTING</div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-gold">TA0011</span>
+      <span class="badge badge-blue">5 ECOSYSTEMS</span>
+      <span class="badge badge-red">14+ COUSIN RULES</span>
+      <span class="badge badge-gold">ETHERRAT RESEARCH</span>
+    </div>
+  </div>
+</header>
+<nav class="site-nav">
+  <div class="site-nav-inner">
+    <a href="index.html" class="nav-link">Home</a>
+    <a href="execution.html" class="nav-link">Execution</a>
+    <a href="persistence.html" class="nav-link">Persistence</a>
+    <a href="privilege-escalation.html" class="nav-link">Privilege Escalation</a>
+    <a href="defense-evasion.html" class="nav-link">Defense Evasion</a>
+    <a href="credential-access.html" class="nav-link">Credential Access</a>
+    <a href="discovery.html" class="nav-link">Discovery</a>
+    <a href="lateral-movement.html" class="nav-link">Lateral Movement</a>
+    <a href="collection.html" class="nav-link">Collection</a>
+    <a href="c2.html" class="nav-link active-red">C2</a>
+    <a href="exfiltration.html" class="nav-link">Exfiltration</a>
+    <a href="impact.html" class="nav-link">Impact</a>
+    <a href="novel-research.html" class="nav-link active-gold">★ Novel Research</a>
+  </div>
+</nav>
+<div class="main">
+
+<div class="intro-box intro-box-red">
+  📡 COMMAND &amp; CONTROL — The attacker's lifeline. Cutting C2 ends the intrusion. <strong>Minimum truth doctrine:</strong> periodic beaconing behaviour distinguishes C2 from legitimate traffic — regular intervals, consistent payload sizes, machine-driven periodicity that human browsing does not produce. The cousin doctrine covers all C2 channel substrates — block HTTPS beaconing and the attacker pivots to DNS tunnelling. Block DNS → domain fronting. Block domain fronting → blockchain C2 (EtherRAT — see Novel Research).
+</div>
+
+<div class="stats-row">
+  <div class="stat-card"><div class="stat-number t-red">5</div><div class="stat-label">Core Ecosystems</div></div>
+  <div class="stat-card"><div class="stat-number t-red">14+</div><div class="stat-label">Cousin Rules</div></div>
+  <div class="stat-card"><div class="stat-number t-gold">T1071</div><div class="stat-label">Primary TTP</div></div>
+  <div class="stat-card"><div class="stat-number t-green">NOVEL</div><div class="stat-label">EtherRAT Research</div></div>
+</div>
+
+<div style="background:var(--bg-card);border:1px solid var(--purple-border);border-radius:4px;padding:20px 24px;margin-bottom:32px;">
+  <div class="doctrine-label">⬡ C2 CHANNEL COUSIN CLUSTER — SHARED INTENT: MAINTAIN PERSISTENT COVERT COMMUNICATION CHANNEL</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+    <div class="cn-node">HTTPS Beacon T1071.001</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">DNS Tunnel T1071.004</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Domain Front T1090.004</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Legitimate SaaS T1102</div><div class="cn-arrow">⟷</div>
+    <div class="cn-node">Blockchain C2 T1071</div>
+  </div>
+  <div style="font-family:var(--font-body);font-size:13px;color:var(--text-dim);font-style:italic;">All five achieve the same outcome: attacker commands reach the compromised host and responses return undetected. Each cousin uses a different substrate to evade C2 detection — from statistical beaconing analysis (HTTPS) to protocol anomaly (DNS) to infrastructure abuse (domain fronting) to truly uncensorable channels (blockchain). See Novel Research for EtherRAT blockchain C2.</div>
+</div>
+
+<!-- ECOSYSTEM 1: HTTPS Beaconing -->
+<div class="ecosystem open" id="eco-https-c2">
+  <div class="eco-header" onclick="toggleEco('eco-https-c2')">
+    <div class="eco-id">T1071.001 · T1573</div>
+    <div><div class="eco-title">HTTPS C2 Beaconing — Encrypted Channel Detection</div><div class="eco-sub">C2 · APPLICATION LAYER PROTOCOL · ENCRYPTED CHANNEL · STATISTICAL DETECTION</div></div>
+    <div class="eco-toggle">▼</div>
+  </div>
+  <div class="eco-body">
+    <div class="core-composite">
+      <div class="core-label">🔵 CORE BASELINE COMPOSITE</div>
+      <div class="core-rule-name">Beaconing Periodicity Anchor — Jitter-Tolerant Statistical Interval Composite</div>
+      <div class="links-row">
+        <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · KQL · Sentinel Network Analytics</a>
+        <a href="https://attack.mitre.org/techniques/T1071/001/" class="link-ext" target="_blank">🔗 T1071.001</a>
+        <a href="https://attack.mitre.org/techniques/T1573/" class="link-ext" target="_blank">🔗 T1573 Encrypted Channel</a>
+        <a href="novel-research.html" class="link-rd">📄 See Novel Research: EtherRAT Blockchain C2</a>
+      </div>
+      <div class="two-col">
+        <div class="panel-blue">
+          <div class="panel-label lbl-blue">🔵 BLUE TEAM</div>
+          <div class="panel-text">C2 beaconing is structurally distinct from human web traffic: it is periodic, consistent in payload size, and persists regardless of user activity (including overnight when no human is at the keyboard). <strong>Statistical composite:</strong> standard deviation of connection intervals to a single external host below threshold (machine-driven regularity), consistent byte sizes across connections, persistence overnight or across weekends when the user is absent.<br><br>Jitter is accommodated by analysing the distribution across 24 hours rather than exact intervals. <strong>Reinforcement:</strong> new domain (&lt;30 days), no HTTP Referer header, anomalous JA3/JA3S hash, parent process not a browser.</div>
+        </div>
+        <div class="panel-red">
+          <div class="panel-label lbl-red">🔴 RED TEAM</div>
+          <div class="panel-text"><strong>Cobalt Strike default profile:</strong> 60-second sleep, 0% jitter. Trivially caught by statistical analysis. <strong>Mature operators</strong> configure 1-4 hour sleep with 25-40% jitter and malleable C2 profiles mimicking legitimate browser traffic — matching JA3 hashes of Chrome, mimicking Google Analytics or Akamai CDN request patterns.<br><br><strong>Brute Ratel C4</strong> and <strong>Sliver C2</strong> are Cobalt Strike alternatives with built-in OPSEC profiles designed to evade statistical beaconing detection.<br><br>When all HTTP/S channels are blocked: <a href="novel-research.html" class="link-rd">EtherRAT uses the Ethereum blockchain as C2 — completely uncensorable</a>.
+            <div class="tags-row">
+              <span class="tag tag-red">Cobalt Strike beacon</span>
+              <a href="https://github.com/BishopFox/sliver" class="tag tag-red" target="_blank">Sliver C2</a>
+              <span class="tag tag-red">Brute Ratel C4</span>
+              <a href="novel-research.html" class="tag tag-gold">EtherRAT (MTDF Novel Research)</a>
+              <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29 NOBELIUM</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cousin-section">
+      <div class="cousin-section-label">🔴 COUSIN COMPOSITE RULES — C2 Channel Ecosystem</div>
+      <div class="cousin-grid">
+
+        <div class="cousin-card" id="cc-c2-dns">
+          <div class="cousin-header" onclick="toggleCousin('cc-c2-dns')">
+            <div class="cousin-icon">🔴</div>
+            <div><div class="cousin-name">DNS Tunnelling C2</div><div class="cousin-ttp-badge">T1071.004</div></div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1071/004/" class="link-ext" target="_blank">🔗 T1071.004 DNS</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: C2 (firewall-bypass — port 53 UDP almost never blocked)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">DNS tunnelling encodes C2 commands in DNS query subdomain labels and responses in TXT records. <strong>Detection signals:</strong> anomalous DNS query length (legitimate queries rarely exceed 50 chars in subdomain), high entropy in subdomain labels (base64/hex encoded data), high query frequency to a single domain (beacon polling), TXT record responses with unusually long or high-entropy content. Monitor for DNS queries to newly registered domains or domains without corresponding HTTP/S traffic.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text"><strong>Why DNS:</strong> Port 53 UDP is almost never blocked outbound. Many organisations don't log DNS at all — blind spot. The attacker controls the authoritative DNS server for their domain — every DNS query is a C2 check-in, every response is a command.<br><br>Command in query: <code>aGVsbG8=.cmd.evil.com</code> — base64-encoded command in subdomain label. Response in TXT record: base64-encoded output.
+                <div class="tags-row">
+                  <a href="https://github.com/iagox86/dnscat2" class="tag tag-red" target="_blank">DNScat2</a>
+                  <span class="tag tag-red">Iodine</span>
+                  <span class="tag tag-red">Cobalt Strike DNS beacon</span>
+                  <a href="https://attack.mitre.org/groups/G0050/" class="tag tag-gold" target="_blank">APT32 (OceanLotus)</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-c2-saas">
+          <div class="cousin-header" onclick="toggleCousin('cc-c2-saas')">
+            <div class="cousin-icon">🔴</div>
+            <div><div class="cousin-name">C2 via Legitimate Web Services</div><div class="cousin-ttp-badge">T1102 · T1102.002</div></div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1102/" class="link-ext" target="_blank">🔗 T1102 Web Service</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: C2 (blend into legitimate SaaS traffic — impossible to block by domain)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">C2 through legitimate services (GitHub, Slack, Teams, OneDrive, Pastebin, Twitter/X) uses trusted infrastructure that cannot be blocked without disrupting business. <strong>Detection:** focus on the process making the connection rather than the destination domain. A legitimate business process (Word, Excel, scheduled task result) connecting to GitHub API or Slack API is anomalous — the endpoint is legitimate but the initiating process context is not.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text"><strong>GitHub C2:</strong> Operator posts commands in a GitHub Gist or repository. Implant polls the Gist every N minutes, reads new commits, executes commands, writes output to another Gist. All traffic is to <code>api.github.com</code> — a domain no organisation can block. Same pattern works with Slack (webhook C2), OneDrive (SharePoint API), and Teams channels.<br><br>Used by APT29 (NOBELIUM) — C2 through legitimate Microsoft infrastructure.
+                <div class="tags-row">
+                  <span class="tag tag-red">GitHub Gist C2</span>
+                  <span class="tag tag-red">Slack webhook C2</span>
+                  <span class="tag tag-red">OneDrive C2</span>
+                  <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29 NOBELIUM</a>
+                  <a href="https://attack.mitre.org/groups/G0050/" class="tag tag-gold" target="_blank">APT32</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-c2-blockchain">
+          <div class="cousin-header" onclick="toggleCousin('cc-c2-blockchain')">
+            <div class="cousin-icon">🔴</div>
+            <div><div class="cousin-name">Blockchain C2 — EtherRAT / Immutable Channel</div><div class="cousin-ttp-badge">T1071 · Novel</div></div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK · React2Shell KQL</a>
+              <a href="novel-research.html" class="link-rd">📄 Full Novel Research: EtherRAT / React2Shell CVE-2025-55182</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: C2 (completely uncensorable — no C2 server to sinkhole)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Blockchain C2 embeds commands in Ethereum transaction input data. The RAT polls a public blockchain API (Infura, Alchemy) rather than a dedicated C2 server. <strong>Detection:</strong> outbound connections to Ethereum RPC endpoints (<code>mainnet.infura.io</code>, <code>eth-mainnet.alchemyapi.io</code>) from non-developer hosts, regular polling intervals to blockchain API endpoints, processes parsing transaction <code>input</code> field data and executing the result. See <a href="novel-research.html">MTDF Novel Research</a> for the full detection suite.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text"><strong>Why blockchain C2 is a step change:</strong> There is no C2 server to sinkhole, no domain to block, no IP to blacklist. The C2 infrastructure IS the Ethereum blockchain — a public, distributed, censorship-resistant ledger. Commands delivered by sending an Ethereum transaction (cost: pennies) with encoded command in the <code>input data</code> field. Entire C2 channel operates over legitimate HTTPS to blockchain infrastructure providers.<br><br>Original MTDF research — CVE-2025-55182 (React2Shell IIS exploit) used to deliver EtherRAT.
+                <div class="tags-row">
+                  <a href="novel-research.html" class="tag tag-gold">EtherRAT (MTDF Novel Research)</a>
+                  <a href="novel-research.html" class="tag tag-gold">CVE-2025-55182</a>
+                  <span class="tag tag-blue">No vendor coverage</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cousin-card" id="cc-c2-front">
+          <div class="cousin-header" onclick="toggleCousin('cc-c2-front')">
+            <div class="cousin-icon">🔴</div>
+            <div><div class="cousin-name">Domain Fronting via CDN</div><div class="cousin-ttp-badge">T1090.004</div></div>
+            <span class="cousin-toggle">▼</span>
+          </div>
+          <div class="cousin-body">
+            <div class="links-row">
+              <a href="#" class="link-rule" onclick="return insertLink(this)">📎 INSERT RULE LINK</a>
+              <a href="https://attack.mitre.org/techniques/T1090/004/" class="link-ext" target="_blank">🔗 T1090.004 Domain Fronting</a>
+            </div>
+            <div class="kc-badge">⚡ KILL CHAIN: C2 (masks true C2 destination behind legitimate CDN domain)</div>
+            <div class="attack-section">
+              <div class="attack-title at-blue">🔵 BLUE TEAM</div>
+              <div class="attack-text">Domain fronting uses a CDN's infrastructure so that the TLS SNI (visible in network inspection) shows a trusted domain (e.g. <code>microsoft.com</code> via Azure CDN) while the actual HTTP Host header inside the encrypted tunnel routes to the attacker's C2. <strong>Detection:</strong> TLS SNI / HTTP Host header mismatch, JA3 hash analysis for known Cobalt Strike/Brute Ratel profiles, anomalous certificate subject vs. connection destination.</div>
+            </div>
+            <div class="attack-section">
+              <div class="attack-title at-red">🔴 RED TEAM</div>
+              <div class="attack-text">Domain fronting was heavily used by APT29 (NOBELIUM) via Azure CDN — all traffic appeared destined for Microsoft infrastructure. Most major CDN providers (AWS CloudFront, Azure CDN, Cloudflare) have now implemented controls to prevent domain fronting, but misconfigured CDN tenants may still be abusable.
+                <div class="tags-row">
+                  <span class="tag tag-red">Cobalt Strike Malleable C2</span>
+                  <a href="https://attack.mitre.org/groups/G0016/" class="tag tag-gold" target="_blank">APT29</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+<footer class="site-footer">
+  ALA DABAT · MTDF · C2 TA0011 · <a href="collection.html" style="color:var(--blue-primary);text-decoration:none;">← Collection</a> · <a href="exfiltration.html" style="color:var(--blue-primary);text-decoration:none;">Exfiltration →</a>
+</footer>
+<a href="#" class="scroll-top">↑</a>
+<script src="mtdf.js"></script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+// ============================================================================
+// COMPOSITE HUNT (L2): Registry_Persistence_Winlogon_LSA_Hijack
+// Author: Ala Dabat
+// MITRE: T1547.004 (Winlogon Helper DLL),
+//        T1547.009 (Shortcut Modification — partial; Shell value),
+//        T1547.008 (LSASS Driver — LSA Security Packages),
+//        T1556.002 (Password Filter DLL — LSA Notification Packages)
+//
+// TRUTH ANCHOR  — Substrate-first
+//   A write to Winlogon Userinit, Shell, or LSA Security/Notification Packages
+//   IS the minimum truth. These values are set once during OS installation and
+//   almost never change in production. The substrate write itself is the attack —
+//   reinforcement signals increase confidence but are not required to fire.
+//
+// NOISE DOMAIN  — VERY LOW
+//   Winlogon Userinit and Shell: written once at OS install by TrustedInstaller.
+//   LSA Security Packages: written by AV/EDR during install, then static.
+//   LSA Notification Packages: written by domain controllers; on workstations,
+//   any write is suspicious.
+//   This surface has the lowest legitimate-write rate in the registry ecosystem.
+//   A single write by any non-trusted process is actionable at HIGH minimum.
+//
+// DESIGN NOTE — Why Winlogon and LSA are in the same composite
+//   Both surfaces are low-noise, both are session-initialisation mechanisms,
+//   both are substrate-first, and both share the same suppression model
+//   (TrustedInstaller + system identity only). Splitting them would create
+//   two rules with near-identical filtering and scoring — that violates the
+//   framework doctrine of splitting only when the noise domain or truth anchor
+//   changes meaningfully.
+//
+// COUSIN RULES
+//   Registry_Persistence_Userland_Autoruns         (Run keys — intent-first, high noise)
+//   Registry_Persistence_Execution_Interception    (IFEO/COM — substrate-first, low-medium noise)
+//   Registry_Persistence_AppPath_Hijack            (App Paths — intent-first, low noise)
+//   Registry_Persistence_Background_Service_TaskCache (already built)
+//
+// FIXES RELATIVE TO MONOLITH
+//   [FIX-1] OrgPrevalence window ends at ago(lookback).
+//   [FIX-2] WriterIsRare null SHA256 guard.
+//   [FIX-3] Base64 decode guarded with isnotempty().
+//   [FIX-4] HunterDirective before project and in column list.
+//   [FIX-6] Winlogon Shell and Userinit values were scored identically to
+//            LSA packages in the monolith. Shell modifications that add a
+//            comma-separated binary alongside explorer.exe are a distinct
+//            attack pattern (T1547.004) requiring a dedicated sub-flag and
+//            specific Hunter Directive pivot path. Added ShellCommaAppend flag.
+// ============================================================================
+
+let lookback = 14d;
+
+// ---------------------------------------------------------------------------
+// TUNABLE PARAMETERS
+// ---------------------------------------------------------------------------
+
+let TrustedPublishers = dynamic([
+    "Microsoft Corporation", "Microsoft Windows",
+    "Google LLC", "Mozilla Corporation"
+]);
+
+// Only TrustedInstaller and the OS setup process should ever write to these
+// keys in production. Any other writer is immediately elevated.
+let TrustedInitiators = dynamic([
+    "trustedinstaller.exe", "lsass.exe", "services.exe",
+    "sppsvc.exe", "winlogon.exe", "smss.exe",
+    // AV/EDR install Security Packages during initial installation only:
+    "msiexec.exe", "setup.exe", "install.exe"
+]);
+
+// Paths whose DLLs are expected in Winlogon/LSA values.
+let SystemPaths = dynamic([
+    @"c:\windows\system32",
+    @"c:\windows\syswow64"
+]);
+
+// User-writable paths — any Winlogon/LSA value pointing here is CRITICAL.
+let UserWritableRx = @"(?i)^[a-z]:\\(users|public|programdata|temp|downloads|appdata)\\";
+
+let DangerTokens = dynamic([
+    "powershell", "pwsh", "cmd.exe", "mshta", "rundll32",
+    "wscript", "cscript", "certutil", "bitsadmin",
+    "-enc", "-encodedcommand", "frombase64string",
+    "http:", "https:"
+]);
+
+let Base64ChunkedRx = @"(?:[A-Za-z0-9+/]{20,}={0,2})(?:\s+[A-Za-z0-9+/]{20,}={0,2})+";
+let IPv4Rx          = @"\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b";
+let DomainRx        = @"\b([a-z0-9][a-z0-9\-]{1,62}\.)+[a-z]{2,}\b";
+let UrlRx           = @"https?://[^\s'""<>]+";
+
+// ---------------------------------------------------------------------------
+// WINLOGON + LSA KEY SURFACE
+//
+// Winlogon Userinit: comma-separated list of executables run at logon.
+//   Default: "C:\Windows\system32\userinit.exe,"
+//   Attack: append "C:\Users\Public\malware.exe" after the trailing comma.
+//
+// Winlogon Shell: the shell process launched after logon.
+//   Default: "explorer.exe"
+//   Attack: "explorer.exe, C:\Temp\backdoor.exe" — the comma-appended binary
+//   launches alongside explorer with the same session token.
+//
+// LSA Security Packages: DLLs loaded into lsass.exe.
+//   Default: empty or "kerberos" on workstations.
+//   Attack: add a malicious DLL — it gets full access to credential material
+//   inside lsass.exe (T1547.008).
+//
+// LSA Notification Packages: DLLs that receive plaintext passwords on change.
+//   Default: "rassfm scecli" on domain controllers, empty on workstations.
+//   Attack: register a credential-harvesting DLL (T1556.002).
+// ---------------------------------------------------------------------------
+let WinlogonLSAKeys = dynamic([
+    @"software\microsoft\windows nt\currentversion\winlogon",     // Userinit + Shell
+    @"system\currentcontrolset\control\lsa"                       // Security + Notification packages
+]);
+
+// ---------------------------------------------------------------------------
+// [FIX-1] PREVALENCE
+// ---------------------------------------------------------------------------
+let OrgPrevalence =
+    DeviceFileEvents
+    | where Timestamp >= ago(30d) and Timestamp < ago(lookback)
+    | where isnotempty(SHA256)
+    | summarize WriterDeviceCount = dcount(DeviceId) by SHA256;
+
+// ---------------------------------------------------------------------------
+// MINIMUM TRUTH
+// The has_any on WinlogonLSAKeys combined with the value name gate below
+// gives us precise substrate coverage without widening to all Winlogon sub-keys.
+// ---------------------------------------------------------------------------
+let Raw =
+    DeviceRegistryEvents
+    | where Timestamp >= ago(lookback)
+    | where ActionType == "RegistryValueSet"
+    | extend
+        RK  = tolower(tostring(RegistryKey)),
+        RVN = tolower(tostring(RegistryValueName)),
+        RVD = tolower(tostring(RegistryValueData))
+    | where RK has_any (WinlogonLSAKeys)
+    // Value name gate: restrict to the specific values that constitute the attack surface.
+    // Without this gate, all Winlogon sub-key writes fire (screensaver, wallpaper etc.).
+    | where (
+        // Winlogon execution values
+        RVN in ("userinit", "shell", "appinit_dlls")
+        // LSA package values
+        or RVN in ("security packages", "notification packages", "authentication packages")
+        // Alternative LSA persistence path
+        or (RK has @"\control\lsa" and RVN == "seccli")
+    );
+
+// ---------------------------------------------------------------------------
+// NATIVE ENRICHMENT + PREVALENCE JOIN
+// ---------------------------------------------------------------------------
+let Enriched =
+    Raw
+    | extend
+        WriterFile    = tostring(InitiatingProcessFileName),
+        WriterCL      = tostring(InitiatingProcessCommandLine),
+        WriterSHA     = tostring(InitiatingProcessSHA256),
+        WriterSigner  = tostring(InitiatingProcessSigner),
+        WriterCompany = tostring(InitiatingProcessVersionInfoCompanyName),
+        WriterUser    = tostring(InitiatingProcessAccountName),
+        WriterPPID    = tostring(InitiatingProcessParentFileName)
+    | extend
+        WriterFileL            = tolower(coalesce(WriterFile, "")),
+        WriterCLL              = tolower(coalesce(WriterCL, "")),
+        WriterTrustedPublisher = toint(
+            WriterCompany in (TrustedPublishers)
+            or WriterSigner in (TrustedPublishers)),
+        WriterTrustedInitiator = toint(WriterFileL in (TrustedInitiators))
+    | join kind=leftouter OrgPrevalence on $left.WriterSHA == $right.SHA256
+    | extend
+        WriterDeviceCount = coalesce(WriterDeviceCount, 0),
+        WriterIsRare      = toint(isnotempty(WriterSHA) and WriterDeviceCount <= 2); // [FIX-2]
+
+// ---------------------------------------------------------------------------
+// SIGNAL FLAGS + SCORING
+// ---------------------------------------------------------------------------
+Enriched
+| extend
+    // --- Surface classification ---
+    IsUserinit     = toint(RVN == "userinit"),           // Logon executable chain
+    IsShell        = toint(RVN == "shell"),               // Shell replacement
+    IsSecPkg       = toint(RVN == "security packages"),  // LSASS DLL injection
+    IsNotifPkg     = toint(RVN == "notification packages" or RVN == "authentication packages"), // Credential harvest
+    IsLSA          = toint(RK has @"\control\lsa"),       // LSA key context
+
+    // [FIX-6] Shell comma-append detection:
+    // The canonical attack appends a binary after "explorer.exe," rather than
+    // replacing the entire Shell value. This pattern is distinct from a full
+    // replacement and indicates awareness of forensic detection of wholesale
+    // Shell replacement. Both are attacks but the comma pattern is more targeted.
+    ShellCommaAppend = toint(
+        RVN == "shell"
+        and RVD contains ","                              // Comma present — additional binary appended
+        and not(RVD == "explorer.exe")),                 // Not just the default
+
+    // --- DLL path context for LSA packages ---
+    // LSA security packages are typically just a DLL name (no path) — Windows
+    // resolves them from System32. A full path in this value is suspicious,
+    // especially if it points to a user-writable location.
+    PackagePointsNonSystem = toint(
+        IsLSA == 1
+        and strlen(RVD) > 20                             // Long enough to be a path
+        and not(RVD has_any (SystemPaths))),             // Not a system path
+
+    // --- Intent signals ---
+    HasDanger      = toint(RVD has_any (DangerTokens) or WriterCLL has_any (DangerTokens)),
+    HasBase64      = toint(RVD matches regex Base64ChunkedRx or WriterCLL matches regex Base64ChunkedRx),
+    HasNet         = toint(RVD matches regex UrlRx or RVD matches regex IPv4Rx or RVD matches regex DomainRx),
+    PointsWritable = toint(RVD matches regex UserWritableRx),
+    UntrustedWriter = toint(WriterTrustedPublisher == 0)
+
+// ---------------------------------------------------------------------------
+// MINIMAL SUPPRESSION
+// Because this surface has near-zero legitimate writes, suppression is narrow.
+// Only TrustedInstaller-equivalent processes writing known-safe values are dropped.
+// ---------------------------------------------------------------------------
+
+// Suppress only when: trusted initiator + trusted publisher + no indicators + system path
+| where not(
+    WriterTrustedInitiator == 1
+    and WriterTrustedPublisher == 1
+    and (HasDanger + HasBase64 + HasNet + PointsWritable + ShellCommaAppend) == 0
+    and PackagePointsNonSystem == 0)
+
+// ---------------------------------------------------------------------------
+// SCORING — BaseScore of 70 reflects the very-low-noise surface.
+// Any surviving event is already suspicious. A raw substrate write by an
+// unknown writer scores 70 + UntrustedWriter bonus = MEDIUM at minimum.
+// This is higher than IFEO (60) because Winlogon/LSA writes are even rarer.
+// ---------------------------------------------------------------------------
+| extend
+    BaseScore            = 70,
+    Score_Userinit       = 25 * IsUserinit,             // Logon execution chain modification
+    Score_Shell          = 20 * IsShell,
+    Score_ShellComma     = 20 * ShellCommaAppend,       // [FIX-6] Stealthy comma-append pattern
+    Score_SecPkg         = 30 * IsSecPkg,               // LSASS DLL injection — very high impact
+    Score_NotifPkg       = 30 * IsNotifPkg,             // Credential harvesting DLL
+    Score_NonSysPkg      = 20 * PackagePointsNonSystem, // Package DLL not in system path
+    Score_Danger         = 20 * HasDanger,
+    Score_Base64         = 15 * HasBase64,
+    Score_Net            = 15 * HasNet,
+    Score_Writable       = 25 * PointsWritable,         // Winlogon pointing to writable = CRITICAL
+    Score_Untrusted      = 10 * UntrustedWriter,
+    Score_Rare           = 15 * WriterIsRare,
+    RiskScore = BaseScore
+              + Score_Userinit + Score_Shell + Score_ShellComma
+              + Score_SecPkg + Score_NotifPkg + Score_NonSysPkg
+              + Score_Danger + Score_Base64 + Score_Net
+              + Score_Writable + Score_Untrusted + Score_Rare,
+    // Any Security Package or Notification Package write by an untrusted writer = CRITICAL.
+    // LSA DLL injection gives the attacker credentials from every authentication on this host.
+    RiskLevel = case(
+        RiskScore >= 130
+        or (IsSecPkg == 1 and UntrustedWriter == 1)
+        or (IsNotifPkg == 1 and UntrustedWriter == 1)
+        or (PointsWritable == 1 and IsUserinit == 1),  "CRITICAL",
+        RiskScore >= 95,  "HIGH",
+        RiskScore >= 70,  "MEDIUM",
+                          "LOW"
+    )
+
+| where RiskLevel in ("MEDIUM", "HIGH", "CRITICAL")
+
+// [FIX-3] Base64 decode guard
+| extend _b64candidate = extract(@"([A-Za-z0-9+/]{40,}={0,2})", 1, tostring(RegistryValueData))
+| extend DecodedPayload = iif(isnotempty(_b64candidate),
+                              base64_decode_string(_b64candidate), "")
+| project-away _b64candidate
+
+| extend HijackClass = case(
+    IsSecPkg == 1,                            "LSA(SecurityPackage-LSASS-inject)",
+    IsNotifPkg == 1,                          "LSA(NotificationPackage-CredHarvest)",
+    IsUserinit == 1,                          "Winlogon(Userinit-logon-chain)",
+    IsShell == 1 and ShellCommaAppend == 1,   "Winlogon(Shell-comma-append)",
+    IsShell == 1,                             "Winlogon(Shell-replacement)",
+                                              "Winlogon/LSA(Other)"
+)
+
+// [FIX-4] HunterDirective before project
+| extend HunterDirective = case(
+    RiskLevel == "CRITICAL" and (IsSecPkg == 1 or IsNotifPkg == 1),
+        "CRITICAL: LSA package persistence — malicious DLL will be loaded into lsass.exe, giving attacker access to credential material. ISOLATE IMMEDIATELY. Collect DLL at path in RegistryValueData. Check for evidence of credential dumping (LSASS memory access events) on DeviceName within ±24h. Scope fleet for same DLL name in LSA keys.",
+    RiskLevel == "CRITICAL" and IsUserinit == 1,
+        "CRITICAL: Winlogon Userinit modified — every user logon on this host executes the appended binary. Pull file events on DeviceName for the binary path in RegistryValueData. Collect binary, isolate host, scope fleet for same Userinit value.",
+    RiskLevel == "HIGH" and ShellCommaAppend == 1,
+        "HIGH: Winlogon Shell comma-append — stealthy addition of binary alongside explorer.exe. Pull RegistryValueData to identify appended binary, check file creation events for that path on DeviceName, pivot to process events for that binary after last logon.",
+    RiskLevel == "HIGH",
+        "HIGH: Winlogon/LSA artefact. Validate writer process ancestry (WriterParent), check for file drops of DLL/EXE at referenced path on DeviceName within ±4h.",
+        "MEDIUM: Winlogon/LSA surface write. Any non-TrustedInstaller writer here should be validated. Confirm writer legitimacy via WriterSigner; if untrusted, escalate immediately."
+)
+
+| project
+    Timestamp,
+    DeviceName,
+    AccountName     = coalesce(WriterUser, tostring(AccountName)),
+    RegistryKey,
+    RegistryValueName,
+    RegistryValueData,
+    DecodedPayload,
+    HijackClass,
+    WriterProcess      = WriterFile,
+    WriterParent       = WriterPPID,
+    WriterCommandLine  = WriterCL,
+    WriterCompany,
+    WriterSigner,
+    WriterSHA,
+    WriterDeviceCount,
+    IsUserinit, IsShell, ShellCommaAppend, IsSecPkg, IsNotifPkg, PackagePointsNonSystem,
+    HasDanger, HasBase64, HasNet, PointsWritable,
+    RiskScore, RiskLevel,
+    HunterDirective                 // [FIX-4]
+| order by RiskScore desc, Timestamp desc

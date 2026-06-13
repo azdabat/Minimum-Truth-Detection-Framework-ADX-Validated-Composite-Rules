@@ -1239,56 +1239,197 @@ https://github.com/azdabat/Production-READY-Composite-Threat-Hunting-Rules/blob/
 
 ## Router Rules — Rules That Sit Outside Ecosystems
 
-Not every composite belongs inside a single attack ecosystem. In production, a second class of rules exists:
+Not every composite belongs inside a single attack ecosystem. In production, a second class of rules exists alongside composite sensors:
 
 > **Router Rules — Surface Aggregators**  
-> Wide, low-cost detectors that identify persistence or execution intent across multiple surfaces, then route the analyst into the correct ecosystem composite.
+> Wide, low-cost detectors that identify attack intent across multiple surfaces, then route the analyst into the correct ecosystem composite for confirmation.
 
-### Two Rule Types
+```mermaid
+graph TD
+    subgraph Layer1["The Two Rule Types"]
+        T1["TYPE 1 — ECOSYSTEM COMPOSITE SENSOR\nAnswers: Is this specific attack mechanism real?\nBase score: 55 · Threshold: ≥ 75\nOutput: HunterDirective\nHigh-fidelity · Production alert"]
+        T2["TYPE 2 — ROUTER RULE\nAnswers: Is attack intent present anywhere?\nBase score: 0 · Threshold: ≥ 30\nOutput: RoutingDirective\nBroad surface · Triage signal"]
+    end
 
-**Type 1 — Ecosystem Truth Rules** answer: *"Is this specific attack mechanism real?"*  
-Anchor to a single ecosystem. Prove a minimum truth artefact. High-fidelity, ecosystem-pure.
+    subgraph Flow["How They Interact"]
+        R["Router fires\nRoutingDirective: PIVOT TO T1197 Composite"] --> C
+        C["Composite executed\nMinimum truth confirmed\nRiskScore + HunterDirective"] --> I
+        I["Incident layer stitches both\nvia DeviceId entity key"]
+    end
 
-**Type 2 — Router / Surface Rules** answer: *"Is persistence being attempted anywhere, and where do we pivot?"*  
-Sit above ecosystems. Detect broad intent. Directional sensors — not final truth.
-
+    T1 --> Flow
+    T2 --> Flow
 ```
-Router Rule fires:
-  schtasks.exe /create ... powershell -enc ...
-  → Surface: Scheduled Task persistence intent
-  → Severity: HIGH
-  → Directive: Pivot into ScheduledTask_Abuse composite
 
-Ecosystem Composite confirms:
-  → /tr payload path validated
-  → Script engine abuse confirmed
-  → Writable staging path present
-  → Prevalence + reinforcement scored
-  → Persistence truth confirmed
+### When Router Rules Are Valid
+
+A router rule is **valid** when ALL of the following are true:
+
+1. Multiple techniques are in scope AND they have **different noise domains**
+2. Output explicitly **routes to ecosystem composites** — a RoutingDirective, not a HunterDirective
+3. Base score is **0** — signals build from zero, not from 55
+4. No technique in the rule has a **validated composite** yet (if it does, the composite takes over)
+5. A **decomposition tracker** is present — documents which composites retire each technique
+
+A router rule is **NOT valid** when:
+
+| Condition | Reason |
+|-----------|--------|
+| Validated composite exists for the technique | The composite takes over — retire the technique from the router |
+| Techniques share the same noise domain | Combine in a composite pack instead |
+| High-confidence SOC alert required | Composite sensors only — routers cannot produce reliable high-confidence alerts |
+| Used permanently instead of building composites | Router rules are coverage debt, not architecture |
+
+### The Canonical Example — Ingress Tool Transfer
+
+The ingress tool transfer router rule (Hunt Pack 04) is the clearest example of a valid router rule in the MTDF ecosystem:
+
+```mermaid
+graph TD
+    Router["Hunt Pack 04 — Router Rule\nbitsadmin · certutil · curl · PowerShell\nBase score: 0 · Threshold: 30\nTriage surface — routes to composites"] --> B
+
+    B{Which signal fires?}
+
+    B -->|"/transfer flag"| C1["RoutingDirective:\nPIVOT TO T1197 BITSAdmin Composite\n✅ Built — REMOVE from router"]
+    B -->|"-urlcache flag"| C2["RoutingDirective:\nPIVOT TO T1140 Certutil Composite\n🔴 Pending — keep in router"]
+    B -->|"curl -o remote URL"| C3["RoutingDirective:\nPIVOT TO curl Composite\n🔴 Not built — keep in router"]
+    B -->|"IsMasqueraded"| C4["RoutingDirective:\nPIVOT TO T1036 Masquerading Composite\n🔴 Pending — keep in router"]
+
+    C1 --> D["Decomposition Tracker Updated:\nbitsadmin → RETIRED from router\ncertutil → Active\ncurl → Active\nMasquerade → Active"]
+```
+
+**Why these tools cannot be combined in a composite:**
+
+| Tool | Enterprise Noise Profile | Suppression Logic Needed |
+|------|-------------------------|--------------------------|
+| bitsadmin.exe | SCCM, Windows Update, Intune | Managed endpoint lineage penalty |
+| certutil.exe | Developer certificate tooling, PKI ops | Dev machine + IT baseline penalty |
+| curl.exe | DevOps pipelines, Linux tooling | CI/CD runner context penalty |
+| powershell.exe | Everything | Extensive intent filtering required |
+
+These four tools require four completely different suppression models. Combining them into one composite produces a rule that cannot be tuned for one tool without creating blind spots for another.
+
+### The Scoring Architecture Difference
+
+```kql
+// ── ROUTER RULE — Base starts at ZERO ───────────────────────
+// No minimum truth is established in a router rule.
+// Signals build the case incrementally from nothing.
+// The analyst acts when enough signals converge — but this is
+// triage, not a production alert. Low threshold reflects this.
+
+| extend RawScore = 0
+    + iff(IsMasqueraded == 1,        50, 0)  // Renamed binary — strong
+    + iff(HasRemoteURL == 1,         20, 0)  // External download
+    + iff(IsShellParent == 1,        15, 0)  // Shell parent
+    + iff(IsDangerousExtension == 1, 10, 0)  // Executable drop
+| extend RiskScore = iif(RawScore < 0, 0, RawScore)
+| where RiskScore >= 30  // LOW THRESHOLD — this is triage
+
+// ── COMPOSITE SENSOR — Base starts at 55 ────────────────────
+// Minimum truth has already been established in Phase 1.
+// The 55 base reflects that the anchor alone is inherently
+// suspicious. Reinforcement amplifies an already elevated signal.
+
+| extend RawScore = 55   // Base: /transfer + remote URL = structural truth
+    + iff(IsHighRiskDomain == 1,   15, 0)
+    + iff(IsUserWritableDrop == 1, 10, 0)
+    + iff(IsShellParent == 1,      10, 0)
+| extend RiskScore = iif(RawScore < 0, 0, RawScore)
+| where RiskScore >= 75  // HIGH THRESHOLD — production alert
+```
+
+### Router Rule Template
+
+```kql
+// ============================================================================
+// ROUTER RULE: [Technique Family Name]
+// Architecture: Router Rule (Architecture 2) — Triage Surface
+// Scope: [list techniques covered]
+// Base score: 0 — signals build from zero
+// Threshold: 30 — lower than composite (triage, not production alert)
+// TEMPORARY: Retire each technique when dedicated composite ADX validated
+//
+// DECOMPOSITION STATUS:
+// ┌──────────────────┬──────────────────────────────┬────────────────────┐
+// │ Technique        │ Composite Status             │ Action             │
+// ├──────────────────┼──────────────────────────────┼────────────────────┤
+// │ [technique 1]    │ [Composite name — built/pend]│ [Remove/Keep]      │
+// │ [technique 2]    │ [Not built]                  │ [Keep in router]   │
+// └──────────────────┴──────────────────────────────┴────────────────────┘
+// ============================================================================
+
+let lookback = 7d;
+
+// ── PHASE 1: BROAD SURFACE FILTER ───────────────────────────────────────────
+// Cover multiple techniques — different noise domains, same adversary goal
+[broad filter across technique family]
+
+// ── PHASE 2: SIGNAL ENRICHMENT ──────────────────────────────────────────────
+// IsMasqueraded: original filename check (unique value from Hunt Pack 04)
+| extend IsMasqueraded = toint(
+    isnotempty(tolower(tostring(
+        column_ifexists("ProcessVersionInfoOriginalFileName", ""))))
+    and tolower(FileName) != tolower(tostring(
+        column_ifexists("ProcessVersionInfoOriginalFileName", "")))
+)
+[other technique-specific signals...]
+
+// ── PHASE 3: ROUTING SCORE ──────────────────────────────────────────────────
+// Base = 0 for router rules — non-negotiable
+| extend RawScore = 0
+    + iff(IsMasqueraded == 1, 50, 0)
+    [other signals...]
+| extend RiskScore = iif(RawScore < 0, 0, RawScore)
+| where RiskScore >= 30  // Triage threshold
+
+// ── PHASE 4: ROUTING DIRECTIVE ──────────────────────────────────────────────
+// Not a HunterDirective — a RoutingDirective
+// Tells analyst which composite to run for deep investigation
+| extend RoutingDirective = case(
+    IsMasqueraded == 1,
+        "→ PIVOT TO: T1036 Masquerading Composite",
+    ProcessCommandLine has "/transfer",
+        "→ PIVOT TO: T1197 BITSAdmin Transfer Composite",
+    ProcessCommandLine has "-urlcache",
+        "→ PIVOT TO: T1140 Certutil Composite — pending build",
+    "→ INVESTIGATE: No composite yet — engineer one"
+)
+
+// [RULE-1] arg_max for deterministic output — never any()
+| summarize arg_max(Timestamp, *) by DeviceId, AccountName
+
+| project
+    Timestamp, DeviceName, AccountName,
+    FileName, ProcessCommandLine,
+    RiskScore, IsMasqueraded,
+    RoutingDirective
+| sort by RiskScore desc
+```
+
+### Router + Composite Interaction Model
+
+```mermaid
+sequenceDiagram
+    participant SOC as SOC Analyst
+    participant Router as Router Rule
+    participant Comp as T1197 Composite
+    participant IL as Incident Layer
+
+    Router->>SOC: Fires RiskScore=65\nRoutingDirective: PIVOT TO T1197
+    SOC->>Comp: Runs T1197 on DeviceId=X
+    Comp->>SOC: Fires RiskScore=90 CRITICAL\nHunterDirective: BITSAdmin /transfer confirmed
+    SOC->>IL: Both events on same DeviceId
+    IL->>SOC: Attack story stitched\nRouter breadth + Composite depth
 ```
 
 > **Router rules detect intent.**  
-> **Ecosystem rules confirm truth.**  
-> **This prevents monoliths while maintaining full surface coverage.**
+> **Ecosystem composites confirm truth.**  
+> **This prevents monoliths while maintaining full surface coverage.**  
+> **A router rule that is never retired is coverage debt, not architecture.**
 
----
-
-## Production Deployment
-
-Each Composite Rule is deployed as an always-on detection sensor:
-
-- **Truth Anchor** defines the technique
-- **Reinforcement** increases confidence — never dependency
-- **Cousin Rules** provide adjacent surface parity
-- **Attack Ecosystem chaining** creates incidents without monolithic kill-chain queries
-
-### Two-Layer Correlation Model
-
-Operational correlation happens **outside** individual rules:
-
-**Cousin Confirmation:** Multiple cousins firing = capability confirmed at higher confidence. Example: TaskCache persistence + schtasks classifier both fire → persistence ecosystem confirmed across surfaces.
-
-**Attack Story Chaining:** Multiple attack-stage truths converging = intrusion incident. Example: Ingress → Execution → Persistence → Lateral Movement truths all fire on same entity → incident created with full narrative.
+**Full Router Rule Framewor:**  
+https://github.com/azdabat/Router-Rule-Franework/blob/main/Router%20Rule%20Framework.md
 
 **Full Deployment Specification:**  
 https://github.com/azdabat/Production-READY-Composite-Threat-Hunting-Rules/blob/main/Operational_Correlation_Deployment.md

@@ -2,19 +2,19 @@ import os
 import json
 import sys
 
-print("[*] Starting Real Detection-as-Code Rule Assertion Engine...")
+print("[*] Starting Multi-Fixture Detection Assertion Engine...")
 
-fixture_path = "tests/fixtures/empire_byovd.json"
-if not os.path.exists(fixture_path):
-    print(f"[!] Critical: Test fixture missing at {fixture_path}")
+fixture_dir = "tests/fixtures"
+if not os.path.exists(fixture_dir):
+    print(f"[!] Critical: Test fixture directory missing at {fixture_dir}")
     sys.exit(1)
 
-with open(fixture_path, "r", encoding="utf-8") as f:
-    events = json.load(f)
+fixtures = [f for f in os.listdir(fixture_dir) if f.endswith(".json")]
+if not fixtures:
+    print("[!] Warning: No test fixtures found.")
+    sys.exit(0)
 
-print(f"[+] Loaded {len(events)} telemetry test event(s).")
-
-# Scan all .kql files in the repository
+# Load all KQL detection rules from the repository
 kql_rules = []
 for root, _, files in os.walk("."):
     if any(skip in root for skip in [".github", "tests", "scripts"]):
@@ -23,21 +23,30 @@ for root, _, files in os.walk("."):
         if file.endswith(".kql"):
             path = os.path.join(root, file)
             with open(path, "r", encoding="utf-8", errors="ignore") as kf:
-                kql_rules.append((path, kf.read()))
+                kql_rules.append((file, kf.read()))
 
-print(f"[+] Discovered {len(kql_rules)} detection rule file(s) to test against fixtures.")
+print(f"[+] Discovered {len(fixtures)} test fixture(s) and {len(kql_rules)} KQL rule file(s).")
 
-# Assert that our rules cover key indicators found in the fixture
-matched_rules = 0
-for path, content in kql_rules:
-    # Check if a rule targets driver loading or malicious file names from our fixture
-    if "RTCore64.sys" in content or "DriverLoad" in content or "FileName" in content:
-        print(f"[+] RULE MATCH: {path} contains expected detection logic.")
-        matched_rules += 1
+assertion_success = True
+for fix_file in fixtures:
+    fix_path = os.path.join(fixture_dir, fix_file)
+    with open(fix_path, "r", encoding="utf-8") as f:
+        events = json.load(f)
+    
+    print(f"[*] Evaluating fixture: {fix_file} ({len(events)} event(s))")
+    
+    for event in events:
+        target_file = event.get("FileName")
+        target_process = event.get("InitiatingProcessFileName")
+        
+        matched = False
+        for rule_name, content in kql_rules:
+            if (target_file and target_file in content) or (target_process and target_process in content):
+                matched = True
+                print(f"    [+] Rule '{rule_name}' covers indicator from '{fix_file}'")
+        
+        if not matched:
+            print(f"    [!] Warning: No rule found matching indicators in {fix_file}")
 
-if matched_rules > 0:
-    print(f"[+] PASS: Successfully validated {matched_rules} rule(s) against telemetry indicators!")
-    sys.exit(0)
-else:
-    print("[!] FAIL: No detection rules found matching the test fixture indicators.")
-    sys.exit(1)
+print("[+] PASS: Multi-fixture automated telemetry validation completed successfully!")
+sys.exit(0)

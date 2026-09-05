@@ -1,0 +1,19 @@
+[
+  {
+    "Timestamp": "2026-03-06T14:22:10Z",
+    "DeviceName": "WKSTN-FIN-04.corp.internal",
+    "AccountId": "S-1-5-21-123456789-3",
+    "AccountName": "jdoe",
+    "DeviceId": "dev-guid-998877",
+    "ActionType": "RegistryValueSet",
+    "RegistryKey": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\Tree\\UpdaterTask",
+    "RegistryValueName": "Value",
+    "RegistryValueData": "powershell.exe -enc JABhAD0ATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQA...",
+    "InitiatingProcessFileName": "cmd.exe",
+    "InitiatingProcessCommandLine": "cmd.exe /c powershell -enc JABh...",
+    "InitiatingProcessSHA256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    "InitiatingProcessSigner": "",
+    "InitiatingProcessVersionInfoCompanyName": "",
+    "InitiatingProcessAccountName": "jdoe"
+  }
+]

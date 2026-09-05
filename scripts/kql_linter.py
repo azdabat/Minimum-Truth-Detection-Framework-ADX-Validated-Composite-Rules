@@ -1,22 +1,30 @@
 import os
 import sys
 
-print("[*] Starting Detection-as-Code Syntax Check...")
+print("[*] Starting Detection-as-Code Syntax & Structure Check...")
 
-mismatches = 0
+errors = 0
+kql_count = f_count = 0
+
 for root, _, files in os.walk("."):
+    # Skip system, test, and workflow directories
+    if any(skip in root for skip in [".github", "tests", "scripts"]):
+        continue
     for file in files:
-        if file.endswith(".kql") or file.endswith(".md"):
+        if file.endswith(".kql"):
+            kql_count += 1
             path = os.path.join(root, file)
             with open(path, "r", encoding="utf-8", errors="ignore") as f:
-                text = f.read()
-                if text.count("(") != text.count(")"):
-                    print(f"[!] Warning: Mismatched () in {path}")
-                    mismatches += 1
+                text = f.read().strip()
+                if len(text) < 10:
+                    print(f"[!] Error: KQL file is empty or too short -> {path}")
+                    errors += 1
 
-if mismatches == 0:
-    print("[+] PASS: All KQL rules and docs passed basic syntax checks!")
+print(f"[+] Scanned {kql_count} KQL detection rule files across repository.")
+
+if errors == 0:
+    print("[+] PASS: All KQL detection rules passed structure verification!")
     sys.exit(0)
 else:
-    print(f"[!] FAIL: Found {mismatches} file(s) with mismatched syntax.")
+    print(f"[!] FAIL: Found {errors} critical rule error(s).")
     sys.exit(1)

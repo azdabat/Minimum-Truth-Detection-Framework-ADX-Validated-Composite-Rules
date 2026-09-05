@@ -1,0 +1,22 @@
+name: Detection-as-Code Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate-kql:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download Repository Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Run KQL Syntax & Parentheses Check
+      run: python scripts/kql_linter.py

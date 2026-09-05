@@ -20,3 +20,6 @@ jobs:
 
     - name: Run KQL Syntax & Parentheses Check
       run: python scripts/kql_linter.py
+
+    - name: Run Dynamic Telemetry Assertions
+      run: python scripts/test_runner.py

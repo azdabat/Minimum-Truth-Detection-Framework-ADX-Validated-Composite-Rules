@@ -1,59 +1,13 @@
-import os
-import json
-import sys
-
-print("[*] Starting Multi-Fixture Detection Assertion Engine...")
-
-fixture_dir = "tests/fixtures"
-if not os.path.exists(fixture_dir):
-    print(f"[!] Critical: Test fixture directory missing at {fixture_dir}")
-    sys.exit(1)
-
-fixtures = [f for f in os.listdir(fixture_dir) if f.endswith(".json")]
-if not fixtures:
-    print("[!] Warning: No test fixtures found.")
-    sys.exit(0)
-
-# Load all KQL detection rules across the repo
-kql_rules = []
-for root, _, files in os.walk("."):
-    if any(skip in root for skip in [".github", "tests", "scripts"]):
-        continue
-    for file in files:
-        if file.endswith(".kql"):
-            path = os.path.join(root, file)
-            with open(path, "r", encoding="utf-8", errors="ignore") as kf:
-                kql_rules.append((file, kf.read()))
-
-print(f"[+] Discovered {len(fixtures)} test fixture(s) and {len(kql_rules)} KQL rule file(s).")
-
-total_matches = 0
-for fix_file in fixtures:
-    fix_path = os.path.join(fixture_dir, fix_file)
-    with open(fix_path, "r", encoding="utf-8") as f:
-        events = json.load(f)
-    
-    print(f"\n[*] Evaluating Fixture: {fix_file} ({len(events)} event(s))")
-    
-    for event in events:
-        target_file = event.get("FileName", "").lower()
-        reg_key = event.get("RegistryKey", "").lower()
-        
-        for rule_name, content in kql_rules:
-            content_lower = content.lower()
-            matched = False
-            
-            # Match logic based on fixture type
-            if "byovd" in fix_file and ("rtcore64" in content_lower or "driver" in content_lower):
-                matched = True
-            elif "taskcache" in fix_file and ("taskcache" in content_lower or "schedule" in content_lower):
-                matched = True
-            elif target_file and target_file in content_lower:
-                matched = True
-            
-            if matched:
-                print(f"    [+] Rule '{rule_name}' validates against '{fix_file}'")
-                total_matches += 1
-
-print(f"\n[+] PASS: Multi-fixture validation completed. Total validations: {total_matches}")
-sys.exit(0)
+[
+  {
+    "Timestamp": "2026-03-06T14:22:10Z",
+    "DeviceName": "WKSTN-FIN-04.corp.internal",
+    "AccountName": "jdoe",
+    "ActionType": "RegistryValueSet",
+    "RegistryKey": "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Schedule\\TaskCache\\Tree\\UpdaterTask",
+    "RegistryValueName": "Value",
+    "RegistryValueData": "powershell.exe -enc JABhAD0ATgBlAHcALQBPAGIAagBlAGMAdAAgAE4AZQB0AC4AVwBlAGIAQwBsAGkAZQBuAHQA...",
+    "InitiatingProcessFileName": "cmd.exe",
+    "InitiatingProcessCommandLine": "cmd.exe /c powershell -enc JABh..."
+  }
+]

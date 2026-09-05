@@ -1,0 +1,7 @@
+// Title: Empire BYOVD RTCore64.sys Driver Load Detection
+// Description: Detects the staging and loading of the vulnerable RTCore64.sys driver used in BYOVD attacks.
+
+DeviceFileEvents
+| where FolderPath has "Temp" 
+  and (FileName == "RTCore64.sys" or InitiatingProcessFileName has "empire")
+| project Timestamp, DeviceName, AccountName, FileName, FolderPath, InitiatingProcessFileName

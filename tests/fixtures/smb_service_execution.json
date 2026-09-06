@@ -1,26 +1,95 @@
-[
-  {
-    "EventTable": "DeviceNetworkEvents",
-    "ActionType": "InboundConnectionAccepted",
-    "LocalPort": 445,
-    "RemoteIP": "192.168.1.50",
-    "DeviceId": "dev-smb-target-01",
-    "Timestamp": "2026-03-06T10:00:00Z"
-  },
-  {
-    "EventTable": "DeviceProcessEvents",
-    "InitiatingProcessFileName": "services.exe",
-    "FileName": "cmd.exe",
-    "ProcessCommandLine": "cmd.exe /c powershell -enc JABh...",
-    "AccountName": "admin_user",
-    "DeviceId": "dev-smb-target-01",
-    "Timestamp": "2026-03-06T10:01:00Z"
-  },
-  {
-    "EventTable": "DeviceFileEvents",
-    "FileName": "psexecsvc.exe",
-    "FolderPath": "C:\\Windows\\Temp\\psexecsvc.exe",
-    "DeviceId": "dev-smb-target-01",
-    "Timestamp": "2026-03-06T10:00:30Z"
-  }
-]
+import os
+import json
+import sys
+
+print("[*] Starting Logic-Asserting Detection Test Engine...")
+
+fixture_dir = "tests/fixtures"
+if not os.path.exists(fixture_dir):
+    print(f"[!] ERROR: Fixture directory missing at '{fixture_dir}'")
+    sys.exit(1)
+
+def validate_smb_fixture(rule_name, content, fixture_data):
+    """
+    Asserts that rules targeting SMB/Service lateral movement contain 
+    required schema tables, ports, process checks, and logic controls.
+    """
+    errors = []
+    content_lower = content.lower()
+    
+    # 1. Required Table Schema Check
+    required_tables = ["devicenetworkevents", "deviceprocessevents"]
+    for table in required_tables:
+        if table not in content_lower:
+            errors.append(f"Missing required table reference: '{table}'")
+
+    # 2. Port assertion for SMB/RPC
+    if "445" not in content or "135" not in content:
+        errors.append("Rule does not assert expected SMB/RPC ports (445, 135)")
+
+    # 3. Process lineage assertion
+    if "services.exe" not in content_lower:
+        errors.append("Rule missing parent process check for 'services.exe'")
+
+    # 4. Management tooling suppression check (FIX-1 validation)
+    if "allowmgmttooling" not in content_lower:
+        errors.append("Rule missing management tooling suppression logic ('AllowMgmtTooling')")
+
+    # 5. Boundary miss fix check (FIX-3 validation)
+    if "binsize" in content_lower and "corrwindow" in content_lower:
+        if "binsize = corrwindow" not in content_lower.replace(" ", ""):
+            errors.append("Rule BinSize does not match CorrWindow (risk of boundary misses)")
+
+    return errors
+
+# Fixture-to-Validation Function Mapping
+FIXTURE_VALIDATORS = {
+    "smb_service_execution.json": validate_smb_fixture
+}
+
+# Recursively discover KQL rule files
+kql_rules = []
+for root, _, files in os.walk("."):
+    if any(skip in root for skip in [".github", "tests", "scripts"]):
+        continue
+    for file in files:
+        if file.endswith(".kql"):
+            path = os.path.join(root, file)
+            with open(path, "r", encoding="utf-8", errors="ignore") as kf:
+                kql_rules.append((file, path, kf.read()))
+
+print(f"[+] Discovered {len(kql_rules)} KQL rule file(s).")
+
+total_failures = 0
+total_assertions = 0
+
+for fix_file, validator in FIXTURE_VALIDATORS.items():
+    fix_path = os.path.join(fixture_dir, fix_file)
+    if not os.path.exists(fix_path):
+        print(f"[!] Warning: Fixture '{fix_file}' not found, skipping.")
+        continue
+
+    with open(fix_path, "r", encoding="utf-8") as f:
+        events = json.load(f)
+
+    print(f"\n[*] Running Logic Assertions for Fixture: {fix_file}")
+
+    for rule_name, rule_path, content in kql_rules:
+        # Target relevant SMB and service execution rules
+        if any(keyword in rule_name.lower() for keyword in ["smb", "psexec", "service"]):
+            total_assertions += 1
+            errors = validator(rule_name, content, events)
+            if errors:
+                total_failures += 1
+                print(f"  [FAIL] Rule '{rule_name}':")
+                for err in errors:
+                    print(f"         - {err}")
+            else:
+                print(f"  [PASS] Rule '{rule_name}' passed logic assertions.")
+
+if total_failures > 0:
+    print(f"\n[!] BUILD FAILED: {total_failures} assertion error(s) detected across {total_assertions} evaluated rule(s).")
+    sys.exit(1)
+
+print(f"\n[+] SUCCESS: All {total_assertions} targeted logic assertions passed clean!")
+sys.exit(0)

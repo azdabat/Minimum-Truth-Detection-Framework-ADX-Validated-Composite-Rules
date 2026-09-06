@@ -1,0 +1,26 @@
+[
+  {
+    "EventTable": "DeviceNetworkEvents",
+    "ActionType": "InboundConnectionAccepted",
+    "LocalPort": 445,
+    "RemoteIP": "192.168.1.50",
+    "DeviceId": "dev-smb-target-01",
+    "Timestamp": "2026-03-06T10:00:00Z"
+  },
+  {
+    "EventTable": "DeviceProcessEvents",
+    "InitiatingProcessFileName": "services.exe",
+    "FileName": "cmd.exe",
+    "ProcessCommandLine": "cmd.exe /c powershell -enc JABh...",
+    "AccountName": "admin_user",
+    "DeviceId": "dev-smb-target-01",
+    "Timestamp": "2026-03-06T10:01:00Z"
+  },
+  {
+    "EventTable": "DeviceFileEvents",
+    "FileName": "psexecsvc.exe",
+    "FolderPath": "C:\\Windows\\Temp\\psexecsvc.exe",
+    "DeviceId": "dev-smb-target-01",
+    "Timestamp": "2026-03-06T10:00:30Z"
+  }
+]

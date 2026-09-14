@@ -221,6 +221,22 @@ These behavioral indicators focus on **process lineage and system telemetry** ra
 | Defense Evasion | Model Insecure Deserialization | AML.T0010 | Stage 2 |
 | Exfiltration | Exfiltration of Model/Vector Assets | AML.T0024 | Stage 5 |
 
+The updated taxonomy maps directly to:
+
+Indirect Prompt Injection (AML.T0051)
+
+LLM Supply Chain / Dependency Confusion (AML.T0048) [Replacing Plugin Compromise]
+
+Model File Weaponization (AML.T0010 / Artifact Poisoning) [Replacing basic Deserialization]
+
+AI Credential & API Key Exfiltration [New Addition]
+
+Vector Database Poisoning / Manipulation [New Addition]
+
+Shadow AI Service Deployment (AML.T0015)
+
+Exfiltration of Model/Vector Assets (AML.T0024)
+
 ---
 
 ## Detection Architecture — Three Tiers

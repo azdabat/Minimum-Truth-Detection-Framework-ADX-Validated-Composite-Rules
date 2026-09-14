@@ -1,0 +1,63 @@
+// =========================================================================
+// COMPOSITE HUNT (L2/L3): AI_Indirect_Prompt_Injection_And_Tool_Hijacking
+// Author: Minimum Truth Detection Framework (MTDF)
+// Status: POC (Proof of Concept - ADX/MDE Validated Schema)
+// Target Platform: Microsoft Defender XDR / Sentinel Advanced Hunting
+// Telemetry Domain: DeviceProcessEvents
+// Target MITRE ATLAS: AML.T0051 (Indirect Prompt Injection)
+// Framework Integrity Baseline:
+//   - Minimum Truth Anchor: AI application runtimes processing external retrieval/web arguments that spawn unexpected administrative or shell utilities.
+//   - Scoring Threshold: Base=55 | Critical >= 120 | High >= 90 | Medium >= 70
+// =========================================================================
+
+let lookback = 7d;
+let AppRuntimes = dynamic(["python.exe", "python3", "node.exe", "uvicorn.exe", "gunicorn"]);
+let SuspiciousInjectedTools = dynamic(["nslookup", "dig", "curl", "wget", "net.exe", "whoami", "powershell.exe", "bash"]);
+let ExternalIngestTokens = dynamic(["--url", "fetch", "scrape", "webhook", "api/v1/query", "read_url"]);
+
+let OrgPrevalence =
+    DeviceProcessEvents
+    | where Timestamp >= ago(30d)
+    | summarize ProcessDeviceCount = dcount(DeviceId) by SHA256;
+
+// Minimum Truth Anchor: App runtime spawning a high-risk tool while handling external ingestion flags
+DeviceProcessEvents
+| where Timestamp >= ago(lookback)
+| where InitiatingProcessFileName in~ (AppRuntimes)
+| where FileName in~ (SuspiciousInjectedTools)
+| extend CurrentCL = tolower(tostring(ProcessCommandLine)),
+         ParentCL  = tolower(tostring(InitiatingProcessCommandLine)),
+         FolderPath = tolower(tostring(FolderPath))
+| where ParentCL has_any (ExternalIngestTokens) or CurrentCL has_any ("http://", "https://")
+| extend 
+    HasExternalContext = toint(ParentCL has_any (ExternalIngestTokens)),
+    HasOutboundURI     = toint(CurrentCL has_any ("http://", "https://")),
+    IsUserWritable     = toint(FolderPath matches regex @"(?i)^[a-z]:\\(users|temp|appdata|programdata|downloads)\\")
+| join kind=leftouter OrgPrevalence on SHA256
+| extend 
+    ProcessDeviceCount = coalesce(ProcessDeviceCount, 0),
+    IsRareExecution    = toint(ProcessDeviceCount <= 2)
+| extend 
+    RawScore = 55
+        + (35 * HasExternalContext)
+        + (30 * HasOutboundURI)
+        + (20 * IsUserWritable)
+        + (10 * IsRareExecution)
+        - (15 * toint(ParentCL has "unit_test" or ParentCL has "pytest")) // Soft penalty for automated testing
+| extend RiskScore = iif(RawScore < 0, 0, RawScore)
+| extend RiskLevel = case(
+    RiskScore >= 120, "CRITICAL",
+    RiskScore >= 90,  "HIGH",
+    RiskScore >= 70,  "MEDIUM",
+    "LOW"
+)
+| where RiskLevel in ("MEDIUM", "HIGH", "CRITICAL")
+| extend HunterDirective = case(
+    RiskLevel >= 120,
+        "CRITICAL [AML.T0051]: AI orchestrator ingested external content and immediately spawned an administrative network/shell utility. High indicator of Indirect Prompt Injection causing agent tool hijacking. Isolate host and inspect ingestion logs.",
+    RiskLevel >= 90,
+        "HIGH [AML.T0051]: AI application runtime executed a suspicious child process with external URI attributes. Verify if tool calling was deterministic or induced by injected inputs.",
+    "MEDIUM: Unusual child utility spawned from AI application runtime context."
+)
+| project Timestamp, DeviceName, AccountName, InitiatingProcessCommandLine, FileName, ProcessCommandLine, RiskScore, RiskLevel, HunterDirective
+| sort by RiskScore desc, Timestamp desc

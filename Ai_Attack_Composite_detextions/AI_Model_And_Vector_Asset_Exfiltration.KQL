@@ -1,0 +1,60 @@
+// =========================================================================
+// COMPOSITE HUNT (L2/L3): AI_Model_And_Vector_Asset_Exfiltration
+// Author: Minimum Truth Detection Framework (MTDF)
+// Status: POC (Proof of Concept - ADX/MDE Validated Schema)
+// Target Platform: Microsoft Defender XDR / Sentinel Advanced Hunting
+// Telemetry Domain: DeviceProcessEvents
+// Target MITRE ATLAS: AML.T0024 (Exfiltration of Model/Vector Assets)
+// Framework Integrity Baseline:
+//   - Minimum Truth Anchor: Compression or cloud exfiltration tools interacting with large model file extensions or vector databases.
+//   - Scoring Threshold: Base=55 | Critical >= 120 | High >= 90 | Medium >= 70
+// =========================================================================
+
+let lookback = 7d;
+let ArchiverTools = dynamic(["tar.exe", "7z.exe", "winrar.exe", "zip.exe", "compress"]);
+let CloudExfilCli = dynamic(["rclone.exe", "aws.exe", "az.exe", "gcloud.exe", "megasync"]);
+let ModelVectorExtensions = dynamic([".gguf", ".safetensors", ".pt", ".ckpt", ".bin", "chroma.sqlite", "vector.db", "faiss"]);
+
+let OrgPrevalence =
+    DeviceProcessEvents
+    | where Timestamp >= ago(30d)
+    | summarize ProcessDeviceCount = dcount(DeviceId) by SHA256;
+
+// Minimum Truth Anchor: Exfiltration or compression tool invocation referencing model/vector artifacts
+DeviceProcessEvents
+| where Timestamp >= ago(lookback)
+| where FileName in~ (ArchiverTools) or FileName in~ (CloudExfilCli)
+| extend CurrentCL = tolower(tostring(ProcessCommandLine))
+| where CurrentCL has_any (ModelVectorExtensions)
+| extend 
+    IsCloudCLI        = toint(FileName in~ (CloudExfilCli)),
+    IsArchiver        = toint(FileName in~ (ArchiverTools)),
+    HasRemoteDest     = toint(CurrentCL has_any ("s3://", "blob.core.windows.net", "remote:", "http://", "https://", "--upload")),
+    TargetsVectorDB   = toint(CurrentCL has_any ("chroma", "vector.db", "faiss"))
+| join kind=leftouter OrgPrevalence on SHA256
+| extend 
+    ProcessDeviceCount = coalesce(ProcessDeviceCount, 0),
+    IsRareExecution    = toint(ProcessDeviceCount <= 2)
+| extend 
+    RawScore = 55
+        + (35 * (IsCloudCLI * HasRemoteDest))
+        + (30 * TargetsVectorDB)
+        + (25 * IsArchiver)
+        + (10 * IsRareExecution)
+| extend RiskScore = iif(RawScore < 0, 0, RiskScore)
+| extend RiskLevel = case(
+    RiskScore >= 120, "CRITICAL",
+    RiskScore >= 90,  "HIGH",
+    RiskScore >= 70,  "MEDIUM",
+    "LOW"
+)
+| where RiskLevel in ("MEDIUM", "HIGH", "CRITICAL")
+| extend HunterDirective = case(
+    RiskScore >= 120,
+        "CRITICAL [AML.T0024]: Cloud transfer utility or compression tool actively packaging proprietary model weights or vector database files for external transmission. Immediate incident response and network egress block required.",
+    RiskLevel >= 90,
+        "HIGH [AML.T0024]: Archiving utility executing against sensitive model/vector storage structures. Validate backup legitimacy versus data theft.",
+    "MEDIUM: Archiving command referencing machine learning artifacts. Review user permissions."
+)
+| project Timestamp, DeviceName, AccountName, FileName, ProcessCommandLine, RiskScore, RiskLevel, HunterDirective
+| sort by RiskScore desc, Timestamp desc

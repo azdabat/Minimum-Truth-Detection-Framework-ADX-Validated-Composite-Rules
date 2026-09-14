@@ -1,10 +1,3 @@
-The issue happens because the content itself contains code blocks (like the KQL queries). When nested inside an outer `markdown block, the inner` closes the outer block prematurely, breaking the response into multiple text boxes and plain text.
-
-To fix this so you get **one single click-to-copy button**, the entire document must be wrapped using four backticks (````markdown) so the inner three-backtick (```) blocks stay inside the wrapper.
-
-Here is the entire document in **one single, unbroken text box**:
-
-```markdown
 # Artificial Intelligence Execution Threats — Prompt Injections vs Autonomous Agent Exploitation
 ### *Why Static Guardrails Fail and Behaviour Wins*
 

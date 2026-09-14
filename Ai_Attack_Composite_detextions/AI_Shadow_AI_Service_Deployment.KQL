@@ -1,0 +1,56 @@
+// =========================================================================
+// COMPOSITE HUNT (L2/L3): AI_Shadow_AI_Service_Deployment
+// Author: Minimum Truth Detection Framework (MTDF)
+// Status: POC (Proof of Concept - ADX/MDE Validated Schema)
+// Target Platform: Microsoft Defender XDR / Sentinel Advanced Hunting
+// Telemetry Domain: DeviceProcessEvents
+// Target MITRE ATLAS: AML.T0015 (Shadow AI Service Deployment)
+// Framework Integrity Baseline:
+//   - Minimum Truth Anchor: Execution of known consumer or unmanaged local LLM daemon binaries from unprivileged user paths.
+//   - Scoring Threshold: Base=55 | Critical >= 120 | High >= 90 | Medium >= 70
+// =========================================================================
+
+let lookback = 7d;
+let ShadowAIBinaries = dynamic(["ollama.exe", "ollama", "lmstudio.exe", "jan.exe", "gpt4all.exe", "llama.cpp", "text-generation-webui", "oobabooga"]);
+let ServiceHostTokens = dynamic(["serve", "start", "run", "--port", "11434", "1234"]);
+
+let OrgPrevalence =
+    DeviceProcessEvents
+    | where Timestamp >= ago(30d)
+    | summarize ProcessDeviceCount = dcount(DeviceId) by SHA256;
+
+// Minimum Truth Anchor: Unmanaged LLM runner binary execution
+DeviceProcessEvents
+| where Timestamp >= ago(lookback)
+| where FileName in~ (ShadowAIBinaries)
+| extend CurrentCL = tolower(tostring(ProcessCommandLine)),
+         FolderPath = tolower(tostring(FolderPath))
+| extend 
+    IsDaemonMode   = toint(CurrentCL has_any (ServiceHostTokens)),
+    IsUserWritable = toint(FolderPath matches regex @"(?i)^[a-z]:\\(users|temp|appdata|programdata|downloads|local)\\"),
+    IsTempFolder   = toint(FolderPath matches regex @"(?i)\\(temp|tmp)\\")
+| join kind=leftouter OrgPrevalence on SHA256
+| extend 
+    ProcessDeviceCount = coalesce(ProcessDeviceCount, 0),
+    IsRareExecution    = toint(ProcessDeviceCount <= 2)
+| extend 
+    RawScore = 55
+        + (30 * IsDaemonMode)
+        + (25 * IsUserWritable)
+        + (20 * IsTempFolder)
+        + (10 * IsRareExecution)
+| extend RiskScore = iif(RawScore < 0, 0, RiskScore)
+| extend RiskLevel = case(
+    RiskScore >= 120, "CRITICAL",
+    RiskScore >= 90,  "HIGH",
+    RiskScore >= 70,  "MEDIUM",
+    "LOW"
+)
+| where RiskLevel in ("MEDIUM", "HIGH", "CRITICAL")
+| extend HunterDirective = case(
+    RiskScore >= 90,
+        "HIGH [AML.T0015]: Unapproved local AI model runner daemon (e.g., Ollama/LMStudio) deployed in a user-writable directory. Check network binding permissions to ensure internal corporate data is not being exposed to unauthenticated endpoints.",
+    "MEDIUM: Shadow AI binary execution detected. Verify authorization status with IT asset management."
+)
+| project Timestamp, DeviceName, AccountName, FileName, FolderPath, ProcessCommandLine, RiskScore, RiskLevel, HunterDirective
+| sort by RiskScore desc, Timestamp desc

@@ -1,0 +1,62 @@
+// =========================================================================
+// COMPOSITE HUNT (L2/L3): AI_Supply_Chain_And_Model_File_Weaponization
+// Author: Minimum Truth Detection Framework (MTDF)
+// Status: POC (Proof of Concept - ADX/MDE Validated Schema)
+// Target Platform: Microsoft Defender XDR / Sentinel Advanced Hunting
+// Telemetry Domain: DeviceProcessEvents
+// Target MITRE ATLAS: AML.T0048 (Compromise ML Software Dependencies), AML.T0010 (Model Serialization / Insecure Deserialization)
+// Framework Integrity Baseline:
+//   - Minimum Truth Anchor: Python/Node environment executing untrusted package managers or loading high-risk model serialization formats.
+//   - Scoring Threshold: Base=55 | Critical >= 120 | High >= 90 | Medium >= 70
+// =========================================================================
+
+let lookback = 7d;
+let PythonRuntimes = dynamic(["python.exe", "python3", "pip.exe", "pip3", "poetry.exe", "uv.exe"]);
+let WeaponizedArtifactTokens = dynamic([".pkl", ".pth", ".ckpt", "pickle.load", "torch.load", "joblib.load"]);
+let SuspiciousRegistryTokens = dynamic(["http://", "https://", "--index-url", "--extra-index-url", "github.com/"]);
+
+// Pre-Summarized Prevalence Table
+let OrgPrevalence =
+    DeviceProcessEvents
+    | where Timestamp >= ago(30d)
+    | summarize ProcessDeviceCount = dcount(DeviceId) by SHA256;
+
+// Minimum Truth Anchor: Package manager referencing external repositories or runtime loading unsafe weights
+DeviceProcessEvents
+| where Timestamp >= ago(lookback)
+| where FileName in~ (PythonRuntimes)
+| extend CurrentCL = tolower(tostring(ProcessCommandLine)),
+         FolderPath = tolower(tostring(FolderPath))
+| where CurrentCL has_any (WeaponizedArtifactTokens) 
+   or (FileName has "pip" and CurrentCL has_any (SuspiciousRegistryTokens))
+| extend 
+    IsDependencyConfusion = toint(FileName has "pip" and CurrentCL has_any (SuspiciousRegistryTokens)),
+    IsWeaponizedModelLoad = toint(CurrentCL has_any (WeaponizedArtifactTokens)),
+    IsUserWritablePath    = toint(FolderPath matches regex @"(?i)^[a-z]:\\(users|temp|appdata|programdata|downloads)\\")
+| join kind=leftouter OrgPrevalence on SHA256
+| extend 
+    ProcessDeviceCount = coalesce(ProcessDeviceCount, 0),
+    IsRareExecution    = toint(ProcessDeviceCount <= 2)
+| extend 
+    RawScore = 55
+        + (35 * IsWeaponizedModelLoad)
+        + (30 * IsDependencyConfusion)
+        + (20 * IsUserWritablePath)
+        + (10 * IsRareExecution)
+| extend RiskScore = iif(RawScore < 0, 0, RawScore)
+| extend RiskLevel = case(
+    RiskScore >= 120, "CRITICAL",
+    RiskScore >= 90,  "HIGH",
+    RiskScore >= 70,  "MEDIUM",
+    "LOW"
+)
+| where RiskLevel in ("MEDIUM", "HIGH", "CRITICAL")
+| extend HunterDirective = case(
+    RiskLevel == "CRITICAL" and IsWeaponizedModelLoad == 1,
+        "CRITICAL [AML.T0010]: Python runtime loading serialized model weights via pickle/torch.load from an unverified path. High probability of Remote Code Execution (RCE) via weaponized model files. Isolate host immediately.",
+    RiskLevel == "HIGH",
+        "HIGH [AML.T0048]: Package installation or dependency resolution pointing to a non-standard or external registry indicator. Verify package provenance against supply chain records.",
+    "MEDIUM: Anomalous Python runtime execution pattern involving package or model loading elements."
+)
+| project Timestamp, DeviceName, AccountName, FileName, ProcessCommandLine, RiskScore, RiskLevel, HunterDirective
+| sort by RiskScore desc, Timestamp desc

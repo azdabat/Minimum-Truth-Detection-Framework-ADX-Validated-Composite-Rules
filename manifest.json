@@ -1,0 +1,43 @@
+{
+  "_note": "One entry per test. 'rows' is the exact number of result rows expected. 'first_row' lists columns that must equal these values in the first result row. Add new tests by copying an entry.",
+  "tests": [
+    {
+      "id": "WMI-01",
+      "name": "WMI fileless: scrcons substrate + same-PID beacon",
+      "rule": "WMI_ECOSYSTEM_VALIDATION/WMI_Fileless_Consumer_Execution_Scrcons_Substrate.KQL",
+      "fixture": "tests/fixtures/wmi_scrcons_attack_beacon.json",
+      "expect": {
+        "rows": 1,
+        "first_row": {
+          "Severity": "HIGH",
+          "HasNet": 1,
+          "AnyNonSystemDll": 0,
+          "MaxTotalScore": 130
+        }
+      }
+    },
+    {
+      "id": "WMI-02",
+      "name": "WMI fileless: substrate only, unrelated traffic not credited",
+      "rule": "WMI_ECOSYSTEM_VALIDATION/WMI_Fileless_Consumer_Execution_Scrcons_Substrate.KQL",
+      "fixture": "tests/fixtures/wmi_scrcons_substrate_only.json",
+      "expect": {
+        "rows": 1,
+        "first_row": {
+          "Severity": "MEDIUM",
+          "HasNet": 0,
+          "MaxTotalScore": 70
+        }
+      }
+    },
+    {
+      "id": "WMI-03",
+      "name": "WMI fileless: normal script host activity stays silent",
+      "rule": "WMI_ECOSYSTEM_VALIDATION/WMI_Fileless_Consumer_Execution_Scrcons_Substrate.KQL",
+      "fixture": "tests/fixtures/wmi_scrcons_benign.json",
+      "expect": {
+        "rows": 0
+      }
+    }
+  ]
+}

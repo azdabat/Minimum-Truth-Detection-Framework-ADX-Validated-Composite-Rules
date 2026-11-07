@@ -1,0 +1,155 @@
+// ============================================================================
+// WMI-A2B_L2_Fileless_Consumer_Execution_Scrcons_Substrate (Composite L2)
+// Author: Ala Dabat
+// Version: 2026-01-15 (v2.3) — Reinforcement-only + PID-safe join + time math safe
+// Platform: Microsoft Defender XDR Advanced Hunting (MDE)
+// Tables: DeviceImageLoadEvents (required), DeviceNetworkEvents (optional)
+// MITRE: T1546.003, T1047, TA0011 (reinforcement only)
+// ============================================================================
+
+let lookback   = 7d;
+let TimeWindow = 1m;
+let RarityLB   = 30d;
+
+let ScriptEngines = dynamic(["vbscript.dll","jscript.dll","scrobj.dll"]);
+
+let IsSystemPath = (path:string) {
+    let p = tolower(path);
+    p startswith "c:\\windows\\system32\\"
+    or p startswith "c:\\windows\\syswow64\\"
+    or p startswith "c:\\windows\\winsxs\\"
+};
+
+let TimeWindowSeconds = toint(TimeWindow / 1s);
+
+// ----------------------------
+// L2 BASELINE (Truth Anchor)
+// ----------------------------
+let L2_Base =
+DeviceImageLoadEvents
+| where Timestamp >= ago(lookback)
+| where InitiatingProcessFileName =~ "scrcons.exe"
+| where FileName in~ (ScriptEngines) // vbscript.dll","jscript.dll","scrobj.dll loaded into scrcons is a closed process like word macros and are unseen by analysts. This is where the attack lives
+| extend
+    BaseTime = Timestamp,
+    DeviceId,
+    DeviceName,
+    Account  = coalesce(InitiatingProcessAccountName, tostring(column_ifexists("AccountName", ""))), // [CI-FIX] AccountName is not a native DeviceImageLoadEvents column
+    DllName  = tostring(FileName),
+    DllPath  = tostring(FolderPath),
+    PID      = tolong(InitiatingProcessId)
+| project BaseTime, DeviceId, DeviceName, Account, DllName, DllPath, PID;
+
+// ----------------------------
+// R1 (Optional): Network events
+// ----------------------------
+let R1_Net =
+DeviceNetworkEvents
+| where Timestamp >= ago(lookback)
+| where InitiatingProcessFileName =~ "scrcons.exe"
+| where RemotePort in (80,443) or RemoteUrl has_any ("http","https")
+| extend
+    NetTime = Timestamp,
+    DeviceId,
+    NetPID   = tolong(InitiatingProcessId), // Always catch on PID, in case Device telemetry does not correlate within the attack ecosystem. SEE: PID Renforcement join.
+    RemoteUrl = tostring(RemoteUrl),
+    RemoteIP  = tostring(RemoteIP),
+    RemotePort
+| project NetTime, DeviceId, NetPID, RemoteUrl, RemoteIP, RemotePort;
+
+// ----------------------------
+// R2 (Optional): Prevalence
+// ----------------------------
+let R2_Prevalence =
+DeviceImageLoadEvents
+| where Timestamp >= ago(RarityLB)
+| where InitiatingProcessFileName =~ "scrcons.exe"
+| where FileName in~ (ScriptEngines)
+| summarize DeviceSeenDays = dcount(bin(Timestamp, 1d)) by DeviceId; // Has this specific device seen this behavior on only 1 day (or fewer) in the last 30 days
+// ----------------------------
+// Base + prevalence + path anomaly
+// ----------------------------
+let BaseWithPrev =
+L2_Base
+| join kind=leftouter (R2_Prevalence) on DeviceId
+| extend
+    DeviceSeenDays = coalesce(DeviceSeenDays, 0),
+    IsRareOnDevice = toint(DeviceSeenDays <= 1),                   //IsRareOnDevice == 1: "This is the first time (or the only day) we have ever seen this happen on this machine." -> Suspicious.
+    NonSystemDllPath = toint(IsSystemPath(DllPath) == false);      //IsRareOnDevice == 0: "This machine does this all the time (on 2+ different days)." -> Likely Benign (Noise).
+
+// ----------------------------
+// Reinforcement Join Strategy
+//   - Prefer PID join when PID exists
+//   - Fallback to DeviceId join when PID missing
+// ----------------------------
+let PID_Path =
+BaseWithPrev
+| where isnotnull(PID)                 //demands that the exact same Process ID (PID) is responsible for both the base event (e.g., the Image Load) and the network event.                            
+| join kind=leftouter (R1_Net) on DeviceId
+| extend
+    PIDMatch = toint(isnotnull(NetPID) and PID == NetPID),      // If scrcons.exe (PID 5555) is matched with a network connection else if chrome.exe (PID 9999), this becomes 0. It only becomes 1 if the PIDs match perfectly.              
+    TimeMatch = toint(isnotempty(NetTime) and abs(datetime_diff("second", NetTime, BaseTime)) <= TimeWindowSeconds), // returns 1 only if the network connection happened within your defined window (e.g., 60 seconds) of the process event.
+    HasNet = toint(PIDMatch == 1 and TimeMatch == 1);   // HasNet = 1 if same device and same PID happened at the same time.
+                                                     
+let Fallback_Path =
+BaseWithPrev
+| where isnull(PID)                          //This ensures this block only runs on the specific rows that the previous "High Fidelity" block threw away. & It prevents double-counting. If a row had a PID, it was already handled by the PID_Path.
+| join kind=leftouter (R1_Net) on DeviceId   // Because it cannot match on specific process execution (PID), it falls back to the only thing it knows: "It happened on this specific machine.
+| extend
+    TimeMatch = toint(isnotempty(NetTime) and abs(datetime_diff("second", NetTime, BaseTime)) <= TimeWindowSeconds), // Since we can't verify who made the connection (Process A vs Process B), we have to rely entirely on "When" it happened.
+    HasNet = toint(TimeMatch == 1);                                                                                  // If scrcons.exe (with no PID) ran at 12:00:00, and any network connection left this device at 12:00:01, we will assume they are related
+
+// ----------------------------
+// Combine + Score (reinforcement only)
+// ----------------------------
+union PID_Path, Fallback_Path
+| extend
+    ReinforcementScore =
+        (60 * HasNet)
+      + (20 * IsRareOnDevice)
+      + (30 * NonSystemDllPath),
+    TotalScore = 50 + ReinforcementScore
+| summarize
+    FirstSeen = min(BaseTime),
+    LastSeen  = max(BaseTime),
+    HasNet    = max(HasNet),
+    NetUrls   = make_set_if(RemoteUrl, HasNet == 1, 10),
+    NetIPs    = make_set_if(RemoteIP,  HasNet == 1, 10),
+    AnyRareOnDevice = max(IsRareOnDevice),
+    AnyNonSystemDll = max(NonSystemDllPath),
+    Evidence = make_set(strcat("scrcons loaded ", DllName, " from ", DllPath), 10),
+    MaxTotalScore = max(TotalScore)
+  by DeviceId, DeviceName, Account
+| extend Severity = case(
+    HasNet == 1 and AnyNonSystemDll == 1, "CRITICAL",
+    HasNet == 1,                           "HIGH",
+    AnyNonSystemDll == 1,                  "HIGH",
+    AnyRareOnDevice == 1,                  "MEDIUM",
+    "MEDIUM"
+)
+| extend HunterDirectives = case(
+    Severity == "CRITICAL",
+        "CRITICAL: scrcons script-engine substrate + near-time network + non-system DLL path. Treat as fileless WMI consumer execution until disproven.",
+    Severity == "HIGH" and HasNet == 1,
+        "HIGH: scrcons loaded script engine and made near-time HTTP/HTTPS. Investigate RemoteUrl/RemoteIP; check for repeat beaconing; validate WMI subscription artifacts.",
+    Severity == "HIGH" and AnyNonSystemDll == 1,
+        "HIGH: scrcons loaded script engine DLL from non-system path. Validate DLL hash/signature and how it landed.",
+    AnyRareOnDevice == 1,
+        "MEDIUM: substrate is rare on this device. Baseline host role + management tooling; promote if repeated or paired with network.",
+    "MEDIUM: substrate detected. Confirm legitimate WMI consumer usage and monitor for reinforcement (network / anomalous path)."
+)
+| project
+    FirstSeen, LastSeen,
+    Severity, MaxTotalScore,
+    DeviceName, DeviceId, Account,
+    HasNet, NetUrls, NetIPs,
+    AnyRareOnDevice, AnyNonSystemDll,
+    Evidence,
+    HunterDirectives
+| order by Severity desc, MaxTotalScore desc, LastSeen desc
+
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------  [CI-FIX] commented out: bare dashes after the query are a syntax error when the whole file runs
+//NOTES
+//PID_Path (Previous Step): High Precision. Almost zero False Positives.
+//Fallback_Path (This Step): High Sensitivity, Higher False Positives.
+//Risk: If scrcons.exe runs at the exact same second that a user browses a website, this fallback path might incorrectly flag that website as being connected to scrcons.

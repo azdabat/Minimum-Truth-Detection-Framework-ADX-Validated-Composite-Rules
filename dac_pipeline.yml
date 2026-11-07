@@ -1,0 +1,55 @@
+name: Detection-as-Code Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint KQL (MTDF bug classes)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run MTDF KQL linter
+        run: python scripts/kql_linter.py
+
+  test:
+    name: Test rules against telemetry (ADX emulator)
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Start ADX emulator (Kustainer)
+        run: |
+          docker run -d --name kusto -e ACCEPT_EULA=Y -m 4G -p 8080:8080 \
+            mcr.microsoft.com/azuredataexplorer/kustainer-linux:latest
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Kusto client
+        run: pip install azure-kusto-data==6.0.4
+
+      - name: Run detection tests
+        run: python scripts/test_runner.py
+
+      - name: Show emulator logs (only if something failed)
+        if: failure()
+        run: docker logs --tail 80 kusto

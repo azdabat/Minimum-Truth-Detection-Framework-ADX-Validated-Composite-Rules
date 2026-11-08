@@ -73,7 +73,8 @@ let BaseWithPrev =
 L2_Base
 | join kind=leftouter (R2_Prevalence) on DeviceId
 | extend
-    DeviceSeenDays = coalesce(DeviceSeenDays, 0),
+    DeviceSeenDays = coalesce(DeviceSeenDays, 0)
+| extend // [CI-FIX] split: a column can't be created and used in the same extend
     IsRareOnDevice = toint(DeviceSeenDays <= 1),                   //IsRareOnDevice == 1: "This is the first time (or the only day) we have ever seen this happen on this machine." -> Suspicious.
     NonSystemDllPath = toint(IsSystemPath(DllPath) == false);      //IsRareOnDevice == 0: "This machine does this all the time (on 2+ different days)." -> Likely Benign (Noise).
 
@@ -88,16 +89,16 @@ BaseWithPrev
 | join kind=leftouter (R1_Net) on DeviceId
 | extend
     PIDMatch = toint(isnotnull(NetPID) and PID == NetPID),      // If scrcons.exe (PID 5555) is matched with a network connection else if chrome.exe (PID 9999), this becomes 0. It only becomes 1 if the PIDs match perfectly.              
-    TimeMatch = toint(isnotempty(NetTime) and abs(datetime_diff("second", NetTime, BaseTime)) <= TimeWindowSeconds), // returns 1 only if the network connection happened within your defined window (e.g., 60 seconds) of the process event.
-    HasNet = toint(PIDMatch == 1 and TimeMatch == 1);   // HasNet = 1 if same device and same PID happened at the same time.
+    TimeMatch = toint(isnotempty(NetTime) and abs(datetime_diff("second", NetTime, BaseTime)) <= TimeWindowSeconds) // returns 1 only if the network connection happened within your defined window (e.g., 60 seconds) of the process event.
+| extend HasNet = toint(PIDMatch == 1 and TimeMatch == 1); // [CI-FIX] split from the extend above   // HasNet = 1 if same device and same PID happened at the same time.
                                                      
 let Fallback_Path =
 BaseWithPrev
 | where isnull(PID)                          //This ensures this block only runs on the specific rows that the previous "High Fidelity" block threw away. & It prevents double-counting. If a row had a PID, it was already handled by the PID_Path.
 | join kind=leftouter (R1_Net) on DeviceId   // Because it cannot match on specific process execution (PID), it falls back to the only thing it knows: "It happened on this specific machine.
 | extend
-    TimeMatch = toint(isnotempty(NetTime) and abs(datetime_diff("second", NetTime, BaseTime)) <= TimeWindowSeconds), // Since we can't verify who made the connection (Process A vs Process B), we have to rely entirely on "When" it happened.
-    HasNet = toint(TimeMatch == 1);                                                                                  // If scrcons.exe (with no PID) ran at 12:00:00, and any network connection left this device at 12:00:01, we will assume they are related
+    TimeMatch = toint(isnotempty(NetTime) and abs(datetime_diff("second", NetTime, BaseTime)) <= TimeWindowSeconds) // Since we can't verify who made the connection (Process A vs Process B), we have to rely entirely on "When" it happened.
+| extend HasNet = toint(TimeMatch == 1); // [CI-FIX] split from the extend above                                                                                  // If scrcons.exe (with no PID) ran at 12:00:00, and any network connection left this device at 12:00:01, we will assume they are related
 
 // ----------------------------
 // Combine + Score (reinforcement only)
@@ -107,8 +108,8 @@ union PID_Path, Fallback_Path
     ReinforcementScore =
         (60 * HasNet)
       + (20 * IsRareOnDevice)
-      + (30 * NonSystemDllPath),
-    TotalScore = 50 + ReinforcementScore
+      + (30 * NonSystemDllPath)
+| extend TotalScore = 50 + ReinforcementScore // [CI-FIX] split from the extend above
 | summarize
     FirstSeen = min(BaseTime),
     LastSeen  = max(BaseTime),

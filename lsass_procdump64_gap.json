@@ -1,0 +1,17 @@
+{
+  "_scenario": "KNOWN GAP. procdump64.exe (the usual binary on 64-bit Windows) is not in DumpTools, so it only scores as a generic keyword (40). Should fire HIGH once procdump64.exe is added.",
+  "DeviceProcessEvents": [
+    {
+      "Timestamp": "2026-02-03T13:05:00Z",
+      "DeviceId": "dev-fin07",
+      "DeviceName": "WS-FIN-07",
+      "ActionType": "ProcessCreated",
+      "FileName": "procdump64.exe",
+      "FolderPath": "C:\\Windows\\System32\\procdump64.exe",
+      "ProcessCommandLine": "procdump64.exe -accepteula -ma lsass.exe C:\\Windows\\Temp\\out.dmp",
+      "AccountName": "adm-jsmith",
+      "InitiatingProcessFileName": "cmd.exe",
+      "InitiatingProcessAccountName": "adm-jsmith"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "_scenario": "KNOWN GAP. Same comsvcs attack using the ordinal #24 instead of the MiniDump export name, dump written to C:\\Windows\\Temp. Currently only the staged-file signal (40) fires, below threshold. Should fire CRITICAL once the rule covers the ordinal form.",
+  "DeviceProcessEvents": [
+    {
+      "Timestamp": "2026-02-03T12:30:00Z",
+      "DeviceId": "dev-fin07",
+      "DeviceName": "WS-FIN-07",
+      "ActionType": "ProcessCreated",
+      "FileName": "rundll32.exe",
+      "FolderPath": "C:\\Windows\\System32\\rundll32.exe",
+      "ProcessCommandLine": "rundll32.exe C:\\Windows\\System32\\comsvcs.dll, #24 724 C:\\Windows\\Temp\\dbg.dmp full",
+      "AccountName": "adm-jsmith",
+      "InitiatingProcessFileName": "cmd.exe",
+      "InitiatingProcessAccountName": "adm-jsmith"
+    }
+  ],
+  "DeviceFileEvents": [
+    {
+      "Timestamp": "2026-02-03T12:30:02Z",
+      "DeviceId": "dev-fin07",
+      "DeviceName": "WS-FIN-07",
+      "ActionType": "FileCreated",
+      "FileName": "dbg.dmp",
+      "FolderPath": "C:\\Windows\\Temp\\dbg.dmp",
+      "InitiatingProcessFileName": "rundll32.exe",
+      "InitiatingProcessAccountName": "adm-jsmith"
+    }
+  ]
+}

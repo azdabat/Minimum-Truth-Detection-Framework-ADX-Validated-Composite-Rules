@@ -10,6 +10,10 @@ For every test in tests/manifest.json:
   4. Run "<inline tables> + <rule>" against the local ADX emulator (Kustainer).
   5. Compare the result to the expected row count and column values.
 
+Tests marked "known_gap": true describe an attack the rule should catch but doesn't yet.
+They are reported as warnings and never fail the build; when the rule is fixed they report
+"gap closed" so the flag can be removed. Blind spots stay documented instead of hidden.
+
 Nothing is ingested, so tests cannot leak into each other.
 
 Usage:
@@ -155,7 +159,7 @@ def main():
             query = build_query(rule_text, fixture, schemas)
         except Exception as exc:
             annotate("error", f"{label}: could not build test — {exc}", t["rule"])
-            results.append((t, False, [str(exc)], 0))
+            results.append((t, "fail", [str(exc)], 0))
             continue
 
         if DRY_RUN:
@@ -168,33 +172,52 @@ def main():
         except Exception as exc:
             msg = str(exc).splitlines()[0][:400]
             annotate("error", f"{label}: query failed — {msg}", t["rule"])
-            results.append((t, False, [f"query failed: {msg}"], 0))
+            results.append((t, "fail", [f"query failed: {msg}"], 0))
             continue
 
         problems = check(t.get("expect", {}), rows)
-        ok = not problems
-        print(f"[{'PASS' if ok else 'FAIL'}] {label} — {len(rows)} row(s)")
+        if t.get("known_gap"):
+            status = "gap_closed" if not problems else "known_gap"
+            tag = "GAP CLOSED" if not problems else "KNOWN GAP"
+        else:
+            status = "pass" if not problems else "fail"
+            tag = status.upper()
+        print(f"[{tag}] {label} — {len(rows)} row(s)")
         if rows:
             print("       first row: " + json.dumps({k: rows[0][k] for k in list(rows[0])[:8]}, default=str))
-        for p in problems:
-            annotate("error", f"{label}: {p}", t["rule"])
-        results.append((t, ok, problems, len(rows)))
+        if status == "fail":
+            for p in problems:
+                annotate("error", f"{label}: {p}", t["rule"])
+        elif status == "known_gap":
+            annotate("warning", f"{label}: documented blind spot, still missed ({problems[0]})", t["rule"])
+        elif status == "gap_closed":
+            annotate("notice", f"{label}: the rule now catches this, so remove \"known_gap\" from tests/manifest.json", t["rule"])
+        results.append((t, status, problems, len(rows)))
 
     if DRY_RUN:
         return 0
 
-    passed = sum(1 for r in results if r[1])
+    real = [r for r in results if r[1] in ("pass", "fail")]
+    passed = sum(1 for r in real if r[1] == "pass")
+    gaps = sum(1 for r in results if r[1] == "known_gap")
+    closed = sum(1 for r in results if r[1] == "gap_closed")
+    headline = f"{passed}/{len(real)} passed"
+    if gaps:
+        headline += f" · {gaps} known gap(s)"
+    if closed:
+        headline += f" · {closed} gap(s) closed"
+    labels = {"pass": "✅ pass", "known_gap": "⚠️ known gap — still missed", "gap_closed": "🎉 gap closed — remove known_gap flag"}
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with open(summary, "a", encoding="utf-8") as fh:
-            fh.write(f"## MTDF detection tests — {passed}/{len(results)} passed\n\n")
+            fh.write(f"## MTDF detection tests — {headline}\n\n")
             fh.write("| Test | Rule | Rows | Result |\n|---|---|---|---|\n")
-            for t, ok, problems, n in results:
-                verdict = "✅ pass" if ok else "❌ " + "; ".join(problems)
+            for t, status, problems, n in results:
+                verdict = labels.get(status, "❌ " + "; ".join(problems))
                 fh.write(f"| {t['id']} — {t['name']} | `{os.path.basename(t['rule'])}` | {n} | {verdict} |\n")
 
-    print(f"\n[*] {passed}/{len(results)} test(s) passed")
-    return 0 if passed == len(results) else 1
+    print(f"\n[*] {headline}")
+    return 0 if passed == len(real) else 1
 
 
 if __name__ == "__main__":

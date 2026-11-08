@@ -1,0 +1,17 @@
+{
+  "_scenario": "ATTACK. procdump.exe -ma lsass.exe. Single explicit-tool signal (75). Must fire HIGH, RiskScore 75.",
+  "DeviceProcessEvents": [
+    {
+      "Timestamp": "2026-02-03T10:02:00Z",
+      "DeviceId": "dev-fin07",
+      "DeviceName": "WS-FIN-07",
+      "ActionType": "ProcessCreated",
+      "FileName": "procdump.exe",
+      "FolderPath": "C:\\Windows\\System32\\procdump.exe",
+      "ProcessCommandLine": "procdump.exe -accepteula -ma lsass.exe C:\\Windows\\Temp\\ad.dmp",
+      "AccountName": "adm-jsmith",
+      "InitiatingProcessFileName": "cmd.exe",
+      "InitiatingProcessAccountName": "adm-jsmith"
+    }
+  ]
+}

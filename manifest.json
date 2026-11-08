@@ -1,5 +1,5 @@
 {
-  "_note": "One entry per test. 'rows' is the exact number of result rows expected. 'first_row' lists columns that must equal these values in the first result row. Add new tests by copying an entry.",
+  "_note": "One entry per test. 'rows' is the exact number of result rows expected. 'first_row' lists columns that must equal these values in the first result row. 'known_gap': true marks an attack the rule should catch but doesn't yet \u2014 it is reported as a warning and never fails the build. Add new tests by copying an entry.",
   "tests": [
     {
       "id": "WMI-01",
@@ -37,6 +37,67 @@
       "fixture": "tests/fixtures/wmi_scrcons_benign.json",
       "expect": {
         "rows": 0
+      }
+    },
+    {
+      "id": "LSASS-01",
+      "name": "LSASS: comsvcs MiniDump + staged dump file converge",
+      "rule": "COMPOSITE_L3_LSASS_CREDENTIAL_THEFT_MASTER.kql",
+      "fixture": "tests/fixtures/lsass_comsvcs_minidump_attack.json",
+      "expect": {
+        "rows": 1,
+        "first_row": {
+          "Severity": "CRITICAL",
+          "RiskScore": 125
+        }
+      }
+    },
+    {
+      "id": "LSASS-02",
+      "name": "LSASS: procdump -ma lsass.exe",
+      "rule": "COMPOSITE_L3_LSASS_CREDENTIAL_THEFT_MASTER.kql",
+      "fixture": "tests/fixtures/lsass_procdump_attack.json",
+      "expect": {
+        "rows": 1,
+        "first_row": {
+          "Severity": "HIGH",
+          "RiskScore": 75
+        }
+      }
+    },
+    {
+      "id": "LSASS-03",
+      "name": "LSASS: Defender access, crash dump and tasklist stay silent",
+      "rule": "COMPOSITE_L3_LSASS_CREDENTIAL_THEFT_MASTER.kql",
+      "fixture": "tests/fixtures/lsass_benign.json",
+      "expect": {
+        "rows": 0
+      }
+    },
+    {
+      "id": "LSASS-04",
+      "name": "LSASS: comsvcs ordinal #24 form",
+      "rule": "COMPOSITE_L3_LSASS_CREDENTIAL_THEFT_MASTER.kql",
+      "known_gap": true,
+      "fixture": "tests/fixtures/lsass_comsvcs_ordinal24_gap.json",
+      "expect": {
+        "rows": 1,
+        "first_row": {
+          "Severity": "CRITICAL"
+        }
+      }
+    },
+    {
+      "id": "LSASS-05",
+      "name": "LSASS: procdump64.exe",
+      "rule": "COMPOSITE_L3_LSASS_CREDENTIAL_THEFT_MASTER.kql",
+      "known_gap": true,
+      "fixture": "tests/fixtures/lsass_procdump64_gap.json",
+      "expect": {
+        "rows": 1,
+        "first_row": {
+          "Severity": "HIGH"
+        }
       }
     }
   ]

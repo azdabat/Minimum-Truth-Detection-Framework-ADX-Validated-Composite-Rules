@@ -1,0 +1,29 @@
+{
+  "_scenario": "ATTACK. rundll32 calls comsvcs.dll MiniDump against LSASS and writes the dump to C:\\Users\\Public. Process signal (90) + staged dump file (40) converge on the same device and account. Must fire CRITICAL, RiskScore 125 (90 + 15 convergence + 20 LOLBin).",
+  "DeviceProcessEvents": [
+    {
+      "Timestamp": "2026-02-03T09:14:00Z",
+      "DeviceId": "dev-fin07",
+      "DeviceName": "WS-FIN-07",
+      "ActionType": "ProcessCreated",
+      "FileName": "rundll32.exe",
+      "FolderPath": "C:\\Windows\\System32\\rundll32.exe",
+      "ProcessCommandLine": "rundll32.exe C:\\Windows\\System32\\comsvcs.dll, MiniDump 724 C:\\Users\\Public\\debug.dmp full",
+      "AccountName": "adm-jsmith",
+      "InitiatingProcessFileName": "cmd.exe",
+      "InitiatingProcessAccountName": "adm-jsmith"
+    }
+  ],
+  "DeviceFileEvents": [
+    {
+      "Timestamp": "2026-02-03T09:14:03Z",
+      "DeviceId": "dev-fin07",
+      "DeviceName": "WS-FIN-07",
+      "ActionType": "FileCreated",
+      "FileName": "debug.dmp",
+      "FolderPath": "C:\\Users\\Public\\debug.dmp",
+      "InitiatingProcessFileName": "rundll32.exe",
+      "InitiatingProcessAccountName": "adm-jsmith"
+    }
+  ]
+}

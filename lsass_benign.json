@@ -1,0 +1,40 @@
+{
+  "_scenario": "BENIGN. Defender (MsMpEng) opens an LSASS handle, WerFault writes a crash dump to C:\\Windows\\Minidump, and a helpdesk user runs tasklist filtered on lsass.exe (weak generic signal, 40, below threshold). Must return zero rows.",
+  "DeviceEvents": [
+    {
+      "Timestamp": "2026-02-03T11:00:00Z",
+      "DeviceId": "dev-fin07",
+      "DeviceName": "WS-FIN-07",
+      "ActionType": "OpenProcessApiCall",
+      "FileName": "lsass.exe",
+      "InitiatingProcessFileName": "MsMpEng.exe",
+      "InitiatingProcessAccountName": "system"
+    }
+  ],
+  "DeviceFileEvents": [
+    {
+      "Timestamp": "2026-02-03T11:00:05Z",
+      "DeviceId": "dev-fin07",
+      "DeviceName": "WS-FIN-07",
+      "ActionType": "FileCreated",
+      "FileName": "110726-11234-01.dmp",
+      "FolderPath": "C:\\Windows\\Minidump\\110726-11234-01.dmp",
+      "InitiatingProcessFileName": "WerFault.exe",
+      "InitiatingProcessAccountName": "system"
+    }
+  ],
+  "DeviceProcessEvents": [
+    {
+      "Timestamp": "2026-02-03T11:00:10Z",
+      "DeviceId": "dev-fin07",
+      "DeviceName": "WS-FIN-07",
+      "ActionType": "ProcessCreated",
+      "FileName": "tasklist.exe",
+      "FolderPath": "C:\\Windows\\System32\\tasklist.exe",
+      "ProcessCommandLine": "tasklist.exe /fi \"imagename eq lsass.exe\"",
+      "AccountName": "helpdesk",
+      "InitiatingProcessFileName": "cmd.exe",
+      "InitiatingProcessAccountName": "helpdesk"
+    }
+  ]
+}

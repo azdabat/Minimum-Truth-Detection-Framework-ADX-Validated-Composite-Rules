@@ -34,7 +34,7 @@ DeviceImageLoadEvents
     BaseTime = Timestamp,
     DeviceId,
     DeviceName,
-    Account  = coalesce(InitiatingProcessAccountName, AccountName),
+    Account  = coalesce(InitiatingProcessAccountName, tostring(column_ifexists("AccountName", ""))), // [CI-FIX] AccountName is not a native DeviceImageLoadEvents column
     DllName  = tostring(FileName),
     DllPath  = tostring(FolderPath),
     PID      = tolong(InitiatingProcessId)
@@ -148,7 +148,7 @@ union PID_Path, Fallback_Path
     HunterDirectives
 | order by Severity desc, MaxTotalScore desc, LastSeen desc
 
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------------------------------------------------------------------------------  [CI-FIX] commented out: bare dashes after the query are a syntax error when the whole file runs
 //NOTES
 //PID_Path (Previous Step): High Precision. Almost zero False Positives.
 //Fallback_Path (This Step): High Sensitivity, Higher False Positives.

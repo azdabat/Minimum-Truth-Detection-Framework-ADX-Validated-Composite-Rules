@@ -1,0 +1,48 @@
+{
+  "_scenario": "BENIGN. wscript.exe loads vbscript.dll (normal admin scripting) and scrcons.exe loads a non-script DLL. Neither is the minimum truth. Rule must return zero rows.",
+  "DeviceImageLoadEvents": [
+    {
+      "Timestamp": "2026-01-18T12:00:00Z",
+      "DeviceId": "dev-ws01",
+      "DeviceName": "WORKSTATION-01",
+      "ActionType": "ImageLoaded",
+      "FileName": "vbscript.dll",
+      "FolderPath": "C:\\Windows\\System32\\vbscript.dll",
+      "InitiatingProcessFileName": "wscript.exe",
+      "InitiatingProcessId": 3001,
+      "InitiatingProcessFolderPath": "C:\\Windows\\System32\\wscript.exe",
+      "InitiatingProcessCommandLine": "wscript.exe",
+      "InitiatingProcessAccountName": "system",
+      "InitiatingProcessParentFileName": "svchost.exe"
+    },
+    {
+      "Timestamp": "2026-01-18T12:00:05Z",
+      "DeviceId": "dev-ws01",
+      "DeviceName": "WORKSTATION-01",
+      "ActionType": "ImageLoaded",
+      "FileName": "kernel32.dll",
+      "FolderPath": "C:\\Windows\\System32\\kernel32.dll",
+      "InitiatingProcessFileName": "scrcons.exe",
+      "InitiatingProcessId": 3002,
+      "InitiatingProcessFolderPath": "C:\\Windows\\System32\\wbem\\scrcons.exe",
+      "InitiatingProcessCommandLine": "scrcons.exe -Embedding",
+      "InitiatingProcessAccountName": "system",
+      "InitiatingProcessParentFileName": "svchost.exe"
+    }
+  ],
+  "DeviceNetworkEvents": [
+    {
+      "Timestamp": "2026-01-18T12:00:06Z",
+      "DeviceId": "dev-ws01",
+      "DeviceName": "WORKSTATION-01",
+      "ActionType": "ConnectionSuccess",
+      "RemoteIP": "198.51.100.20",
+      "RemotePort": 443,
+      "RemoteUrl": "www.example.org",
+      "RemoteIPType": "Public",
+      "Protocol": "Tcp",
+      "InitiatingProcessFileName": "chrome.exe",
+      "InitiatingProcessId": 7788
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "_scenario": "SUBSTRATE ONLY. scrcons.exe loads jscript.dll with no network of its own. A browser connects out at the same second. Rule must still surface the substrate (MEDIUM) but must NOT credit the browser traffic as reinforcement (HasNet = 0).",
+  "DeviceImageLoadEvents": [
+    {
+      "Timestamp": "2026-01-18T11:00:00Z",
+      "DeviceId": "dev-ws01",
+      "DeviceName": "WORKSTATION-01",
+      "ActionType": "ImageLoaded",
+      "FileName": "jscript.dll",
+      "FolderPath": "C:\\Windows\\System32\\jscript.dll",
+      "InitiatingProcessFileName": "scrcons.exe",
+      "InitiatingProcessId": 5150,
+      "InitiatingProcessFolderPath": "C:\\Windows\\System32\\wbem\\scrcons.exe",
+      "InitiatingProcessCommandLine": "scrcons.exe -Embedding",
+      "InitiatingProcessAccountName": "system",
+      "InitiatingProcessParentFileName": "svchost.exe"
+    }
+  ],
+  "DeviceNetworkEvents": [
+    {
+      "Timestamp": "2026-01-18T11:00:00Z",
+      "DeviceId": "dev-ws01",
+      "DeviceName": "WORKSTATION-01",
+      "ActionType": "ConnectionSuccess",
+      "RemoteIP": "198.51.100.20",
+      "RemotePort": 443,
+      "RemoteUrl": "www.example.org",
+      "RemoteIPType": "Public",
+      "Protocol": "Tcp",
+      "InitiatingProcessFileName": "chrome.exe",
+      "InitiatingProcessId": 7788
+    }
+  ]
+}

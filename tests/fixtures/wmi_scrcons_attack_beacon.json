@@ -1,0 +1,34 @@
+{
+  "_scenario": "ATTACK. WMI permanent subscription fires: scrcons.exe (PID 4242) loads vbscript.dll, then the same PID connects out on 443 twenty seconds later. Rule must fire HIGH with HasNet = 1.",
+  "DeviceImageLoadEvents": [
+    {
+      "Timestamp": "2026-01-18T10:00:00Z",
+      "DeviceId": "dev-ws01",
+      "DeviceName": "WORKSTATION-01",
+      "ActionType": "ImageLoaded",
+      "FileName": "vbscript.dll",
+      "FolderPath": "C:\\Windows\\System32\\vbscript.dll",
+      "InitiatingProcessFileName": "scrcons.exe",
+      "InitiatingProcessId": 4242,
+      "InitiatingProcessFolderPath": "C:\\Windows\\System32\\wbem\\scrcons.exe",
+      "InitiatingProcessCommandLine": "scrcons.exe -Embedding",
+      "InitiatingProcessAccountName": "system",
+      "InitiatingProcessParentFileName": "svchost.exe"
+    }
+  ],
+  "DeviceNetworkEvents": [
+    {
+      "Timestamp": "2026-01-18T10:00:20Z",
+      "DeviceId": "dev-ws01",
+      "DeviceName": "WORKSTATION-01",
+      "ActionType": "ConnectionSuccess",
+      "RemoteIP": "203.0.113.50",
+      "RemotePort": 443,
+      "RemoteUrl": "c2.example.com",
+      "RemoteIPType": "Public",
+      "Protocol": "Tcp",
+      "InitiatingProcessFileName": "scrcons.exe",
+      "InitiatingProcessId": 4242
+    }
+  ]
+}

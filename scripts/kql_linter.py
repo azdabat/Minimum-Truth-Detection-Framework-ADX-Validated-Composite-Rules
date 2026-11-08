@@ -12,6 +12,9 @@ Checks
   E002  unbalanced ( ) [ ] { } outside strings and comments
   E003  any() aggregation — non-deterministic; use arg_max(Timestamp, *)        (Rule 1)
   E004  make_set(iff(...)) — use make_set_if(...)                                (Rule 2)
+  E005  a column is created and then used inside the same `extend`
+        (KQL can't resolve it — split into two extends). Found by the pipeline
+        in the WMI flagship rule on its first real run.
   W001  file name looks like KQL but has the wrong extension (",kql", ".sql")
 """
 import json
@@ -61,6 +64,41 @@ def strip_strings_and_comments(text):
     return "".join(out)
 
 
+def split_top_level(text, seps):
+    """Split text on any char in seps, ignoring separators nested inside (), [], {}."""
+    parts, depth, cur = [], 0, []
+    for ch in text:
+        if ch in "([{":
+            depth += 1
+        elif ch in ")]}":
+            depth -= 1
+        if ch in seps and depth == 0:
+            parts.append("".join(cur)); cur = []
+        else:
+            cur.append(ch)
+    parts.append("".join(cur))
+    return parts
+
+
+def same_extend_refs(code):
+    """Yield (lineno, name) where an extend uses a column it created earlier in the same extend."""
+    for m in re.finditer(r"\|\s*extend\b", code):
+        start = m.end()
+        block = split_top_level(code[start:], "|;")[0]
+        offset, defined = start, []
+        for piece in split_top_level(block, ","):
+            am = re.match(r"\s*([A-Za-z_]\w*)\s*=(?!=)(.*)", piece, re.S)
+            expr = am.group(2) if am else piece
+            for name in defined:
+                hit = re.search(rf"(?<![\w.]){re.escape(name)}(?!\w)", expr)
+                if hit:
+                    pos = offset + piece.find(expr) + hit.start()
+                    yield code.count("\n", 0, pos) + 1, name
+            if am:
+                defined.append(am.group(1))
+            offset += len(piece) + 1
+
+
 def check_file(path):
     findings = []
     raw = open(path, "rb").read()
@@ -88,6 +126,8 @@ def check_file(path):
             findings.append(("E003", lineno, "any() is non-deterministic — use arg_max(Timestamp, *) (MTDF Rule 1)"))
         if re.search(r"\bmake_set\s*\(\s*(iif|iff)\s*\(", line):
             findings.append(("E004", lineno, "make_set(iff(...)) — use make_set_if(...) (MTDF Rule 2)"))
+    for lineno, name in same_extend_refs(code):
+        findings.append(("E005", lineno, f"'{name}' is created and used in the same extend — split into two extends"))
     return findings
 
 
